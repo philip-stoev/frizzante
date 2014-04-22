@@ -1,3 +1,4 @@
 *.class
 target/
 *.jar
+java.hprof.txt

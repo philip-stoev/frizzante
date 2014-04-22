@@ -2,7 +2,9 @@ package org.stoev.fuzzer;
 
 import java.util.Scanner;
 import java.util.List;
-import java.util.LinkedList;
+import java.util.ArrayList;
+
+import java.io.IOException;
 
 class GrammarRule implements Generatable {
 
@@ -13,7 +15,7 @@ class GrammarRule implements Generatable {
 
 	GrammarRule(final String rn, final String ruleString) {
 		ruleName = rn;
-		productions = new LinkedList<Generatable>();
+		productions = new ArrayList<Generatable>();
 
                 Scanner scanner = new Scanner(ruleString);
 		scanner.useDelimiter(PRODUCTION_SEPARATION_PATTERN);
@@ -29,7 +31,7 @@ class GrammarRule implements Generatable {
 		productions = ruleProductions;
 	}
 
-	public void generate(final Context context, final StringBuilder buffer) {
+	public void generate(final Context context, final Sentence<?> sentence) throws IOException {
 		if (productions.size() == 0) {
 			return;
 		}
@@ -37,18 +39,18 @@ class GrammarRule implements Generatable {
 		int randomProductionId = context.randomInt(productions.size());
 
 		if (context.shouldCacheRule(ruleName)) {
-			StringBuilder temporaryBuffer = new StringBuilder();
-			productions.get(randomProductionId).generate(context, temporaryBuffer);
-			context.setCachedValue(ruleName, temporaryBuffer.toString());
-			buffer.append(temporaryBuffer);
+			Sentence<String> ruleSentence = new Sentence<String>();
+			productions.get(randomProductionId).generate(context, ruleSentence);
+			context.setCachedValue(ruleName, ruleSentence);
+			sentence.addAll(ruleSentence);
 		} else {
-			productions.get(randomProductionId).generate(context, buffer);
+			productions.get(randomProductionId).generate(context, sentence);
 		}
 	}
 
-	public void link(final Grammar grammar) {
+	public void compile(final Grammar grammar) {
 		for (Generatable production : productions) {
-			production.link(grammar);
+			production.compile(grammar);
 		}
 	}
 

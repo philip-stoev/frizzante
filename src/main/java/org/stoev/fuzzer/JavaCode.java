@@ -1,6 +1,7 @@
 package org.stoev.fuzzer;
 
 import java.util.List;
+import java.util.Arrays;
 import java.util.ArrayList;
 
 import java.net.URI;
@@ -39,17 +40,22 @@ public class JavaCode implements Generatable {
 		javaCode.append("import org.stoev.fuzzer.Generatable;\n");
 		javaCode.append("import org.stoev.fuzzer.Grammar;\n");
 		javaCode.append("import org.stoev.fuzzer.Context;\n");
+		javaCode.append("import org.stoev.fuzzer.Sentence;\n");
+		javaCode.append("import java.io.IOException;\n");
 		javaCode.append("public class " + className + " implements Generatable {\n");
 		javaCode.append("	protected Object storage;\n");
-		javaCode.append("	public void link(final Grammar grammar) { } ;");
-		javaCode.append("	public void generate(final Context context, final StringBuilder buffer)\n");
+		javaCode.append("	public void compile(final Grammar grammar) { } ;");
+		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) throws IOException\n");
 		javaCode.append(javaString);
 		javaCode.append("\n}\n");
 
 		JavaFileManager fileManager = new FileManagerInMemory(compiler.getStandardFileManager(null, null, null));
 		List<JavaFileObject> javaFiles = new ArrayList<JavaFileObject>();
 		javaFiles.add(new JavaSourceInMemory(fullClassName, javaCode.toString()));
-		boolean compilationSuccess = compiler.getTask(null, fileManager, null, null, null, javaFiles).call();
+
+		String[] compilerOptions = new String[] {"-Xlint:all", "-Werror" };
+
+		boolean compilationSuccess = compiler.getTask(null, fileManager, null, Arrays.asList(compilerOptions), null, javaFiles).call();
 
 		if (!compilationSuccess) {
 			throw new ConfigurationException();
@@ -63,11 +69,11 @@ public class JavaCode implements Generatable {
 		}
         }
 
-	public final void generate(final Context context, final StringBuilder buffer) {
-		javaObject.generate(context, buffer);
+	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {
+		javaObject.generate(context, sentence);
 	}
 
-	public void link(final Grammar grammar) {
+	public void compile(final Grammar grammar) {
 
 	}
 
@@ -115,7 +121,8 @@ class JavaClassInMemory extends SimpleJavaFileObject {
 	}
 }
 
-class FileManagerInMemory extends ForwardingJavaFileManager {
+@edu.umd.cs.findbugs.annotations.SuppressFBWarnings("DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED")
+class FileManagerInMemory extends ForwardingJavaFileManager<JavaFileManager> {
 	private JavaClassInMemory javaClassInMemory;
 
 	public FileManagerInMemory(final StandardJavaFileManager standardManager) {

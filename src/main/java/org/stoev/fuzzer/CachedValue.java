@@ -1,5 +1,7 @@
 package org.stoev.fuzzer;
 
+import java.io.IOException;
+
 class CachedValue implements Generatable {
 	private final String ruleName;
 
@@ -7,10 +9,10 @@ class CachedValue implements Generatable {
 		ruleName = rn;
 	}
 
-	public void generate(final Context context, final StringBuilder buffer) {
-		String value = context.getCachedValue(ruleName);
-		if (value != null) {
-			buffer.append(value);
+	public void generate(final Context context, final Sentence<?> sentence) throws IOException {
+		Sentence<?> cachedSentenceFragment = context.getCachedValue(ruleName);
+		if (cachedSentenceFragment != null) {
+			sentence.addAll(cachedSentenceFragment);
 		}
 	}
 
@@ -18,7 +20,7 @@ class CachedValue implements Generatable {
 		return "$" + ruleName;
 	}
 
-	public void link(final Grammar grammar) {
+	public void compile(final Grammar grammar) {
 		assert false;
 	}
 }

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import java.io.IOException;
+
 public class GrammarProduction implements Generatable {
 	private final List<Generatable> elements;
 
@@ -13,7 +15,7 @@ public class GrammarProduction implements Generatable {
 
                 while (scanner.hasNext()) {
                         String elementString = scanner.next();
-			elements.add(new Literal(elementString));
+			elements.add(new GrammarLiteral(elementString));
                 }
         }
 
@@ -21,23 +23,13 @@ public class GrammarProduction implements Generatable {
 		elements = grammarElements;
 	}
 
-	public final void generate(final Context context, final StringBuilder buffer) {
-		switch (elements.size()) {
-			case 0:
-				break;
-			case 1:
-				elements.get(0).generate(context, buffer);
-				break;
-			default:
-				elements.get(0).generate(context, buffer);
-				for (int i = 1; i < elements.size(); i++) {
-					context.appendUnitSeparator(buffer);
-					elements.get(i).generate(context, buffer);
-				}
+	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {
+		for (Generatable element: elements) {
+			element.generate(context, sentence);
 		}
 	}
 
-	public final void link(final Grammar grammar) {
+	public final void compile(final Grammar grammar) {
 		for (int i = 0; i < elements.size(); i++) {
 			String ruleName = elements.get(i).toString();
 			Generatable replacement = null;

@@ -1,7 +1,8 @@
 package org.stoev.fuzzer;
+import java.io.IOException;
 
 public interface Generatable {
-	void generate(Context context, StringBuilder buffer);
+	void generate(final Context context, final Sentence<?> sentence) throws IOException;
 
-	void link(Grammar grammar);
+	void compile(Grammar grammar);
 }

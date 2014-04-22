@@ -1,0 +1,58 @@
+package org.stoev.fuzzer;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+public class Sentence<T> implements Iterable<T> {
+	private final List<T> elements = new ArrayList<T>();
+	private final String separator;
+
+// Construct
+
+	public Sentence() {
+		separator = "";
+	}
+
+	public Sentence(final String separatorString) {
+		separator = separatorString;
+	}
+
+// Put stuff in
+
+        @SuppressWarnings("unchecked")
+	public final void add(final Object newElement) {
+		elements.add((T) newElement);
+	}
+
+        @SuppressWarnings("unchecked")
+	final void addAll(final Sentence<?> newSentence) {
+		elements.addAll((List<T>) newSentence.elements);
+	}
+
+// Take stuff out
+
+	public final Iterator<T> iterator() {
+		return elements.iterator();
+	}
+
+	public final String toString() {
+		if (elements.size() == 0) {
+			return "";
+		} else {
+			StringBuilder builder = new StringBuilder();
+			Iterator<T> iterator = elements.iterator();
+
+			builder.append(iterator.next().toString());
+
+			while (iterator.hasNext()) {
+				if (separator != null) {
+					builder.append(separator);
+				}
+				builder.append(iterator.next().toString());
+			}
+
+			return builder.toString();
+		}
+	}
+}

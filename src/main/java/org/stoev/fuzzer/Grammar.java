@@ -3,6 +3,8 @@ package org.stoev.fuzzer;
 import java.util.Scanner;
 import java.util.HashMap;
 
+import java.io.IOException;
+
 public class Grammar implements Generatable {
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
@@ -35,20 +37,20 @@ public class Grammar implements Generatable {
 			}
 		}
 
-		link(this);
+		compile(this);
 	}
 
-	public final void link(final Grammar grammar) {
+	public final void compile(final Grammar grammar) {
 		for (Generatable rule : rules.values()) {
-			rule.link(grammar);
+			rule.compile(grammar);
 		}
 	}
 
-	public final void generate(final Context context, final StringBuilder buffer) {
+	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {
 		Generatable mainRule = rules.get(STARTING_GRAMMAR_RULE);
 
 		if (mainRule != null) {
-			mainRule.generate(context, buffer);
+			mainRule.generate(context, sentence);
 		}
 	}
 
