@@ -78,8 +78,10 @@
         <configuration>
           <compilerArgs>
             <arg>-Xlint:all</arg>
-            <!--		<arg>-Werror</arg> -->
+            <arg>-Werror</arg>
           </compilerArgs>
+          <source>1.7</source>
+          <target>1.7</target>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
           <fork>true</fork>

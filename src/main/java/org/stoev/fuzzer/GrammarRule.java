@@ -9,26 +9,28 @@ import java.io.IOException;
 class GrammarRule implements Generatable {
 
 	private final String ruleName;
-	private final List<Generatable> productions;
+	private final List<GrammarProduction> productions;
+	private final int totalWeight;
 
-        private static final String PRODUCTION_SEPARATION_PATTERN = "\\s*\\|\\s*|\\s*\\z";
+        private static final String PRODUCTION_SEPARATION_PATTERN = "\\s*\\||\\s*\\z|\\s*;\\s*";
 
 	GrammarRule(final String rn, final String ruleString) {
 		ruleName = rn;
-		productions = new ArrayList<Generatable>();
+		productions = new ArrayList<GrammarProduction>();
 
                 Scanner scanner = new Scanner(ruleString);
 		scanner.useDelimiter(PRODUCTION_SEPARATION_PATTERN);
 
+		int runningWeightSum = 0;
+
                 while (scanner.hasNext()) {
                         String productionString = scanner.next();
-			productions.add(new GrammarProduction(productionString));
+			GrammarProduction production = new GrammarProduction(productionString);
+			productions.add(production);
+			runningWeightSum = runningWeightSum + production.getWeight();
 		}
-	}
 
-	GrammarRule(final String rn, final List<Generatable> ruleProductions) {
-		ruleName = rn;
-		productions = ruleProductions;
+		totalWeight = runningWeightSum;
 	}
 
 	public void generate(final Context context, final Sentence<?> sentence) throws IOException {
@@ -36,15 +38,27 @@ class GrammarRule implements Generatable {
 			return;
 		}
 
-		int randomProductionId = context.randomInt(productions.size());
+		GrammarProduction randomProduction = null;
+		int randomWeight = context.randomInt(totalWeight);
+		int runningWeight = 0;
+
+		for (GrammarProduction production: productions) {
+			runningWeight = runningWeight + production.getWeight();
+			if (runningWeight > randomWeight) {
+				randomProduction = production;
+				break;
+			}
+		}
+
+		assert randomProduction != null;
 
 		if (context.shouldCacheRule(ruleName)) {
 			Sentence<String> ruleSentence = new Sentence<String>();
-			productions.get(randomProductionId).generate(context, ruleSentence);
+			randomProduction.generate(context, ruleSentence);
 			context.setCachedValue(ruleName, ruleSentence);
 			sentence.addAll(ruleSentence);
 		} else {
-			productions.get(randomProductionId).generate(context, sentence);
+			randomProduction.generate(context, sentence);
 		}
 	}
 
@@ -58,3 +72,4 @@ class GrammarRule implements Generatable {
 		return ruleName;
 	}
 }
+

@@ -3,15 +3,31 @@ package org.stoev.fuzzer;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import java.io.IOException;
 
-public class GrammarProduction implements Generatable {
+class GrammarProduction implements Generatable {
+	private static final Pattern WEIGHT_PATTERN = Pattern.compile("\\d+(%|)");
+	private static final int DEFAULT_WEIGHT_VALUE = 1;
+
+	private final int weight;
 	private final List<Generatable> elements;
 
         GrammarProduction(final String productionString) {
                 Scanner scanner = new Scanner(productionString);
 		elements = new ArrayList<Generatable>();
+
+		if (scanner.hasNext(WEIGHT_PATTERN)) {
+			String weightString = scanner.next(WEIGHT_PATTERN);
+			if (weightString.endsWith("%")) {
+				weight = Integer.parseInt(weightString.substring(0, weightString.length() - 1));
+			} else {
+				weight = Integer.parseInt(weightString);
+			}
+		} else {
+			weight = DEFAULT_WEIGHT_VALUE;
+		}
 
                 while (scanner.hasNext()) {
                         String elementString = scanner.next();
@@ -20,7 +36,12 @@ public class GrammarProduction implements Generatable {
         }
 
 	GrammarProduction(final List<Generatable> grammarElements) {
+		weight = DEFAULT_WEIGHT_VALUE;
 		elements = grammarElements;
+	}
+
+	final int getWeight() {
+		return weight;
 	}
 
 	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {

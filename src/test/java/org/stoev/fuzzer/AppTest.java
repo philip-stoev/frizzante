@@ -7,9 +7,6 @@ import junit.framework.TestSuite;
 import java.io.IOException;
 import java.util.Iterator;
 
-/**
- * Unit test for simple App.
- */
 public class AppTest extends TestCase {
 	/**
 	* Create the test case.
@@ -34,9 +31,9 @@ public class AppTest extends TestCase {
 	}
 
 	public final void testLinker() throws IOException {
-		Grammar grammar = new Grammar("main: foo , bar ; foo: foo2 ; bar: bar2;");
+		Grammar grammar = new Grammar("main: linker1 , linker2 ; linker1: linkerA ; linker2: linkerB;");
 		Context context = new Context(grammar, " ");
-		assertEquals(context.generateString(), "foo2 , bar2");
+		assertEquals(context.generateString(), "linkerA , linkerB");
 	}
 
 	public final void testJavaCode() throws IOException {
@@ -69,26 +66,6 @@ public class AppTest extends TestCase {
 		grammar.generate(context, sentence);
 		assertEquals("ABC XYZ", sentence.toString());
 	}
-
-	public final void testBenchmark() throws IOException {
-		Grammar grammar = new Grammar("main: foo , main | foo , foo ; foo: foo1 | foo2 ; foo2.java: { sentence.add(\"foo4\"); };");
-                Context context = new Context(grammar);
-
-		final long iterations = 10000000;
-		final long millispernano = 1000000;
-
-		long start = System.nanoTime();
-
-		for (int x = 1; x < iterations; x = x + 1) {
-			String sentence = context.generateString();
-		}
-
-		long end = System.nanoTime();
-
-		System.out.println("Benchmark took " + ((end - start) / millispernano) + " msecs.");
-	}
-
-
 
 /*
 	public final void testCaching() throws IOException {

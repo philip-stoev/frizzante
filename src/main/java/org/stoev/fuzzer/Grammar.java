@@ -1,5 +1,6 @@
 package org.stoev.fuzzer;
 
+import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
 
@@ -9,9 +10,9 @@ public class Grammar implements Generatable {
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
 
-	private static final String RULE_SEPARATION_PATTERN = "\\s*;\\s*";
-	private static final String JAVA_PATTERN = ".*}\\s*;\\s*";
-	private static final String RULE_NAME_SEPARATION_PATTERN = "\\s*:\\s*";
+	private static final Pattern RULE_PATTERN = Pattern.compile(".*?\\s*;\\s*");
+	private static final Pattern JAVA_PATTERN = Pattern.compile(".*?};\\s*");
+	private static final Pattern RULE_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_.]*:");
 	private static final String JAVA_EXTENSION = ".java";
 
 	private final HashMap<String, Generatable> rules = new HashMap<String, Generatable>();
@@ -21,19 +22,24 @@ public class Grammar implements Generatable {
 		Scanner scanner = new Scanner(grammarString);
 
 		while (scanner.hasNext()) {
-			scanner.useDelimiter(RULE_NAME_SEPARATION_PATTERN);
-			String generatableName = scanner.next();
-			scanner.skip(RULE_NAME_SEPARATION_PATTERN);
+			String generatableName = scanner.findWithinHorizon(RULE_NAME_PATTERN, grammarString.length());
+			generatableName = generatableName.substring(0, generatableName.length() - 1);
+
+			Generatable generatableObject;
 
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
-				String javaName = generatableName.substring(0, generatableName.length() - JAVA_EXTENSION.length());
-				String javaString = scanner.next(JAVA_PATTERN);
-				rules.put(javaName, new JavaCode(javaName, javaString));
+				generatableName = generatableName.substring(0, generatableName.length() - JAVA_EXTENSION.length());
+				String javaString = scanner.findWithinHorizon(JAVA_PATTERN, grammarString.length());
+				generatableObject = new JavaCode(generatableName, javaString);
 			} else {
-				scanner.useDelimiter(RULE_SEPARATION_PATTERN);
-				String ruleString = scanner.next();
-				scanner.skip(RULE_SEPARATION_PATTERN);
-				rules.put(generatableName, new GrammarRule(generatableName, ruleString));
+				String ruleString = scanner.findWithinHorizon(RULE_PATTERN, grammarString.length());
+				generatableObject = new GrammarRule(generatableName, ruleString);
+			}
+
+			if (rules.containsKey(generatableName)) {
+				throw new ConfigurationException("Name " + generatableName + " defined multiple times in grammar.");
+			} else {
+				rules.put(generatableName, generatableObject);
 			}
 		}
 
@@ -51,6 +57,8 @@ public class Grammar implements Generatable {
 
 		if (mainRule != null) {
 			mainRule.generate(context, sentence);
+		} else {
+			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
 		}
 	}
 
