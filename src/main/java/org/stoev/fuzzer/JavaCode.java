@@ -53,7 +53,7 @@ public class JavaCode implements Generatable {
 		List<JavaFileObject> javaFiles = new ArrayList<JavaFileObject>();
 		javaFiles.add(new JavaSourceInMemory(fullClassName, javaCode.toString()));
 
-		String[] compilerOptions = new String[] {"-Xlint:all", "-Werror" };
+		String[] compilerOptions = new String[] {"-Xlint:all", "-Werror", "-source", "1.6" };
 
 		boolean compilationSuccess = compiler.getTask(null, fileManager, null, Arrays.asList(compilerOptions), null, javaFiles).call();
 

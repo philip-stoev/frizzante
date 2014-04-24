@@ -9,6 +9,11 @@
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>4.2.2</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
@@ -37,10 +42,23 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>4.2.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>2.5.3</version>
         <configuration>
+          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
           <effort>Max</effort>
           <threshold>Low</threshold>
         </configuration>
@@ -61,6 +79,9 @@
         <configuration>
           <linkXRef>false</linkXRef>
           <printFailingErrors>true</printFailingErrors>
+          <excludeRoots>
+            <excludeRoot>${basedir}/target/generated-sources/antlr4</excludeRoot>
+          </excludeRoots>
         </configuration>
         <executions>
           <execution>
@@ -77,15 +98,15 @@
         <version>3.1</version>
         <configuration>
           <compilerArgs>
-            <arg>-Xlint:all</arg>
+            <arg>-Xlint:-options</arg>
             <arg>-Werror</arg>
           </compilerArgs>
-          <source>1.7</source>
-          <target>1.7</target>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
           <fork>true</fork>
           <verbose>true</verbose>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
       <plugin>
