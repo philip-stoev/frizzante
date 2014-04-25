@@ -10,6 +10,7 @@ import java.io.IOException;
 class GrammarProduction implements Generatable {
 	private static final Pattern WEIGHT_PATTERN = Pattern.compile("\\d+(%|)");
 	private static final int DEFAULT_WEIGHT_VALUE = 1;
+	private static final String VISITOR_EXTENSION = ".visitor";
 
 	private final int weight;
 	private final List<Generatable> elements;
@@ -27,6 +28,10 @@ class GrammarProduction implements Generatable {
 			}
 		} else {
 			weight = DEFAULT_WEIGHT_VALUE;
+		}
+
+		if (weight < 1) {
+			throw new ConfigurationException("Weight must be positive");
 		}
 
                 while (scanner.hasNext()) {
@@ -59,6 +64,9 @@ class GrammarProduction implements Generatable {
 				String replacementRuleName = ruleName.substring(1);
 				replacement = new CachedValue(replacementRuleName);
 				grammar.setRuleCached(replacementRuleName);
+			} else if (ruleName.endsWith(VISITOR_EXTENSION)) {
+				String replacementVisitorName = ruleName.substring(0, ruleName.length() - VISITOR_EXTENSION.length());
+				replacement = new VisitorValue(replacementVisitorName);
 			} else {
 				replacement = grammar.getRule(ruleName);
 			}

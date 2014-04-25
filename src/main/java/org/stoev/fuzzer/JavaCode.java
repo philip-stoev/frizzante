@@ -45,9 +45,10 @@ public class JavaCode implements Generatable {
 		javaCode.append("public class " + className + " implements Generatable {\n");
 		javaCode.append("	protected Object storage;\n");
 		javaCode.append("	public void compile(final Grammar grammar) { } ;");
-		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) throws IOException\n");
+		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) throws IOException {\n");
 		javaCode.append(javaString);
-		javaCode.append("\n}\n");
+		javaCode.append("	}\n");
+		javaCode.append("}\n");
 
 		JavaFileManager fileManager = new FileManagerInMemory(compiler.getStandardFileManager(null, null, null));
 		List<JavaFileObject> javaFiles = new ArrayList<JavaFileObject>();

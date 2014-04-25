@@ -3,6 +3,7 @@ package org.stoev.fuzzer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -144,4 +145,123 @@ public class GrammarTest {
 		Assert.assertEquals(map.size(), 2);
 	}
 
+	@Test
+	public final void testEmptySeparator() throws IOException {
+		final String[] grammarStrings = {
+			"main:foobar;",
+			"main: foobar;",
+			"main:foobar ;",
+			"main:f oobar;",
+			"main:fooba r;",
+			"main:f o o b a r;",
+			"main:x y;x:foo;y:bar;",
+//			"main:foo\t\r\nbar;",
+			"main:\t\r\nfoobar;",
+			"main:foobar\t\r\n;"
+		};
+
+		for (String grammarString: grammarStrings) {
+			Grammar g = new Grammar(grammarString);
+			Context c = new Context(g, "");
+			Assert.assertEquals(c.generateString(), "foobar", "Problematic string produced by grammar:'" + grammarString + "'");
+		}
+	}
+
+	@Test
+	public final void testSeparator() throws IOException {
+		final String[] grammarStrings = {
+			"main:foo bar;",
+			"main:foo bar|foo bar;",
+			"main: foo bar;",
+			"main: foo bar| foo bar;",
+			"main:foo bar ;",
+			"main:foo bar |foo bar;",
+			"main:x y;x:foo;y:bar;",
+			"main:x y;x: foo;y: bar;",
+			"main:x y;x:foo ;y:bar ;",
+		};
+
+		for (String grammarString: grammarStrings) {
+			Grammar g = new Grammar(grammarString);
+			Context c = new Context(g, " ");
+			Assert.assertEquals(c.generateString(), "foo bar", "Problematic string produced by grammar:'" + grammarString + "'");
+		}
+	}
+
+	@Test (expectedExceptions = ConfigurationException.class)
+	public final void testZeroWeight() throws IOException {
+		Grammar g = new Grammar("main:0 foo;");
+		Context c = new Context(g);
+		c.generateString();
+	}
+
+	@Test
+	public final void testSmallWeights() throws IOException {
+		final String[] grammarStrings = {
+			"main:1 foo;",
+			"main:1 foo |1 foo;",
+			"main:1 foo | foo;",
+			"main: foo |1 foo;"
+		};
+
+		for (String grammarString: grammarStrings) {
+			Grammar g = new Grammar(grammarString);
+			Context c = new Context(g, " ");
+			for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
+				String generated = c.generateString();
+				Assert.assertEquals(generated, "foo", "Problematic string '" + generated + "' produced by grammar '" + grammarString + "'");
+			}
+		}
+	}
+
+	@Test
+	public final void testEmptyJava() throws IOException {
+		Grammar g = new Grammar("main: foo ; foo.java: {{ }};");
+		Context c = new Context(g);
+		Assert.assertEquals(c.generateString(), "");
+
+	}
+
+	@Test
+	final void testVisitors() throws IOException {
+		Grammar g = new Grammar("main: foo.visitor bar.visitor;");
+
+		class TestVisitor {
+			public void foo(final Context context, final Sentence<?> sentence) {
+				sentence.add("foo2");
+			}
+
+			public void bar(final Context context, final Sentence<?> sentence) {
+				sentence.add("bar2");
+			}
+		}
+
+		Object visitor = new TestVisitor();
+		Context c = new Context(g, visitor);
+
+		Assert.assertEquals(c.generateString(), "foo2bar2");
+	}
+
+	@Test
+	final void testVisitorWithType() throws IOException {
+		Grammar g = new Grammar("main: foo.visitor;");
+		class TestObject {
+
+		}
+
+		class TestVisitor {
+			public void foo(final Context context, final Sentence<TestObject> sentence) {
+				sentence.add(new TestObject());
+			}
+		}
+
+		Object visitor = new TestVisitor();
+		Context c = new Context(g, visitor);
+
+		Sentence<TestObject> sentence = new Sentence<TestObject>();
+                g.generate(c, sentence);
+                Iterator<TestObject> iterator = sentence.iterator();
+
+		Assert.assertTrue(iterator.next() instanceof TestObject);
+	}
 }

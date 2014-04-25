@@ -11,7 +11,7 @@ public class Grammar implements Generatable {
 	private static final String STARTING_GRAMMAR_RULE = "main";
 
 	private static final Pattern RULE_PATTERN = Pattern.compile(".*?\\s*;\\s*");
-	private static final Pattern JAVA_PATTERN = Pattern.compile(".*?};\\s*");
+	private static final Pattern JAVA_PATTERN = Pattern.compile("\\{\\{.*?\\}\\};\\s*");
 	private static final Pattern RULE_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_.]*:");
 	private static final String JAVA_EXTENSION = ".java";
 

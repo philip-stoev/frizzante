@@ -10,29 +10,41 @@ public class Context {
 	private final String unitSeparator;
 	private final Grammar grammar;
         private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
+	private final Object visitor;
 
 	Context(final Grammar gr) {
 		grammar = gr;
 		random = new Random(1);
 		unitSeparator = "";
+		visitor = null;
 	}
 
 	Context(final Grammar gr, final String us) {
 		grammar = gr;
 		random = new Random(1);
 		unitSeparator = us;
+		visitor = null;
 	}
 
 	Context(final Random rnd, final String us) {
 		grammar = null;
 		random = rnd;
 		unitSeparator = us;
+		visitor = null;
 	}
 
 	Context(final Grammar gr, final Random rnd, final String us) {
 		grammar = gr;
 		random = rnd;
 		unitSeparator = us;
+		visitor = null;
+	}
+
+	Context(final Grammar gr, final Object v) {
+		grammar = gr;
+		random = new Random(1);
+		unitSeparator = "";
+		visitor = v;
 	}
 
 	public final String generateString() throws IOException {
@@ -43,6 +55,10 @@ public class Context {
 
 	final int randomInt(final int n) {
 		return random.nextInt(n);
+	}
+
+	final Object getVisitor() {
+		return visitor;
 	}
 
 	final void appendUnitSeparator(final StringBuilder buffer) {

@@ -37,13 +37,13 @@ public class AppTest extends TestCase {
 	}
 
 	public final void testJavaCode() throws IOException {
-		Grammar grammar = new Grammar("main: foo ; foo.java: { sentence.add(\"foo2\"); };");
+		Grammar grammar = new Grammar("main: foo ; foo.java: {{ sentence.add(\"foo2\"); }};");
 		Context context = new Context(grammar, " ");
 		assertEquals("foo2", context.generateString());
 	}
 
 	public final void testForeignGeneratable() throws IOException {
-		Grammar grammar = new Grammar("main: foo foo; foo.java: { sentence.add(new Long(2)); };");
+		Grammar grammar = new Grammar("main: foo foo; foo.java: {{ sentence.add(new Long(2)); }};");
 		Context context = new Context(grammar);
 
 		Sentence<Long> sentence = new Sentence<Long>();
