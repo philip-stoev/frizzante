@@ -1,7 +1,5 @@
 package org.stoev.fuzzer;
 
-import java.io.IOException;
-
 class GrammarLiteral implements Generatable {
 	private final String value;
 
@@ -9,7 +7,7 @@ class GrammarLiteral implements Generatable {
 		value = literalValue;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) throws IOException {
+	public void generate(final Context context, final Sentence<?> sentence) {
 		sentence.add(value);
 	}
 

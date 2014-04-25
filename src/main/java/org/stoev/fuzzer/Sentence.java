@@ -11,11 +11,11 @@ public class Sentence<T> implements Iterable<T> {
 // Construct
 
 	public Sentence() {
-		separator = "";
+		separator = null;
 	}
 
-	public Sentence(final String separatorString) {
-		separator = separatorString;
+	public Sentence(final String s) {
+		separator = s;
 	}
 
 // Put stuff in

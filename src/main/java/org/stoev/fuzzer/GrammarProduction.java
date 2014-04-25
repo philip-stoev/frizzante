@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import java.io.IOException;
-
 class GrammarProduction implements Generatable {
 	private static final Pattern WEIGHT_PATTERN = Pattern.compile("\\d+(%|)");
 	private static final int DEFAULT_WEIGHT_VALUE = 1;
@@ -49,7 +47,7 @@ class GrammarProduction implements Generatable {
 		return weight;
 	}
 
-	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {
+	public final void generate(final Context context, final Sentence<?> sentence) {
 		for (Generatable element: elements) {
 			element.generate(context, sentence);
 		}

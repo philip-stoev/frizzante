@@ -4,8 +4,6 @@ import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 
-import java.io.IOException;
-
 class GrammarRule implements Generatable {
 
 	private final String ruleName;
@@ -33,7 +31,7 @@ class GrammarRule implements Generatable {
 		totalWeight = runningWeightSum;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) throws IOException {
+	public void generate(final Context context, final Sentence<?> sentence) {
 		if (productions.size() == 0) {
 			return;
 		}

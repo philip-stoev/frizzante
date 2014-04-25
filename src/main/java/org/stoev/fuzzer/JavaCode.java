@@ -45,7 +45,7 @@ public class JavaCode implements Generatable {
 		javaCode.append("public class " + className + " implements Generatable {\n");
 		javaCode.append("	protected Object storage;\n");
 		javaCode.append("	public void compile(final Grammar grammar) { } ;");
-		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) throws IOException {\n");
+		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) {\n");
 		javaCode.append(javaString);
 		javaCode.append("	}\n");
 		javaCode.append("}\n");
@@ -70,7 +70,7 @@ public class JavaCode implements Generatable {
 		}
         }
 
-	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {
+	public final void generate(final Context context, final Sentence<?> sentence) {
 		javaObject.generate(context, sentence);
 	}
 

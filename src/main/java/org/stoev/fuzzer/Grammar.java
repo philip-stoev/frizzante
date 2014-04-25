@@ -4,8 +4,6 @@ import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
 
-import java.io.IOException;
-
 public class Grammar implements Generatable {
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
@@ -52,34 +50,34 @@ public class Grammar implements Generatable {
 		}
 	}
 
-	public final void generate(final Context context, final Sentence<?> sentence) throws IOException {
-		Generatable mainRule = rules.get(STARTING_GRAMMAR_RULE);
+	public final void generate(final Context context, final Sentence<?> sentence) {
+		Generatable startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
-		if (mainRule != null) {
-			mainRule.generate(context, sentence);
+		if (startingRule != null) {
+			startingRule.generate(context, sentence);
 		} else {
 			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
 		}
 	}
 
-	public final Generatable getRule(final String ruleName) {
+	final Generatable getRule(final String ruleName) {
 		return rules.get(ruleName);
 	}
 
-	public final Generatable getRule(final Generatable generatable) {
+	final Generatable getRule(final Generatable generatable) {
 		return rules.get(generatable.toString());
 	}
 
-	public final void setRuleCached(final String ruleName) {
+	final void setRuleCached(final String ruleName) {
 		shouldCacheRule.put(ruleName, true);
 	}
 
-	public final boolean shouldCacheRule(final String ruleName) {
+	final boolean shouldCacheRule(final String ruleName) {
 		return shouldCacheRule.containsKey(ruleName);
 	}
 
 	public final String toString() {
 		assert false;
-		return "foo";
+		return null;
 	}
 }

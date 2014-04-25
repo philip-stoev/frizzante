@@ -1,7 +1,5 @@
 package org.stoev.fuzzer;
 
-import java.io.IOException;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
@@ -12,7 +10,7 @@ class VisitorValue implements Generatable {
 		methodName = m;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) throws IOException {
+	public void generate(final Context context, final Sentence<?> sentence) {
 		Object visitor = context.getVisitor();
 		Class visitorClass = visitor.getClass();
 		try {
