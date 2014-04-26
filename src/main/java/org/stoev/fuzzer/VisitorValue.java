@@ -1,5 +1,7 @@
 package org.stoev.fuzzer;
 
+import java.util.Deque;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
@@ -10,7 +12,7 @@ class VisitorValue implements Generatable {
 		methodName = m;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {
 		Object visitor = context.getVisitor();
 		Method methodObject = context.getCachedVisitor(methodName);
 

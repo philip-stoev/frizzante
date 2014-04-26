@@ -1,5 +1,7 @@
 package org.stoev.fuzzer;
 
+import java.util.Deque;
+
 class CachedValue implements Generatable {
 	private final String ruleName;
 
@@ -7,7 +9,7 @@ class CachedValue implements Generatable {
 		ruleName = rn;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {
 		Sentence<?> cachedSentenceFragment = context.getCachedValue(ruleName);
 		if (cachedSentenceFragment != null) {
 			sentence.addAll(cachedSentenceFragment);

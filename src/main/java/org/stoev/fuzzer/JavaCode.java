@@ -3,6 +3,7 @@ package org.stoev.fuzzer;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Deque;
 
 import java.net.URI;
 
@@ -40,11 +41,12 @@ public class JavaCode implements Generatable {
 		javaCode.append("import org.stoev.fuzzer.Generatable;\n");
 		javaCode.append("import org.stoev.fuzzer.Grammar;\n");
 		javaCode.append("import org.stoev.fuzzer.Context;\n");
-		javaCode.append("import org.stoev.fuzzer.Sentence;\n");
+		javaCode.append("import org.stoev.fuzzer.Sentence;\n\n");
+		javaCode.append("import java.util.Deque;\n\n");
 		javaCode.append("public class " + className + " implements Generatable {\n");
 		javaCode.append("	protected Object storage;\n");
 		javaCode.append("	public void compile(final Grammar grammar) { } ;");
-		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) {\n");
+		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {\n");
 		javaCode.append(javaString);
 		javaCode.append("	}\n");
 		javaCode.append("}\n");
@@ -69,8 +71,8 @@ public class JavaCode implements Generatable {
 		}
         }
 
-	public final void generate(final Context context, final Sentence<?> sentence) {
-		javaObject.generate(context, sentence);
+	public final void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {
+		javaObject.generate(context, sentence, stack);
 	}
 
 	public void compile(final Grammar grammar) {
