@@ -77,6 +77,6 @@ class GrammarProduction implements Generatable {
 
 	public final String toString() {
 		assert false;
-		return "foo";
+		return "";
 	}
 }

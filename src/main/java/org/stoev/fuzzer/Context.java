@@ -3,7 +3,7 @@ package org.stoev.fuzzer;
 import java.util.Random;
 import java.util.HashMap;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
 
 public final class Context {
 	private final Grammar grammar;
@@ -12,6 +12,7 @@ public final class Context {
 	private final Object visitor;
 
         private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
+	private final HashMap<String, Method> cachedVisitors = new HashMap<String, Method>();
 
 	private Context(final ContextBuilder builder) {
 		this.grammar = builder.grammar;
@@ -66,7 +67,7 @@ public final class Context {
 
 	}
 
-	public String generateString() throws IOException {
+	public String generateString() {
 		Sentence<String> sentence = new Sentence<String>(separator);
 		generate(sentence);
 		return sentence.toString();
@@ -94,5 +95,13 @@ public final class Context {
 
 	void setCachedValue(final String ruleName, final Sentence<?> value) {
 		cachedRules.put(ruleName, value);
+	}
+
+	Method getCachedVisitor(final String methodName) {
+		return cachedVisitors.get(methodName);
+	}
+
+	void setCachedVisitor(final String methodName, final Method methodObject) {
+		cachedVisitors.put(methodName, methodObject);
 	}
 }

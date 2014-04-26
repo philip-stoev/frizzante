@@ -41,7 +41,6 @@ public class JavaCode implements Generatable {
 		javaCode.append("import org.stoev.fuzzer.Grammar;\n");
 		javaCode.append("import org.stoev.fuzzer.Context;\n");
 		javaCode.append("import org.stoev.fuzzer.Sentence;\n");
-		javaCode.append("import java.io.IOException;\n");
 		javaCode.append("public class " + className + " implements Generatable {\n");
 		javaCode.append("	protected Object storage;\n");
 		javaCode.append("	public void compile(final Grammar grammar) { } ;");

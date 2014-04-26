@@ -32,13 +32,13 @@ public class AppTest extends TestCase {
 
 	public final void testLinker() throws IOException {
 		Grammar grammar = new Grammar("main: linker1 , linker2 ; linker1: linkerA ; linker2: linkerB;");
-		Context context = new Context.ContextBuilder(grammar).separator(" ").build();
+		Context context = new Context.ContextBuilder(grammar).build();
 		assertEquals(context.generateString(), "linkerA , linkerB");
 	}
 
 	public final void testJavaCode() throws IOException {
 		Grammar grammar = new Grammar("main: foo ; foo.java: {{ sentence.add(\"foo2\"); }};");
-		Context context = new Context.ContextBuilder(grammar).separator(" ").build();
+		Context context = new Context.ContextBuilder(grammar).build();
 		assertEquals("foo2", context.generateString());
 	}
 
@@ -57,14 +57,6 @@ public class AppTest extends TestCase {
 		assertEquals(2, longValue2.longValue());
 
 		assertFalse(iterator.hasNext());
-	}
-
-	public final void testGeneratableString() throws IOException {
-		Grammar grammar = new Grammar("main: ABC XYZ;");
-		Context context = new Context.ContextBuilder(grammar).build();
-		Sentence<String> sentence = new Sentence<String>(" ");
-		context.generate(sentence);
-		assertEquals("ABC XYZ", sentence.toString());
 	}
 
 	public final void testCaching() throws IOException {

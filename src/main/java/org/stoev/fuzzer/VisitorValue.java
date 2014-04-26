@@ -12,12 +12,20 @@ class VisitorValue implements Generatable {
 
 	public void generate(final Context context, final Sentence<?> sentence) {
 		Object visitor = context.getVisitor();
-		Class visitorClass = visitor.getClass();
+		Method methodObject = context.getCachedVisitor(methodName);
+
+		if (methodObject == null) {
+			try {
+				Class visitorClass = visitor.getClass();
+				methodObject = visitorClass.getDeclaredMethod(methodName, Context.class, Sentence.class);
+				context.setCachedVisitor(methodName, methodObject);
+			} catch (NoSuchMethodException e) {
+				throw new ConfigurationException("Method " + methodName + " does not exist.");
+			}
+		}
+
 		try {
-			Method method = visitorClass.getDeclaredMethod(methodName, Context.class, Sentence.class);
-			method.invoke(visitor, context, sentence);
-		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Method " + methodName + " does not exist.");
+			methodObject.invoke(visitor, context, sentence);
 		} catch (IllegalAccessException e) {
 			throw new ConfigurationException("Attempting to invoke Visitor caused an IllegalAccessException");
 		} catch (InvocationTargetException e) {

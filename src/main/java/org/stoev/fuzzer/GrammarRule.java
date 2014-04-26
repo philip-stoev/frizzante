@@ -15,6 +15,7 @@ class GrammarRule implements Generatable {
 	GrammarRule(final String rn, final String ruleString) {
 		ruleName = rn;
 		productions = new ArrayList<GrammarProduction>();
+		assert ruleString != null;
 
                 Scanner scanner = new Scanner(ruleString);
 		scanner.useDelimiter(PRODUCTION_SEPARATION_PATTERN);

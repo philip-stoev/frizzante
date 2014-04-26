@@ -28,10 +28,19 @@ public class Grammar implements Generatable {
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
 				generatableName = generatableName.substring(0, generatableName.length() - JAVA_EXTENSION.length());
 				String javaString = scanner.findWithinHorizon(JAVA_PATTERN, grammarString.length());
-				generatableObject = new JavaCode(generatableName, javaString);
+				if (javaString == null) {
+					throw new ConfigurationException("Unable to parse Java code for rule " + generatableName + " (missing '}};' terminator?)");
+				} else {
+					generatableObject = new JavaCode(generatableName, javaString);
+				}
 			} else {
 				String ruleString = scanner.findWithinHorizon(RULE_PATTERN, grammarString.length());
-				generatableObject = new GrammarRule(generatableName, ruleString);
+
+				if (ruleString == null) {
+					throw new ConfigurationException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
+				} else {
+					generatableObject = new GrammarRule(generatableName, ruleString);
+				}
 			}
 
 			if (rules.containsKey(generatableName)) {
