@@ -25,7 +25,7 @@ import javax.tools.FileObject;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-public class JavaCode implements Generatable {
+class JavaCode implements Generatable {
 	private final String className;
 	private final String javaString;
 	private Method javaMethod = null;

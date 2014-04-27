@@ -78,7 +78,7 @@ public final class Context {
 		return sentence.toString();
 	}
 
-	int randomInt(final int n) {
+	public int randomInt(final int n) {
 		return random.nextInt(n);
 	}
 
