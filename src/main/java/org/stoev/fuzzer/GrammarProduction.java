@@ -29,7 +29,7 @@ class GrammarProduction implements Generatable {
 		}
 
 		if (weight < 1) {
-			throw new ConfigurationException("Weight must be positive");
+			throw new ConfigurationException("Weight must be positive.");
 		}
 
                 while (scanner.hasNext()) {
@@ -64,7 +64,7 @@ class GrammarProduction implements Generatable {
 				grammar.setRuleCached(replacementRuleName);
 			} else if (ruleName.endsWith(VISITOR_EXTENSION)) {
 				String replacementVisitorName = ruleName.substring(0, ruleName.length() - VISITOR_EXTENSION.length());
-				replacement = new VisitorValue(replacementVisitorName);
+				replacement = new JavaVisitor(replacementVisitorName);
 			} else {
 				replacement = grammar.getRule(ruleName);
 			}

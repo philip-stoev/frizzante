@@ -22,10 +22,13 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.FileObject;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+
 public class JavaCode implements Generatable {
 	private final String className;
 	private final String javaString;
-	private Generatable javaObject = null;
+	private Method javaMethod = null;
 
         JavaCode(final String cn, final String js) {
 		javaString = js;
@@ -37,15 +40,10 @@ public class JavaCode implements Generatable {
 		StringBuilder javaCode = new StringBuilder();
 
 		javaCode.append("package org.stoev.fuzzer.embedded;\n");
-		javaCode.append("import org.stoev.fuzzer.Generatable;\n");
-		javaCode.append("import org.stoev.fuzzer.Grammar;\n");
 		javaCode.append("import org.stoev.fuzzer.Context;\n");
 		javaCode.append("import org.stoev.fuzzer.Sentence;\n\n");
-		javaCode.append("import java.util.Deque;\n\n");
-		javaCode.append("public class " + className + " implements Generatable {\n");
-		javaCode.append("	protected Object storage;\n");
-		javaCode.append("	public void compile(final Grammar grammar) { } ;");
-		javaCode.append("	public void generate(final Context context, final Sentence<?> sentence) {\n");
+		javaCode.append("public class " + className + " {\n");
+		javaCode.append("	public static void generate(final Context context, final Sentence<?> sentence) {\n");
 		javaCode.append(javaString);
 		javaCode.append("	}\n");
 		javaCode.append("}\n");
@@ -59,19 +57,29 @@ public class JavaCode implements Generatable {
 		boolean compilationSuccess = compiler.getTask(null, fileManager, null, Arrays.asList(compilerOptions), null, javaFiles).call();
 
 		if (!compilationSuccess) {
-			throw new ConfigurationException();
+			throw new ConfigurationException("Inline Java code compilation failed.");
 		}
 
 		try {
-			javaObject = (Generatable) fileManager.getClassLoader(null).loadClass(fullClassName).newInstance();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ConfigurationException();
+			Class javaClass = fileManager.getClassLoader(null).loadClass(fullClassName);
+			javaMethod = javaClass.getDeclaredMethod("generate", Context.class, Sentence.class);
+		} catch (ClassNotFoundException e) {
+			assert false : e.getMessage();
+		} catch (NoSuchMethodException e) {
+			assert false : e.getMessage();
 		}
+
+		assert javaMethod != null;
         }
 
 	public final void generate(final Context context, final Sentence<?> sentence) {
-		javaObject.generate(context, sentence);
+		try {
+			javaMethod.invoke(null, context, sentence);
+		} catch (IllegalAccessException e) {
+			assert false : e.getMessage();
+		} catch (InvocationTargetException e) {
+			throw new ConfigurationException("Inline Java code threw an exception: " + e.getMessage());
+		}
 	}
 
 	public void compile(final Grammar grammar) {
@@ -103,7 +111,6 @@ class JavaSourceInMemory extends SimpleJavaFileObject {
 		return javaString;
 	}
 }
-
 
 class JavaClassInMemory extends SimpleJavaFileObject {
 	private final ByteArrayOutputStream bos = new ByteArrayOutputStream();
