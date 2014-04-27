@@ -333,6 +333,21 @@ public class GrammarTest {
 		Grammar g = new Grammar("main: missing.visitor;");
 
 		class TestVisitor {
+			public int cached(final Context context, final Sentence<String> sentence) {
+				return 1;
+			}
+		}
+
+                Object v = new TestVisitor();
+                Context c = new Context.ContextBuilder(g).visitor(v).build();
+		c.generateString();
+	}
+
+	@Test (expectedExceptions = ConfigurationException.class)
+	final void testNonvoidVisitor() {
+		Grammar g = new Grammar("main: missing.visitor;");
+
+		class TestVisitor {
 			public void cached() {
 
 			}

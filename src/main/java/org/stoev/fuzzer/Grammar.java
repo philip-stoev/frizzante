@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
 
-public class Grammar implements Generatable {
+public final class Grammar implements Generatable {
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
 
@@ -53,13 +53,13 @@ public class Grammar implements Generatable {
 		compile(this);
 	}
 
-	public final void compile(final Grammar grammar) {
+	public void compile(final Grammar grammar) {
 		for (Generatable rule : rules.values()) {
 			rule.compile(grammar);
 		}
 	}
 
-	public final void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context context, final Sentence<?> sentence) {
 		Generatable startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
 		if (startingRule != null) {
@@ -69,19 +69,19 @@ public class Grammar implements Generatable {
 		}
 	}
 
-	final Generatable getRule(final String ruleName) {
+	Generatable getRule(final String ruleName) {
 		return rules.get(ruleName);
 	}
 
-	final void setRuleCached(final String ruleName) {
+	void setRuleCached(final String ruleName) {
 		shouldCacheRule.put(ruleName, true);
 	}
 
-	final boolean shouldCacheRule(final String ruleName) {
+	boolean shouldCacheRule(final String ruleName) {
 		return shouldCacheRule.containsKey(ruleName);
 	}
 
-	public final String toString() {
+	public String toString() {
 		assert false;
 		return null;
 	}

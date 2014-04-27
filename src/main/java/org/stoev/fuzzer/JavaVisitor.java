@@ -30,7 +30,13 @@ class JavaVisitor implements Generatable {
 			} catch (NoSuchMethodException e) {
 				throw new ConfigurationException("Method " + methodName + " does not exist.");
 			}
+
+			if (!methodObject.getReturnType().equals(Void.TYPE)) {
+				throw new ConfigurationException("Visitor must be declared as void.");
+			}
 		}
+
+		assert methodObject != null;
 
 		try {
 			methodObject.invoke(visitor, context, sentence);
