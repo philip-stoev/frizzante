@@ -45,6 +45,8 @@ public class Sentence<T> implements Iterable<T> {
 	}
 
 	public final String toString() {
+		assert stack.isEmpty() : "Stack was not empty at the time toString() was called.";
+
 		if (elements.size() == 0) {
 			return "";
 		} else {

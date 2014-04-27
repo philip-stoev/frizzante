@@ -73,10 +73,6 @@ public class Grammar implements Generatable {
 		return rules.get(ruleName);
 	}
 
-	final Generatable getRule(final Generatable generatable) {
-		return rules.get(generatable.toString());
-	}
-
 	final void setRuleCached(final String ruleName) {
 		shouldCacheRule.put(ruleName, true);
 	}

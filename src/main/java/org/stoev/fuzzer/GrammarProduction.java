@@ -32,16 +32,13 @@ class GrammarProduction implements Generatable {
 			throw new ConfigurationException("Weight must be positive.");
 		}
 
+		// We populate the elements array backwards as this is how items will be inserted into the stack during generation
+
                 while (scanner.hasNext()) {
                         String elementString = scanner.next();
 			elements.add(0, new GrammarLiteral(elementString));
                 }
         }
-
-	GrammarProduction(final List<Generatable> grammarElements) {
-		weight = DEFAULT_WEIGHT_VALUE;
-		elements = grammarElements;
-	}
 
 	final int getWeight() {
 		return weight;

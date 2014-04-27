@@ -42,6 +42,31 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <instrumentation>
+            <excludes>
+              <exclude>org/stoev/fuzzer/Antlr*.class</exclude>
+              <exclude>org/stoev/fuzzer/Generatable.class</exclude>
+            </excludes>
+          </instrumentation>
+          <check>
+            <haltOnFailure>true</haltOnFailure>
+            <totalLineRate>85</totalLineRate>
+          </check>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>clean</goal>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
         <version>4.2.2</version>

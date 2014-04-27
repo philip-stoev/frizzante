@@ -87,11 +87,9 @@ public final class Context {
 	}
 
 	boolean shouldCacheRule(final String ruleName) {
-		if (grammar == null) {
-			return false;
-		} else {
-			return grammar.shouldCacheRule(ruleName);
-		}
+		assert grammar != null;
+
+		return grammar.shouldCacheRule(ruleName);
 	}
 
 	Sentence<?> getCachedValue(final String ruleName) {

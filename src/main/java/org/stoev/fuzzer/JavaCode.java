@@ -33,6 +33,11 @@ class JavaCode implements Generatable {
         JavaCode(final String cn, final String js) {
 		javaString = js;
 		className = cn;
+
+		assert javaString != null;
+		assert className != null;
+		assert className.length() > 0;
+
 		String fullClassName = "org.stoev.fuzzer.embedded." + cn;
 
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
