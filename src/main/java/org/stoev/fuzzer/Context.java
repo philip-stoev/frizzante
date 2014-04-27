@@ -3,7 +3,6 @@ package org.stoev.fuzzer;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.Deque;
-import java.util.ArrayDeque;
 
 import java.lang.reflect.Method;
 
@@ -65,11 +64,11 @@ public final class Context {
 	}
 
 	public void generate(final Sentence sentence) {
-		Deque<Generatable> stack = new ArrayDeque<Generatable>();
+		Deque<Generatable> stack = sentence.getStack();
 		stack.push(grammar);
 
 		while (!stack.isEmpty()) {
-			stack.pop().generate(this, sentence, stack);
+			stack.pop().generate(this, sentence);
 		}
 	}
 

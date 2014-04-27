@@ -3,7 +3,6 @@ package org.stoev.fuzzer;
 import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
-import java.util.Deque;
 
 public class Grammar implements Generatable {
 
@@ -60,11 +59,11 @@ public class Grammar implements Generatable {
 		}
 	}
 
-	public final void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {
+	public final void generate(final Context context, final Sentence<?> sentence) {
 		Generatable startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
 		if (startingRule != null) {
-			stack.add(startingRule);
+			sentence.getStack().push(startingRule);
 		} else {
 			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
 		}

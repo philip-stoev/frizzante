@@ -3,8 +3,6 @@ package org.stoev.fuzzer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Deque;
-import java.util.ArrayDeque;
 
 class GrammarRule implements Generatable {
 
@@ -34,7 +32,7 @@ class GrammarRule implements Generatable {
 		totalWeight = runningWeightSum;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {
+	public void generate(final Context context, final Sentence<?> sentence) {
 		if (productions.size() == 0) {
 			return;
 		}
@@ -55,18 +53,17 @@ class GrammarRule implements Generatable {
 
 		if (context.shouldCacheRule(ruleName)) {
 			Sentence<String> cachedSentence = new Sentence<String>();
-			Deque<Generatable> cachedQueue = new ArrayDeque<Generatable>();
 
-			cachedQueue.push(randomProduction);
+			cachedSentence.getStack().push(randomProduction);
 
-			while (!cachedQueue.isEmpty()) {
-				cachedQueue.pop().generate(context, cachedSentence, cachedQueue);
+			while (!cachedSentence.getStack().isEmpty()) {
+				cachedSentence.getStack().pop().generate(context, cachedSentence);
 			}
 
 			context.setCachedValue(ruleName, cachedSentence);
 			sentence.addAll(cachedSentence);
 		} else {
-			stack.push(randomProduction);
+			sentence.getStack().push(randomProduction);
 		}
 	}
 

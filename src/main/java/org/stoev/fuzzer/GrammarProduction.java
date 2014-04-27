@@ -2,7 +2,6 @@ package org.stoev.fuzzer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Deque;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -48,9 +47,9 @@ class GrammarProduction implements Generatable {
 		return weight;
 	}
 
-	public final void generate(final Context context, final Sentence<?> sentence, final Deque<Generatable> stack) {
+	public final void generate(final Context context, final Sentence<?> sentence) {
 		for (Generatable element: elements) {
-			stack.push(element);
+			sentence.getStack().push(element);
 		}
 	}
 
