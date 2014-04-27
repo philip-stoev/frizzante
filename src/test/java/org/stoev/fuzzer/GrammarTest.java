@@ -11,6 +11,7 @@ public class GrammarTest {
 	public static final int ITERATIONS = 10;
 	public static final int MANY_ITERATIONS = 10000;
 	public static final int FOUR = 4;
+	public static final int TEN = 10;
 	public static final int MANY_ITERATIONS_QUARTER = MANY_ITERATIONS / FOUR;
 
 	@Test (expectedExceptions = ConfigurationException.class)
@@ -150,9 +151,9 @@ public class GrammarTest {
 
 	@Test
 	public final void testRecursiveWeight() {
-		Grammar g = new Grammar("main:70% foo , main | 20% foo;");
+		Grammar g = new Grammar("main:90% foo , main | 10% foo;");
 		Context c = new Context.ContextBuilder(g).build();
-		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo");
+		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo");
 	}
 
 	@Test
@@ -232,6 +233,28 @@ public class GrammarTest {
 
 	}
 
+	@Test (expectedExceptions = ConfigurationException.class)
+	public final void testMalformedJava() {
+		Grammar g = new Grammar("main: foo ; foo.java: {{ ;");
+		Context c = new Context.ContextBuilder(g).build();
+		Assert.assertEquals(c.generateString(), "");
+	}
+
+
+	@Test (expectedExceptions = ConfigurationException.class)
+	public final void testInvalidJava() {
+		Grammar g = new Grammar("main: foo ; foo.java: {{ foo(); }};");
+		Context c = new Context.ContextBuilder(g).build();
+		Assert.assertEquals(c.generateString(), "");
+	}
+
+	@Test (expectedExceptions = ConfigurationException.class)
+	public final void testJavaException() {
+		Grammar g = new Grammar("main: foo ; foo.java: {{ int a = 0 ; int b = 2 / a; }};");
+		Context c = new Context.ContextBuilder(g).build();
+		Assert.assertEquals(c.generateString(), "");
+	}
+
 	@Test
 	final void testVisitors() {
 		Grammar g = new Grammar("main: foo.visitor bar.visitor;");
@@ -292,10 +315,38 @@ public class GrammarTest {
 		Assert.assertNotNull(c.getCachedVisitor("cached"));
 	}
 
-//	@Test (expectedExceptions = java.lang.StackOverflowError.class)
-	public final void testInfiniteRecursion() {
-		Grammar g = new Grammar("main: main;");
-		Context c = new Context.ContextBuilder(g).build();
+	@Test (expectedExceptions = ConfigurationException.class)
+	final void testMissingVisitorMethod() {
+                Grammar g = new Grammar("main: missing.visitor;");
+
+                class TestVisitor {
+
+                }
+
+                Object v = new TestVisitor();
+                Context c = new Context.ContextBuilder(g).visitor(v).build();
+		c.generateString();
+	}
+
+	@Test (expectedExceptions = ConfigurationException.class)
+	final void testMissingVisitorMethodDefinition() {
+		Grammar g = new Grammar("main: missing.visitor;");
+
+		class TestVisitor {
+			public void cached() {
+
+			}
+		}
+
+                Object v = new TestVisitor();
+                Context c = new Context.ContextBuilder(g).visitor(v).build();
+		c.generateString();
+	}
+
+	@Test (expectedExceptions = ConfigurationException.class)
+	final void testMissingVisitorClass() {
+                Grammar g = new Grammar("main: missing.visitor;");
+                Context c = new Context.ContextBuilder(g).build();
 		c.generateString();
 	}
 
@@ -312,5 +363,26 @@ public class GrammarTest {
                 Context c = new Context.ContextBuilder(g).build();
                 Assert.assertEquals(c.generateString(), "fooA , fooB , barA , barB");
 
+	}
+
+	@Test
+	public final void testLongSentence() {
+                Grammar g = new Grammar("main:9999999 X main |1 Y;");
+                Context c = new Context.ContextBuilder(g).separator("").build();
+
+		Assert.assertTrue(c.generateString().length() > (TEN * TEN * TEN * TEN));
+	}
+
+	@Test
+	public final void testMassiveRecursion() {
+                Grammar g = new Grammar("main:50% main main |50% Y;");
+                Context c = new Context.ContextBuilder(g).separator("").build();
+
+		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
+			if (c.generateString().length() > (TEN * TEN * TEN)) {
+				return;
+			}
+		}
+		Assert.fail("No long sentences produced");
 	}
 }
