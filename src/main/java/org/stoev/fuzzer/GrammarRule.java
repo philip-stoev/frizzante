@@ -10,7 +10,7 @@ class GrammarRule implements Generatable {
 	private final List<GrammarProduction> productions;
 	private final int totalWeight;
 
-        private static final String PRODUCTION_SEPARATION_PATTERN = "\\s*\\||\\s*\\z|\\s*;\\s*";
+        private static final String PRODUCTION_SEPARATION_PATTERN = "\\s*(?<!\\\\)\\||\\s*\\z|\\s*;\\s*";
 
 	GrammarRule(final String rn, final String ruleString) {
 		ruleName = rn;
@@ -23,7 +23,8 @@ class GrammarRule implements Generatable {
 		int runningWeightSum = 0;
 
                 while (scanner.hasNext()) {
-                        String productionString = scanner.next();
+			String productionString = scanner.next();
+			productionString = productionString.replaceAll("\\\\\\|", "|");
 			GrammarProduction production = new GrammarProduction(productionString);
 			productions.add(production);
 			runningWeightSum = runningWeightSum + production.getWeight();

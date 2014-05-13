@@ -10,7 +10,7 @@ class GrammarLiteral implements Generatable {
 	}
 
 	public void generate(final Context context, final Sentence<?> sentence) {
-		sentence.add(value);
+		sentence.append(value);
 	}
 
 	public String toString() {

@@ -8,8 +8,8 @@ public final class Grammar implements Generatable {
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
 
-	private static final Pattern RULE_PATTERN = Pattern.compile(".*?\\s*;\\s*");
-	private static final Pattern JAVA_PATTERN = Pattern.compile("\\{\\{.*?\\}\\};\\s*");
+	private static final Pattern RULE_PATTERN = Pattern.compile(".*?\\s*;\\s*", Pattern.DOTALL);
+	private static final Pattern JAVA_PATTERN = Pattern.compile("\\{\\{.*?\\}\\};\\s*", Pattern.DOTALL);
 	private static final Pattern RULE_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_.]*:");
 	private static final String JAVA_EXTENSION = ".java";
 
@@ -20,21 +20,21 @@ public final class Grammar implements Generatable {
 		Scanner scanner = new Scanner(grammarString);
 
 		while (scanner.hasNext()) {
-			String generatableName = scanner.findWithinHorizon(RULE_NAME_PATTERN, grammarString.length());
+			String generatableName = scanner.findWithinHorizon(RULE_NAME_PATTERN, 0);
 			generatableName = generatableName.substring(0, generatableName.length() - 1);
 
 			Generatable generatableObject;
 
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
 				generatableName = generatableName.substring(0, generatableName.length() - JAVA_EXTENSION.length());
-				String javaString = scanner.findWithinHorizon(JAVA_PATTERN, grammarString.length());
+				String javaString = scanner.findWithinHorizon(JAVA_PATTERN, 0);
 				if (javaString == null) {
 					throw new ConfigurationException("Unable to parse Java code for rule " + generatableName + " (missing '}};' terminator?)");
 				} else {
 					generatableObject = new JavaCode(generatableName, javaString);
 				}
 			} else {
-				String ruleString = scanner.findWithinHorizon(RULE_PATTERN, grammarString.length());
+				String ruleString = scanner.findWithinHorizon(RULE_PATTERN, 0);
 
 				if (ruleString == null) {
 					throw new ConfigurationException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");

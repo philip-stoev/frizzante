@@ -48,7 +48,7 @@ class JavaCode implements Generatable {
 		javaCode.append("import org.stoev.fuzzer.Context;\n");
 		javaCode.append("import org.stoev.fuzzer.Sentence;\n\n");
 		javaCode.append("public class " + className + " {\n");
-		javaCode.append("	public static void generate(final Context context, final Sentence<?> sentence) {\n");
+		javaCode.append("	public static void generate(final Context context, final Sentence<Object> sentence) {\n");
 		javaCode.append(javaString);
 		javaCode.append("	}\n");
 		javaCode.append("}\n");

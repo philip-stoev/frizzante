@@ -6,63 +6,155 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
-public class Sentence<T> implements Iterable<T> {
+import java.io.IOException;
+
+/**
+ * This class holds the output from a random generation run.
+ *
+ * Usually, a String Sentence is used:
+ * <pre>
+ * {@code
+ * Sentence<String> sentence = new Sentence("\n");
+ * ... perform generation
+ * System.out.println(sentence.toString());
+ * }
+ * </pre>
+ * Alternatively, the Sentence can be composed of objects from some other type:
+ * <pre>
+ * {@code
+ * Sentence<Long> sentence = new Sentence<Long>();
+ * ... perform generation
+ * for (Long element: sentence) {
+ * ... process each element
+ * }
+ * }
+ * </pre>
+ *
+ * @author Philip Stoev <philip [at] stoev.org>
+**/
+
+public class Sentence<T> implements Iterable<T>, Appendable {
 	private final List<T> elements = new ArrayList<T>();
 	private final Deque<Generatable> stack = new ArrayDeque<Generatable>();
-
 	private final String separator;
 
-// Construct
+	/**
+	 * Creates a Sentence without a separator.
+	**/
 
 	public Sentence() {
 		separator = null;
 	}
 
-	public Sentence(final String s) {
-		separator = s;
+	/**
+	 * Creates a Sentence with a String separator.
+	 * @param sep the separator to be added between each two items when toString() is called
+	**/
+
+	public Sentence(final String sep) {
+		this.separator = sep;
 	}
 
-// Put stuff in
+	/**
+	Adds a new element to the Sentence
 
-        @SuppressWarnings("unchecked")
-	public final void add(final Object newElement) {
-		elements.add((T) newElement);
+	@param element the element to be added.
+	**/
+
+	public final void add(final T element) {
+		elements.add(element);
 	}
 
-        @SuppressWarnings("unchecked")
+	/**
+	Adds all the elements from newSentence
+
+	@param newSentence the Sentence to add elements from
+	@throws ClassCastException if the Sentence being added is not compatible
+	**/
+
 	final void addAll(final Sentence<?> newSentence) {
 		elements.addAll((List<T>) newSentence.elements);
 	}
 
-// Take stuff out
+	/**
+	Appends a string to the Sentence
 
-	final Deque<Generatable> getStack() {
-		return stack;
+	@param string the String to be appended
+	@throws ClassCastException if the Sentence is not compatible with String
+	**/
+
+	public final void append(final String string) {
+		elements.add((T) string);
 	}
 
+	/**
+	Appends a CharSequence to the Sentence
+
+	@param csq the CharSequence to be appended
+	@throws ClassCastException if the Sentence is not compatible with String
+	**/
+
+	public final Appendable append(final CharSequence csq) throws IOException {
+		elements.add((T) csq.toString());
+		return this;
+	}
+
+	/**
+	Not supported
+
+	@throws UnsupportedOperationException
+	**/
+
+	public final Appendable append(final char c) throws IOException {
+		throw new UnsupportedOperationException("Sentence does not support append(char r)");
+	}
+
+	/**
+	Not supported
+
+	@throws UnsupportedOperationException
+	**/
+
+	public final Appendable append(final CharSequence csq, final int start, final int end) throws IOException {
+		throw new UnsupportedOperationException("Sentence does not support append(CharSequence csq, int start, int end)");
+	}
+
+	/**
+	Returns an iterator over the elements of the Sentence
+	**/
+
 	public final Iterator<T> iterator() {
+		assert stack.isEmpty() : "Stack was not empty at the time Iterator was accessed.";
+
 		return elements.iterator();
 	}
 
+	/**
+	Returns the Sentence as a string, possibly with seprators between the elements
+	**/
+
 	public final String toString() {
-		assert stack.isEmpty() : "Stack was not empty at the time toString() was called.";
 
 		if (elements.size() == 0) {
 			return "";
 		} else {
 			StringBuilder builder = new StringBuilder();
-			Iterator<T> iterator = elements.iterator();
+			Iterator<T> iterator = iterator();
 
-			builder.append(iterator.next().toString());
+			builder.append(iterator.next());
 
 			while (iterator.hasNext()) {
 				if (separator != null) {
 					builder.append(separator);
 				}
-				builder.append(iterator.next().toString());
+				builder.append(iterator.next());
 			}
 
 			return builder.toString();
 		}
+	}
+
+	final Deque<Generatable> getStack() {
+		return stack;
 	}
 }

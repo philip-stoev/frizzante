@@ -166,7 +166,7 @@ public class GrammarTest {
 			"main:fooba r;",
 			"main:f o o b a r;",
 			"main:x y;x:foo;y:bar;",
-//			"main:foo\t\r\nbar;",
+			"main:foo\t\r\nbar;",
 			"main:\t\r\nfoobar;",
 			"main:foobar\t\r\n;"
 		};
@@ -260,11 +260,11 @@ public class GrammarTest {
 		Grammar g = new Grammar("main: foo.visitor bar.visitor;");
 
 		class TestVisitor {
-			public void foo(final Context context, final Sentence<?> sentence) {
+			public void foo(final Context context, final Sentence<String> sentence) {
 				sentence.add("foo2");
 			}
 
-			public void bar(final Context context, final Sentence<?> sentence) {
+			public void bar(final Context context, final Sentence<String> sentence) {
 				sentence.add("bar2");
 			}
 		}
@@ -304,7 +304,7 @@ public class GrammarTest {
 
 		class TestVisitor {
 			public void cached(final Context context, final Sentence<String> sentence) {
-				sentence.add("cached2");
+				sentence.append("cached2");
 			}
 		}
 
@@ -399,5 +399,27 @@ public class GrammarTest {
 			}
 		}
 		Assert.fail("No long sentences produced");
+	}
+
+	@Test
+	public final void testEscapedPipe() {
+		Grammar g = new Grammar("main: foo \\| bar | foo \\| bar;");
+		Context c = new Context.ContextBuilder(g).build();
+		Assert.assertEquals(c.generateString(), "foo | bar");
+
+	}
+
+	@Test
+	public final void testBackslash() {
+		Grammar g = new Grammar("main: foo \\ bar;");
+		Context c = new Context.ContextBuilder(g).build();
+		Assert.assertEquals(c.generateString(), "foo \\ bar");
+	}
+
+	@Test
+	public final void testUnicodeProduction() {
+		Grammar g = new Grammar("main: тест ;");
+		Context c = new Context.ContextBuilder(g).build();
+		Assert.assertEquals(c.generateString(), "тест");
 	}
 }

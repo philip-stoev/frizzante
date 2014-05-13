@@ -9,11 +9,6 @@
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
-      <groupId>org.antlr</groupId>
-      <artifactId>antlr4-runtime</artifactId>
-      <version>4.2.2</version>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
@@ -62,18 +57,6 @@
             <goals>
               <goal>clean</goal>
               <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.antlr</groupId>
-        <artifactId>antlr4-maven-plugin</artifactId>
-        <version>4.2.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>antlr4</goal>
             </goals>
           </execution>
         </executions>
@@ -128,6 +111,7 @@
           </compilerArgs>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
+          <useIncrementalCompilation>false</useIncrementalCompilation>
           <fork>true</fork>
           <verbose>true</verbose>
           <source>1.6</source>
@@ -178,4 +162,13 @@
       </plugin>
     </plugins>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

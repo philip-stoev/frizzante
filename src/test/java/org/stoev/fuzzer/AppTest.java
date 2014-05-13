@@ -36,7 +36,7 @@ public class AppTest extends TestCase {
 	}
 
 	public final void testJavaCode() {
-		Grammar grammar = new Grammar("main: foo ; foo.java: {{ sentence.add(\"foo2\"); }};");
+		Grammar grammar = new Grammar("main: foo ; foo.java: {{ sentence.append(\"foo2\"); }};");
 		Context context = new Context.ContextBuilder(grammar).build();
 		assertEquals("foo2", context.generateString());
 	}

@@ -48,6 +48,11 @@ public final class Context {
 			return this;
 		}
 
+		public final ContextBuilder random(final int seed) {
+			this.random = new Random(seed);
+			return this;
+		}
+
 		public final ContextBuilder separator(final String s) {
 			this.separator = s;
 			return this;
