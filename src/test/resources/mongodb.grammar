@@ -1,0 +1,27 @@
+main:
+	mongo_insert ;
+
+mongo_insert:
+	DBCollection coll = db.getCollection("testCollection") \;
+	BasicObject obj = basic_object \;
+	coll.insert(obj) \;
+;
+
+basic_object: new BasicObject(object_parameters).append_list ;
+
+append_list: | append_item | append_list.append_item;
+
+append_item: append(object_parameters) ;
+
+object_parameters: name,value ;
+
+name: "string" ;
+
+value: "string" | integer | basic_object;
+
+string: ABC | XYZ ;
+
+integer: a| 2;
+
+foo: bar;
+

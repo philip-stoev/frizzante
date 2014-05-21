@@ -15,6 +15,8 @@ public final class Context {
         private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
 	private final HashMap<String, Method> cachedVisitors = new HashMap<String, Method>();
 
+	private static final String SPACE = " ";
+
 	private Context(final ContextBuilder builder) {
 		this.grammar = builder.grammar;
 
@@ -24,10 +26,14 @@ public final class Context {
 			this.random = new Random(1);
 		}
 
-		if (builder.separator != null) {
-			this.separator = builder.separator;
+		if (builder.nullSeparator) {
+			this.separator = null;
 		} else {
-			this.separator = " ";
+			if (builder.separator != null) {
+				this.separator = builder.separator;
+			} else {
+				this.separator = SPACE;
+			}
 		}
 
 		this.visitor = builder.visitor;
@@ -37,6 +43,7 @@ public final class Context {
 		private final Grammar grammar;
 		private Random random;
 		private String separator;
+		private boolean nullSeparator;
 		private Object visitor;
 
 		public ContextBuilder(final Grammar gr) {
@@ -55,6 +62,12 @@ public final class Context {
 
 		public final ContextBuilder separator(final String s) {
 			this.separator = s;
+			return this;
+		}
+
+		public final ContextBuilder nullSeparator() {
+			this.separator = null;
+			this.nullSeparator = true;
 			return this;
 		}
 
@@ -78,13 +91,21 @@ public final class Context {
 	}
 
 	public String generateString() {
-		Sentence<String> sentence = new Sentence<String>(separator);
+		Sentence<String> sentence = new Sentence<String>();
 		generate(sentence);
 		return sentence.toString();
 	}
 
 	public int randomInt(final int n) {
 		return random.nextInt(n);
+	}
+
+	public double randomDouble() {
+		return random.nextDouble();
+	}
+
+	String getSeparator() {
+		return separator;
 	}
 
 	Object getVisitor() {

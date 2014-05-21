@@ -30,20 +30,20 @@ public class AppTest extends TestCase {
 	}
 
 	public final void testLinker() {
-		Grammar grammar = new Grammar("main: linker1 , linker2 ; linker1: linkerA ; linker2: linkerB;");
+		Grammar grammar = new Grammar("main: linker1 , linker2 ;\n linker1: linkerA ;\n linker2: linkerB;");
 		Context context = new Context.ContextBuilder(grammar).build();
 		assertEquals("linkerA , linkerB", context.generateString());
 	}
 
 	public final void testJavaCode() {
-		Grammar grammar = new Grammar("main: foo ; foo.java: {{ sentence.append(\"foo2\"); }};");
+		Grammar grammar = new Grammar("main: foo ;\n foo.java: {{ sentence.append(\"foo2\"); }};");
 		Context context = new Context.ContextBuilder(grammar).build();
 		assertEquals("foo2", context.generateString());
 	}
 
 	public final void testForeignGeneratable() {
-		Grammar grammar = new Grammar("main: foo foo; foo.java: {{ sentence.add(new Long(2)); }};");
-		Context context = new Context.ContextBuilder(grammar).build();
+		Grammar grammar = new Grammar("main: foo foo;\n foo.java: {{ sentence.add(new Long(2)); }};");
+		Context context = new Context.ContextBuilder(grammar).nullSeparator().build();
 
 		Sentence<Long> sentence = new Sentence<Long>();
 		context.generate(sentence);
@@ -59,7 +59,7 @@ public class AppTest extends TestCase {
 	}
 
 	public final void testCaching() {
-		Grammar grammar = new Grammar("main: foo , $foo ; foo: foo2 ;");
+		Grammar grammar = new Grammar("main: foo , foo_cached ;\n foo: foo2 ;");
 		Context context = new Context.ContextBuilder(grammar).build();
 		assertEquals(context.generateString(), "foo2 , foo2");
 	}

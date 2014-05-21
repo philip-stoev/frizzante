@@ -43,13 +43,12 @@
         <configuration>
           <instrumentation>
             <excludes>
-              <exclude>org/stoev/fuzzer/Antlr*.class</exclude>
               <exclude>org/stoev/fuzzer/Generatable.class</exclude>
             </excludes>
           </instrumentation>
           <check>
             <haltOnFailure>true</haltOnFailure>
-            <totalLineRate>85</totalLineRate>
+            <totalLineRate>65</totalLineRate>
           </check>
         </configuration>
         <executions>

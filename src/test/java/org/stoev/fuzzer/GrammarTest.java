@@ -88,7 +88,7 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testDuplicateRules() {
-		Grammar g = new Grammar("main: FOO ; main: BAR ;");
+		Grammar g = new Grammar("main: FOO ;\n main: BAR ;");
 	}
 
 	@Test
@@ -151,9 +151,12 @@ public class GrammarTest {
 
 	@Test
 	public final void testRecursiveWeight() {
-		Grammar g = new Grammar("main:90% foo , main | 10% foo;");
+		Grammar g = new Grammar("main:90% foo , main |10% foo;");
 		Context c = new Context.ContextBuilder(g).build();
-		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo");
+		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo");
+		Assert.assertEquals(c.generateString(), "foo , foo");
+		Assert.assertEquals(c.generateString(), "foo");
+		Assert.assertEquals(c.generateString(), "foo");
 	}
 
 	@Test
@@ -165,10 +168,7 @@ public class GrammarTest {
 			"main:f oobar;",
 			"main:fooba r;",
 			"main:f o o b a r;",
-			"main:x y;x:foo;y:bar;",
-			"main:foo\t\r\nbar;",
-			"main:\t\r\nfoobar;",
-			"main:foobar\t\r\n;"
+			"main:x y;\nx:foo;\ny:bar;"
 		};
 
 		for (String grammarString: grammarStrings) {
@@ -187,9 +187,9 @@ public class GrammarTest {
 			"main: foo bar| foo bar;",
 			"main:foo bar ;",
 			"main:foo bar |foo bar;",
-			"main:x y;x:foo;y:bar;",
-			"main:x y;x: foo;y: bar;",
-			"main:x y;x:foo ;y:bar ;",
+			"main:x y;\nx:foo;\ny:bar;",
+			"main:x y;\nx: foo;\ny: bar;",
+			"main:x y;\nx:foo ;\ny:bar ;",
 		};
 
 		for (String grammarString: grammarStrings) {
@@ -227,7 +227,7 @@ public class GrammarTest {
 
 	@Test
 	public final void testEmptyJava() {
-		Grammar g = new Grammar("main: foo ; foo.java: {{ }};");
+		Grammar g = new Grammar("main: foo ;\n foo.java: {{ }};");
 		Context c = new Context.ContextBuilder(g).build();
 		Assert.assertEquals(c.generateString(), "");
 
@@ -235,7 +235,7 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testMalformedJava() {
-		Grammar g = new Grammar("main: foo ; foo.java: {{ ;");
+		Grammar g = new Grammar("main: foo ;\n foo.java: {{ ;");
 		Context c = new Context.ContextBuilder(g).build();
 		Assert.assertEquals(c.generateString(), "");
 	}
@@ -243,21 +243,21 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testInvalidJava() {
-		Grammar g = new Grammar("main: foo ; foo.java: {{ foo(); }};");
+		Grammar g = new Grammar("main: foo ;\n foo.java: {{ foo(); }};");
 		Context c = new Context.ContextBuilder(g).build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testJavaException() {
-		Grammar g = new Grammar("main: foo ; foo.java: {{ int a = 0 ; int b = 2 / a; }};");
+		Grammar g = new Grammar("main: foo ;\n foo.java: {{ int a = 0 ; int b = 2 / a; }};");
 		Context c = new Context.ContextBuilder(g).build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test
 	final void testVisitors() {
-		Grammar g = new Grammar("main: foo.visitor bar.visitor;");
+		Grammar g = new Grammar("main: foo_visitor bar_visitor;");
 
 		class TestVisitor {
 			public void foo(final Context context, final Sentence<String> sentence) {
@@ -277,7 +277,7 @@ public class GrammarTest {
 
 	@Test
 	final void testVisitorWithType() {
-		Grammar g = new Grammar("main: foo.visitor;");
+		Grammar g = new Grammar("main: foo_visitor;");
 		class TestObject {
 
 		}
@@ -300,7 +300,7 @@ public class GrammarTest {
 
 	@Test
 	final void testVisitorCaching() {
-		Grammar g = new Grammar("main: cached.visitor cached.visitor;");
+		Grammar g = new Grammar("main: cached_visitor cached_visitor;");
 
 		class TestVisitor {
 			public void cached(final Context context, final Sentence<String> sentence) {
@@ -317,7 +317,7 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorMethod() {
-                Grammar g = new Grammar("main: missing.visitor;");
+                Grammar g = new Grammar("main: missing_visitor;");
 
                 class TestVisitor {
 
@@ -330,7 +330,7 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorMethodDefinition() {
-		Grammar g = new Grammar("main: missing.visitor;");
+		Grammar g = new Grammar("main: missing_visitor;");
 
 		class TestVisitor {
 			public int cached(final Context context, final Sentence<String> sentence) {
@@ -345,7 +345,7 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testNonvoidVisitor() {
-		Grammar g = new Grammar("main: missing.visitor;");
+		Grammar g = new Grammar("main: missing_visitor;");
 
 		class TestVisitor {
 			public void cached() {
@@ -360,21 +360,21 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorClass() {
-                Grammar g = new Grammar("main: missing.visitor;");
+                Grammar g = new Grammar("main: missing_visitor;");
                 Context c = new Context.ContextBuilder(g).build();
 		c.generateString();
 	}
 
 	@Test
 	public final void testEmptyCached() {
-		Grammar g = new Grammar("main: $main;");
+		Grammar g = new Grammar("main: main_cached;");
 		Context c = new Context.ContextBuilder(g).build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test
 	public final void testRuleTree() {
-		Grammar g = new Grammar("main: foo , bar ; foo: fooA , fooB ; bar: barA , barB ;");
+		Grammar g = new Grammar("main: foo , bar ;\n foo: fooA , fooB ;\n bar: barA , barB ;");
                 Context c = new Context.ContextBuilder(g).build();
                 Assert.assertEquals(c.generateString(), "fooA , fooB , barA , barB");
 

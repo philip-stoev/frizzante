@@ -25,19 +25,11 @@ public class SentenceTest {
 	}
 
 	@Test
-	public final void testNullSeparator() {
-		Sentence<String> s = new Sentence<String>(null);
-		s.append("abc");
-		s.append("xyz");
-		Assert.assertEquals(s.toString(), "abcxyz");
-	}
-
-	@Test
 	public final void testObjectToString() {
-		Sentence<Long> s = new Sentence<Long>(" ");
+		Sentence<Long> s = new Sentence<Long>();
 		s.add(1L);
 		s.add(2L);
-		Assert.assertEquals(s.toString(), "1 2");
+		Assert.assertEquals(s.toString(), "12");
 	}
 
 	@Test
@@ -53,7 +45,7 @@ public class SentenceTest {
 
 	@Test
 	public final void testNullElements() {
-		Sentence<String> s = new Sentence<String>(" ");
+		Sentence<String> s = new Sentence<String>();
 		s.add(null);
 		s.append(null);
 		Iterator<String> i = s.iterator();
@@ -61,6 +53,6 @@ public class SentenceTest {
 		Assert.assertNull(i.next());
 		Assert.assertNull(i.next());
 
-		Assert.assertEquals(s.toString(), "null null");
+		Assert.assertEquals(s.toString(), "nullnull");
 	}
 }

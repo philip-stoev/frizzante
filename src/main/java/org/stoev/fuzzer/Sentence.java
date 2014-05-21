@@ -36,24 +36,7 @@ import java.io.IOException;
 public class Sentence<T> implements Iterable<T>, Appendable {
 	private final List<T> elements = new ArrayList<T>();
 	private final Deque<Generatable> stack = new ArrayDeque<Generatable>();
-	private final String separator;
-
-	/**
-	 * Creates a Sentence without a separator.
-	**/
-
-	public Sentence() {
-		separator = null;
-	}
-
-	/**
-	 * Creates a Sentence with a String separator.
-	 * @param sep the separator to be added between each two items when toString() is called
-	**/
-
-	public Sentence(final String sep) {
-		this.separator = sep;
-	}
+	private final List<GrammarProduction> productions = new ArrayList<GrammarProduction>();
 
 	/**
 	Adds a new element to the Sentence
@@ -144,9 +127,6 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 			builder.append(iterator.next());
 
 			while (iterator.hasNext()) {
-				if (separator != null) {
-					builder.append(separator);
-				}
 				builder.append(iterator.next());
 			}
 
@@ -157,4 +137,21 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	final Deque<Generatable> getStack() {
 		return stack;
 	}
+
+	final void addProduction(final GrammarProduction production) {
+		productions.add(production);
+	}
+
+	final void fail(final double penalty) {
+		for (GrammarProduction production: productions) {
+			production.penalize(penalty);
+		}
+	}
+
+	final void success(final double promotion) {
+		for (GrammarProduction production: productions) {
+			production.promote(promotion);
+		}
+	}
+
 }

@@ -4,25 +4,57 @@ import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+
 public final class Grammar implements Generatable {
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
 
-	private static final Pattern RULE_PATTERN = Pattern.compile(".*?\\s*;\\s*", Pattern.DOTALL);
-	private static final Pattern JAVA_PATTERN = Pattern.compile("\\{\\{.*?\\}\\};\\s*", Pattern.DOTALL);
-	private static final Pattern RULE_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_.]*:");
+	private static final String ANY_STRING = ".*?";
+	private static final String SEMICOLON_AT_EOL = ";\\s*(\\n+|\\z)";
+	private static final String JAVA_DOUBLE_OPENING_BRACES = "\\{\\{";
+	private static final String JAVA_DOUBLE_CLOSING_BRACES_SEMICOLON_EOL = "\\}\\};(\\n|\\z)";
+
+	private static final Pattern RULE_PATTERN = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + SEMICOLON_AT_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
+	private static final Pattern JAVA_PATTERN = Pattern.compile(JAVA_DOUBLE_OPENING_BRACES + ANY_STRING + JAVA_DOUBLE_CLOSING_BRACES_SEMICOLON_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
+	private static final Pattern RULE_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_. ]*:");
 	private static final String JAVA_EXTENSION = ".java";
 
 	private final HashMap<String, Generatable> rules = new HashMap<String, Generatable>();
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
 	Grammar(final String grammarString) {
-		Scanner scanner = new Scanner(grammarString);
+		this(new Scanner(grammarString));
+	}
 
-		while (scanner.hasNext()) {
+	Grammar(final File file) throws FileNotFoundException {
+		this(new Scanner(file, "UTF-8"));
+	}
+
+	Grammar(final InputStream stream) {
+		this(new Scanner(stream, "UTF-8"));
+	}
+
+	private Grammar(final Scanner scanner) {
+		while (true) {
+			// Trim leading whitespace
+			while (scanner.hasNext(Constants.WHITESPACE)) {
+				scanner.next(Constants.WHITESPACE);
+			}
+
 			String generatableName = scanner.findWithinHorizon(RULE_NAME_PATTERN, 0);
-			generatableName = generatableName.substring(0, generatableName.length() - 1);
 
+			if (generatableName == null) {
+				break;
+			}
+
+			if (generatableName.contains(Constants.SPACE)) {
+				throw new ConfigurationException("Rule name " + generatableName + " contains space.");
+			}
+
+			generatableName = generatableName.substring(0, generatableName.length() - 1);
 			Generatable generatableObject;
 
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
@@ -82,7 +114,16 @@ public final class Grammar implements Generatable {
 	}
 
 	public String toString() {
-		assert false;
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		for (Generatable rule: rules.values()) {
+			sb.append(rule.toString());
+		}
+
+		return sb.toString();
+	}
+
+	public String getName() {
+		return "";
 	}
 }

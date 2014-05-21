@@ -17,6 +17,10 @@ class GrammarLiteral implements Generatable {
 		return value;
 	}
 
+	public String getName() {
+		return value;
+	}
+
 	public void compile(final Grammar grammar) {
 		assert false;
 	}

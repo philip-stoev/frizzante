@@ -51,6 +51,10 @@ class JavaVisitor implements Generatable {
 		return methodName;
 	}
 
+	public String getName() {
+		return methodName;
+	}
+
 	public void compile(final Grammar grammar) {
 		assert false;
 	}

@@ -18,6 +18,10 @@ class CachedValue implements Generatable {
 		return "$" + ruleName;
 	}
 
+	public String getName() {
+		return "$" + ruleName;
+	}
+
 	public void compile(final Grammar grammar) {
 		assert false;
 	}

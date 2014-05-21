@@ -8,9 +8,16 @@ class GrammarRule implements Generatable {
 
 	private final String ruleName;
 	private final List<GrammarProduction> productions;
-	private final int totalWeight;
+	private double totalWeight;
 
-        private static final String PRODUCTION_SEPARATION_PATTERN = "\\s*(?<!\\\\)\\||\\s*\\z|\\s*;\\s*";
+        private static final String PIPE_NOT_ESCAPED = "(?<!\\\\)\\|";
+
+	private static final String ESCAPED_PIPE = "\\\\\\|";
+
+        private static final String PRODUCTION_SEPARATION_PATTERN =
+		  Constants.OPTIONAL_WHITESPACE + PIPE_NOT_ESCAPED
+		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.EOL + Constants.OPTIONAL_WHITESPACE
+		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.OPTIONAL_WHITESPACE + Constants.EOF;
 
 	GrammarRule(final String rn, final String ruleString) {
 		ruleName = rn;
@@ -20,13 +27,20 @@ class GrammarRule implements Generatable {
                 Scanner scanner = new Scanner(ruleString);
 		scanner.useDelimiter(PRODUCTION_SEPARATION_PATTERN);
 
-		int runningWeightSum = 0;
-
                 while (scanner.hasNext()) {
 			String productionString = scanner.next();
-			productionString = productionString.replaceAll("\\\\\\|", "|");
-			GrammarProduction production = new GrammarProduction(productionString);
+			productionString = productionString.replaceAll(ESCAPED_PIPE, "|");
+			GrammarProduction production = new GrammarProduction(this, productionString);
 			productions.add(production);
+		}
+
+		recalculateWeights();
+	}
+
+	public void recalculateWeights() {
+		double runningWeightSum = 0;
+
+		for (GrammarProduction production: productions) {
 			runningWeightSum = runningWeightSum + production.getWeight();
 		}
 
@@ -39,8 +53,8 @@ class GrammarRule implements Generatable {
 		}
 
 		GrammarProduction randomProduction = null;
-		int randomWeight = context.randomInt(totalWeight);
-		int runningWeight = 0;
+		double randomWeight = context.randomDouble() * totalWeight;
+		double runningWeight = 0;
 
 		for (GrammarProduction production: productions) {
 			runningWeight = runningWeight + production.getWeight();
@@ -75,6 +89,21 @@ class GrammarRule implements Generatable {
 	}
 
 	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(ruleName);
+		sb.append(":");
+
+		for (GrammarProduction production: productions) {
+			sb.append(production.toString());
+			sb.append("|\n");
+		}
+
+		sb.append(";\n");
+
+		return sb.toString();
+	}
+
+	public String getName() {
 		return ruleName;
 	}
 }

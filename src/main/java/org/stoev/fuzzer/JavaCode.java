@@ -92,8 +92,11 @@ class JavaCode implements Generatable {
 	}
 
 	public final String toString() {
-		assert false;
-		return "foo";
+		return "{{" + javaString + "}};";
+	}
+
+	public final String getName() {
+		return className;
 	}
 }
 
