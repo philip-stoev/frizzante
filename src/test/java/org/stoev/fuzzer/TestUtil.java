@@ -15,7 +15,7 @@ final class TestUtil {
 	}
 
 	static void assertGenerates(final String grammarString, final String expectedString) {
-                Context context = new Context.ContextBuilder().grammar(grammarString).build();
+		Context context = new Context.ContextBuilder().grammar(grammarString).build();
 
 		for (int i = 1; i <= ITERATIONS; i++) {
 			Assert.assertEquals(context.generateString(), expectedString, "String was generated using the following grammar:\n" + grammarString + "\n");
@@ -23,7 +23,7 @@ final class TestUtil {
 	}
 
 	static void assertGeneratesSkipWhitespace(final String grammarString, final String expectedString) {
-                Context context = new Context.ContextBuilder().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		Context context = new Context.ContextBuilder().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 
 		for (int i = 1; i <= ITERATIONS; i++) {
 			Assert.assertEquals(context.generateString(), expectedString, "String was generated using the following grammar:\n" + grammarString + "\n");

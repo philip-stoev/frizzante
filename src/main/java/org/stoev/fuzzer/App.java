@@ -48,14 +48,14 @@ public final class App {
 
 			System.out.println("Cycle: " + c);
 			System.out.println(map.toString());
-			System.out.println(grammar.toString());
+			System.out.println(grammar);
 			System.out.println();
 		}
 	}
 
 	public static void mainBenchmark(final String[] args) {
 
-                String grammar = "main: foo , main | foo , foo ; foo: foo1 | foo2 ; foo2.java: { sentence.add(\"foo4\"); };";
+		String grammar = "main: foo , main | foo , foo ; foo: foo1 | foo2 ; foo2.java: { sentence.add(\"foo4\"); };";
 		Context context = new Context.ContextBuilder().grammar(grammar).build();
 
 		final long iterations = 10000000;

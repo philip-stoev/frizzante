@@ -286,7 +286,7 @@ public class GrammarTest {
 
 		Sentence<TestObject> sentence = new Sentence<TestObject>();
 		c.generate(sentence);
-                Iterator<TestObject> iterator = sentence.iterator();
+		Iterator<TestObject> iterator = sentence.iterator();
 
 		Assert.assertTrue(iterator.next() instanceof TestObject);
 	}
@@ -310,14 +310,14 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorMethod() {
-                String g = "main: missing_visitor;";
+		String g = "main: missing_visitor;";
 
-                class TestVisitor {
+		class TestVisitor {
 
-                }
+		}
 
-                Object v = new TestVisitor();
-                Context c = new ContextBuilder().grammar(g).visitor(v).build();
+		Object v = new TestVisitor();
+		Context c = new ContextBuilder().grammar(g).visitor(v).build();
 		c.generateString();
 	}
 
@@ -331,8 +331,8 @@ public class GrammarTest {
 			}
 		}
 
-                Object v = new TestVisitor();
-                Context c = new ContextBuilder().grammar(g).visitor(v).build();
+		Object v = new TestVisitor();
+		Context c = new ContextBuilder().grammar(g).visitor(v).build();
 		c.generateString();
 	}
 
@@ -346,15 +346,15 @@ public class GrammarTest {
 			}
 		}
 
-                Object v = new TestVisitor();
-                Context c = new ContextBuilder().grammar(g).visitor(v).build();
+		Object v = new TestVisitor();
+		Context c = new ContextBuilder().grammar(g).visitor(v).build();
 		c.generateString();
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorClass() {
-                String g = "main: missing_visitor;";
-                Context c = new ContextBuilder().grammar(g).build();
+		String g = "main: missing_visitor;";
+		Context c = new ContextBuilder().grammar(g).build();
 		c.generateString();
 	}
 
@@ -368,23 +368,23 @@ public class GrammarTest {
 	@Test
 	public final void testRuleTree() {
 		String g = "main: foo , bar ;\n foo: fooA , fooB ;\n bar: barA , barB ;";
-                Context c = new ContextBuilder().grammar(g).build();
-                Assert.assertEquals(c.generateString(), "fooA , fooB , barA , barB");
+		Context c = new ContextBuilder().grammar(g).build();
+		Assert.assertEquals(c.generateString(), "fooA , fooB , barA , barB");
 
 	}
 
 	@Test
 	public final void testLongSentence() {
-                String g = "main:9999999 X main |1 Y;";
-                Context c = new ContextBuilder().grammar(g).build();
+		String g = "main:9999999 X main |1 Y;";
+		Context c = new ContextBuilder().grammar(g).build();
 
 		Assert.assertTrue(c.generateString().length() > (TEN * TEN * TEN * TEN));
 	}
 
 	@Test
 	public final void testMassiveRecursion() {
-                String g = "main:50% main main |50% Y;";
-                Context c = new ContextBuilder().grammar(g).build();
+		String g = "main:50% main main |50% Y;";
+		Context c = new ContextBuilder().grammar(g).build();
 
 		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
 			if (c.generateString().length() > (TEN * TEN * TEN)) {

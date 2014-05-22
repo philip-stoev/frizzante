@@ -20,7 +20,7 @@ public final class Context {
 	private final Random random;
 	private final Object visitor;
 
-        private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
+	private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
 	private final HashMap<String, Method> cachedVisitors = new HashMap<String, Method>();
 
 	private Context(final ContextBuilder builder) {
@@ -42,7 +42,7 @@ public final class Context {
 		public ContextBuilder grammar(final String grammarString) {
 			this.grammar = new Grammar(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
 			return this;
-	        }
+		}
 
 		public ContextBuilder grammar(final String grammarString, final Set<GrammarFlags> flags) {
 			this.grammar = new Grammar(new Scanner(grammarString), flags);
@@ -50,9 +50,9 @@ public final class Context {
 		}
 
 		public ContextBuilder grammar(final File file) throws FileNotFoundException {
-	                this.grammar = new Grammar(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+			this.grammar = new Grammar(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
 			return this;
-	        }
+		}
 
 		public ContextBuilder grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
 			this.grammar = new Grammar(new Scanner(file, "UTF-8"), flags);
@@ -60,12 +60,12 @@ public final class Context {
 		}
 
 		public ContextBuilder grammar(final InputStream stream) {
-	                this.grammar = new Grammar(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+			this.grammar = new Grammar(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
 			return this;
 		}
 
 		public ContextBuilder grammar(final InputStream stream, final Set<GrammarFlags> flags) {
-	                this.grammar = new Grammar(new Scanner(stream, "UTF-8"), flags);
+			this.grammar = new Grammar(new Scanner(stream, "UTF-8"), flags);
 			return this;
 		}
 

@@ -66,13 +66,13 @@ final class GrammarProduction implements Generatable {
 
 			// We populate the elements array backwards as this is how items will be inserted into the stack during generation
 
-			if (!flags.contains(GrammarFlags.SKIP_WHITESPACE))  {
+			if (!flags.contains(GrammarFlags.SKIP_WHITESPACE)) {
 				elements.add(0, new GrammarLiteral(elementString));
 			} else if (!elementString.matches(Constants.WHITESPACE)) {
 				elements.add(0, new GrammarLiteral(elementString));
 			}
-                }
-        }
+		}
+	}
 
 	double getWeight() {
 		return weight;
@@ -80,7 +80,7 @@ final class GrammarProduction implements Generatable {
 
 	void demote(final double penalty) {
 		if ((penalty < 0.0f) || (penalty > 1.0f)) {
-                        throw new ConfigurationException("Penalty must be between 0 and 1.0.");
+			throw new ConfigurationException("Penalty must be between 0 and 1.0.");
 		}
 
 		this.weight = this.weight * (1 - penalty);
@@ -91,7 +91,7 @@ final class GrammarProduction implements Generatable {
 
 	void promote(final double promotion) {
 		if ((promotion < 0.0f) || (promotion > 1.0d)) {
-                        throw new ConfigurationException("Promotion must be between 0 and 1.0.");
+			throw new ConfigurationException("Promotion must be between 0 and 1.0.");
 		}
 
 
