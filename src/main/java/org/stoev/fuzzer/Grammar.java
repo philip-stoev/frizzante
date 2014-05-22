@@ -3,6 +3,8 @@ package org.stoev.fuzzer;
 import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
+import java.util.EnumSet;
+import java.util.Set;
 
 import java.io.File;
 import java.io.InputStream;
@@ -10,14 +12,20 @@ import java.io.FileNotFoundException;
 
 public final class Grammar implements Generatable {
 
+	public static enum GrammarFlags {
+		STANDALONE_SEMICOLONS_ONLY,
+		SKIP_WHITESPACE,
+		TRAILING_PIPES_ONLY
+	};
+
 	private static final String STARTING_GRAMMAR_RULE = "main";
 
 	private static final String ANY_STRING = ".*?";
 	private static final String SEMICOLON_AT_EOL = ";\\s*(\\n+|\\z)";
+	private static final String STANDALONE_SEMICOLON = "\n;\\s*(\\n+|\\z)";
 	private static final String JAVA_DOUBLE_OPENING_BRACES = "\\{\\{";
 	private static final String JAVA_DOUBLE_CLOSING_BRACES_SEMICOLON_EOL = "\\}\\};(\\n|\\z)";
 
-	private static final Pattern RULE_PATTERN = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + SEMICOLON_AT_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
 	private static final Pattern JAVA_PATTERN = Pattern.compile(JAVA_DOUBLE_OPENING_BRACES + ANY_STRING + JAVA_DOUBLE_CLOSING_BRACES_SEMICOLON_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
 	private static final String RULE_NAME_PATTERN = "[a-zA-Z0-9_. ]*:";
 	private static final String JAVA_EXTENSION = ".java";
@@ -26,19 +34,39 @@ public final class Grammar implements Generatable {
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
 	Grammar(final String grammarString) {
-		this(new Scanner(grammarString));
+		this(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
+	}
+
+	Grammar(final String grammarString, final Set<GrammarFlags> flags) {
+		this(new Scanner(grammarString), flags);
 	}
 
 	Grammar(final File file) throws FileNotFoundException {
-		this(new Scanner(file, "UTF-8"));
+		this(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+	}
+
+	Grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
+		this(new Scanner(file, "UTF-8"), flags);
 	}
 
 	Grammar(final InputStream stream) {
-		this(new Scanner(stream, "UTF-8"));
+		this(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
 	}
 
-	private Grammar(final Scanner scanner) {
+	Grammar(final InputStream stream, final Set<GrammarFlags> flags) {
+		this(new Scanner(stream, "UTF-8"), flags);
+	}
+
+	private Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
 		scanner.useDelimiter("");
+
+		final Pattern rulePattern;
+
+		if (flags.contains(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)) {
+			rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + STANDALONE_SEMICOLON + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
+		} else {
+			rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + SEMICOLON_AT_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
+		}
 
 		while (true) {
 			// Trim leading whitespace
@@ -75,13 +103,13 @@ public final class Grammar implements Generatable {
 
 				generatableObject = new InlineJava(generatableName, javaString);
 			} else {
-				String ruleString = scanner.findWithinHorizon(RULE_PATTERN, 0);
+				String ruleString = scanner.findWithinHorizon(rulePattern, 0);
 
 				if (ruleString == null) {
 					throw new ConfigurationException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
 				}
 
-				generatableObject = new GrammarRule(generatableName, ruleString);
+				generatableObject = new GrammarRule(generatableName, ruleString, flags);
 			}
 
 			rules.put(generatableName, generatableObject);

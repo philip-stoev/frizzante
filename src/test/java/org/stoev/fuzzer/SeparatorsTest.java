@@ -1,5 +1,10 @@
 package org.stoev.fuzzer;
 
+import java.util.EnumSet;
+
+import org.stoev.fuzzer.Grammar.GrammarFlags;
+
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class SeparatorsTest {
@@ -49,8 +54,8 @@ public class SeparatorsTest {
 		TestUtil.assertGenerates("main:foo bar;", "foo bar");
 		TestUtil.assertGenerates("main:foo bar ;", "foo bar");
 		TestUtil.assertGenerates("main: foo bar;", "foo bar");
-		TestUtil.assertGenerates("main: foo\tbar;", "foo bar");
-		TestUtil.assertGenerates("main: foo\nbar;", "foo bar");
+		TestUtil.assertGenerates("main: foo\tbar;", "foo\tbar");
+		TestUtil.assertGenerates("main: foo\nbar;", "foo\nbar");
 	}
 
 	@Test
@@ -88,6 +93,15 @@ public class SeparatorsTest {
 	}
 
 	@Test
+	public final void testTrailingPipe() {
+		Grammar grammar = new Grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY));
+		Context context = new Context.ContextBuilder(grammar).build();
+
+		Assert.assertEquals(context.generateString(), "foo | bar");
+		Assert.assertEquals(context.generateString(), "foo | bar");
+	}
+
+	@Test
 	public final void testMiddleSemicolon() {
 		TestUtil.assertGenerates("main:foo;bar;", "foo;bar");
 		TestUtil.assertGenerates("main:foo; bar;", "foo; bar");
@@ -98,22 +112,30 @@ public class SeparatorsTest {
 	}
 
 	@Test
-	public final void testEmptySeparator() {
-		TestUtil.assertGeneratesEmptySeparator("main: foo bar ;", "foobar");
-		TestUtil.assertGeneratesEmptySeparator("main:  foo  bar  ;", "foobar");
-		TestUtil.assertGeneratesEmptySeparator("main: \\ . / ;", "\\./");
+	public final void testStandaloneSemicolon() {
+		Grammar grammar = new Grammar("main: foo ; bar ;\n baz;\n;\n", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY));
+		Context context = new Context.ContextBuilder(grammar).build();
 
-		TestUtil.assertGeneratesEmptySeparator("main: foo;bar;", "foo;bar");
-		TestUtil.assertGeneratesEmptySeparator("main: foo ; bar;", "foo;bar");
-		TestUtil.assertGeneratesEmptySeparator("main: foo  ;  bar;", "foo;bar");
+		Assert.assertEquals(context.generateString(), "foo ; bar ;\n baz;");
+	}
 
-		TestUtil.assertGeneratesEmptySeparator("main: foo\nbar;", "foobar");
-		TestUtil.assertGeneratesEmptySeparator("main: foo \n bar;", "foobar");
-		TestUtil.assertGeneratesEmptySeparator("main: foo  \n  bar;", "foobar");
+	@Test
+	public final void testSkipWhitespace() {
+		TestUtil.assertGeneratesSkipWhitespace("main: foo bar ;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main:  foo  bar  ;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main: \\ . / ;", "\\./");
 
-		TestUtil.assertGeneratesEmptySeparator("main: foo\tbar;", "foobar");
-		TestUtil.assertGeneratesEmptySeparator("main: foo \t bar;", "foobar");
-		TestUtil.assertGeneratesEmptySeparator("main: foo  \t  bar;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo;bar;", "foo;bar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo ; bar;", "foo;bar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo  ;  bar;", "foo;bar");
+
+		TestUtil.assertGeneratesSkipWhitespace("main: foo\nbar;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo \n bar;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo  \n  bar;", "foobar");
+
+		TestUtil.assertGeneratesSkipWhitespace("main: foo\tbar;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo \t bar;", "foobar");
+		TestUtil.assertGeneratesSkipWhitespace("main: foo  \t  bar;", "foobar");
 	}
 
 	@Test

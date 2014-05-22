@@ -6,6 +6,9 @@ import org.testng.annotations.Test;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.EnumSet;
+
+import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public class GrammarTest {
 	public static final int ITERATIONS = 10;
@@ -160,7 +163,7 @@ public class GrammarTest {
 	}
 
 	@Test
-	public final void testEmptySeparator() {
+	public final void testSkipWhitespace() {
 		final String[] grammarStrings = {
 			"main:foobar;",
 			"main: foobar;",
@@ -172,14 +175,14 @@ public class GrammarTest {
 		};
 
 		for (String grammarString: grammarStrings) {
-			Grammar g = new Grammar(grammarString);
-			Context c = new Context.ContextBuilder(g).separator("").build();
+			Grammar g = new Grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE));
+			Context c = new Context.ContextBuilder(g).build();
 			Assert.assertEquals(c.generateString(), "foobar", "Problematic string produced by grammar:'" + grammarString + "'");
 		}
 	}
 
 	@Test
-	public final void testSeparator() {
+	public final void testWhitespace() {
 		final String[] grammarStrings = {
 			"main:foo bar;",
 			"main:foo bar|foo bar;",
@@ -270,9 +273,9 @@ public class GrammarTest {
 		}
 
 		Object v = new TestVisitor();
-		Context c = new Context.ContextBuilder(g).visitor(v).separator("").build();
+		Context c = new Context.ContextBuilder(g).visitor(v).build();
 
-		Assert.assertEquals(c.generateString(), "foo2bar2");
+		Assert.assertEquals(c.generateString(), "foo2 bar2");
 	}
 
 	@Test
@@ -383,7 +386,7 @@ public class GrammarTest {
 	@Test
 	public final void testLongSentence() {
                 Grammar g = new Grammar("main:9999999 X main |1 Y;");
-                Context c = new Context.ContextBuilder(g).separator("").build();
+                Context c = new Context.ContextBuilder(g).build();
 
 		Assert.assertTrue(c.generateString().length() > (TEN * TEN * TEN * TEN));
 	}
@@ -391,7 +394,7 @@ public class GrammarTest {
 	@Test
 	public final void testMassiveRecursion() {
                 Grammar g = new Grammar("main:50% main main |50% Y;");
-                Context c = new Context.ContextBuilder(g).separator("").build();
+                Context c = new Context.ContextBuilder(g).build();
 
 		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
 			if (c.generateString().length() > (TEN * TEN * TEN)) {
@@ -399,14 +402,6 @@ public class GrammarTest {
 			}
 		}
 		Assert.fail("No long sentences produced");
-	}
-
-	@Test
-	public final void testEscapedPipe() {
-		Grammar g = new Grammar("main: foo \\| bar | foo \\| bar;");
-		Context c = new Context.ContextBuilder(g).build();
-		Assert.assertEquals(c.generateString(), "foo | bar");
-
 	}
 
 	@Test

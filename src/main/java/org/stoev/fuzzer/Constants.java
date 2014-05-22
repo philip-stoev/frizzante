@@ -14,5 +14,7 @@ final class Constants {
 	public static final String EOF = "\\z";
 
 	public static final String SEMICOLON = ";";
+	public static final String PIPE = "\\|";
+	public static final String TRAILING_PIPE = "\\|\n";
 	public static final String SPACE = " ";
 }

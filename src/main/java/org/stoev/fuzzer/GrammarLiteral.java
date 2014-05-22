@@ -6,7 +6,6 @@ class GrammarLiteral implements Generatable {
 	GrammarLiteral(final String lv) {
 		assert lv != null;
 		assert lv.length() > 0;
-		assert !lv.matches(Constants.WHITESPACE);
 
 		value = lv;
 	}

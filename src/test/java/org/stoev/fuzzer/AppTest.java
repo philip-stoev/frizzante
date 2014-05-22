@@ -1,10 +1,13 @@
 package org.stoev.fuzzer;
 
+import org.stoev.fuzzer.Grammar.GrammarFlags;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import java.util.Iterator;
+import java.util.EnumSet;
 
 public class AppTest extends TestCase {
 	/**
@@ -25,8 +28,8 @@ public class AppTest extends TestCase {
 
 	public final void testParser() {
 		Grammar grammar = new Grammar("main: THIS IS A TEXT | THIS IS SOME OTHER TEXT;");
-		Context context = new Context.ContextBuilder(grammar).separator("<separator>").build();
-		assertEquals(context.generateString(), "THIS<separator>IS<separator>SOME<separator>OTHER<separator>TEXT");
+		Context context = new Context.ContextBuilder(grammar).build();
+		assertEquals(context.generateString(), "THIS IS SOME OTHER TEXT");
 	}
 
 	public final void testLinker() {
@@ -42,8 +45,8 @@ public class AppTest extends TestCase {
 	}
 
 	public final void testForeignGeneratable() {
-		Grammar grammar = new Grammar("main: foo foo;\n foo.java: {{ sentence.add(new Long(2)); }};");
-		Context context = new Context.ContextBuilder(grammar).nullSeparator().build();
+		Grammar grammar = new Grammar("main: foo foo;\n foo.java: {{ sentence.add(new Long(2)); }};", EnumSet.of(GrammarFlags.SKIP_WHITESPACE));
+		Context context = new Context.ContextBuilder(grammar).build();
 
 		Sentence<Long> sentence = new Sentence<Long>();
 		context.generate(sentence);

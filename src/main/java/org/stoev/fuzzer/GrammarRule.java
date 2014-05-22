@@ -1,9 +1,12 @@
 package org.stoev.fuzzer;
 
+import org.stoev.fuzzer.Grammar.GrammarFlags;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Iterator;
+import java.util.Set;
 
 class GrammarRule implements Generatable {
 
@@ -11,27 +14,28 @@ class GrammarRule implements Generatable {
 	private final List<GrammarProduction> productions;
 	private double totalWeight;
 
-	private static final String PIPE_NOT_ESCAPED = "(?<!\\\\)\\|";
-
-	private static final String ESCAPED_PIPE = "\\\\\\|";
-
-	private static final String PRODUCTION_SEPARATION_PATTERN =
-		  Constants.OPTIONAL_WHITESPACE + PIPE_NOT_ESCAPED
-		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.EOL + Constants.OPTIONAL_WHITESPACE
-		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.OPTIONAL_WHITESPACE + Constants.EOF;
-
-	GrammarRule(final String rn, final String ruleString) {
+	GrammarRule(final String rn, final String ruleString, final Set<GrammarFlags> flags) {
 		ruleName = rn;
 		productions = new ArrayList<GrammarProduction>();
 		assert ruleString != null;
 
+		final String pipePattern;
+
+		if (flags.contains(GrammarFlags.TRAILING_PIPES_ONLY)) {
+			pipePattern = Constants.TRAILING_PIPE;
+		} else {
+			pipePattern = Constants.PIPE;
+		}
+
+		final String productionSeparationPattern = Constants.OPTIONAL_WHITESPACE + pipePattern
+		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.OPTIONAL_WHITESPACE + Constants.EOF;
+
 		Scanner scanner = new Scanner(ruleString);
-		scanner.useDelimiter(PRODUCTION_SEPARATION_PATTERN);
+		scanner.useDelimiter(productionSeparationPattern);
 
 		while (scanner.hasNext()) {
 			String productionString = scanner.next();
-			productionString = productionString.replaceAll(ESCAPED_PIPE, "|");
-			GrammarProduction production = new GrammarProduction(this, productionString);
+			GrammarProduction production = new GrammarProduction(this, productionString, flags);
 			productions.add(production);
 		}
 
