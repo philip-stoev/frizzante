@@ -61,12 +61,6 @@ public class AppTest extends TestCase {
 		assertFalse(iterator.hasNext());
 	}
 
-	public final void testCaching() {
-		String grammar = "main: foo , foo_cached ;\n foo: foo2 ;";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
-		assertEquals(context.generateString(), "foo2 , foo2");
-	}
-
 	public final void testLoops() {
 		String grammar = "main: foo | main , foo ;";
 		Context context = new Context.ContextBuilder().grammar(grammar).build();

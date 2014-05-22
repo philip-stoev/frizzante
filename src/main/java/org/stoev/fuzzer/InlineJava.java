@@ -79,7 +79,15 @@ final class InlineJava implements Generatable {
 
 	public void generate(final Context context, final Sentence<?> sentence) {
 		try {
-			javaMethod.invoke(null, context, sentence);
+
+			if (context.shouldCacheRule(className)) {
+				Sentence<?> cachedSentence = sentence.newInstance();
+				javaMethod.invoke(null, context, cachedSentence);
+	                        context.setCachedValue(className, cachedSentence);
+				sentence.addAll(cachedSentence);
+			} else {
+				javaMethod.invoke(null, context, sentence);
+			}
 		} catch (IllegalAccessException e) {
 			assert false : e.getMessage();
 		} catch (InvocationTargetException e) {

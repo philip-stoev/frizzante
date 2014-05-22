@@ -12,7 +12,7 @@ class GrammarRule implements Generatable {
 
 	private final String ruleName;
 	private final List<GrammarProduction> productions;
-	private double totalWeight;
+	private double weightSum;
 
 	GrammarRule(final String rn, final String ruleString, final Set<GrammarFlags> flags) {
 		ruleName = rn;
@@ -39,17 +39,15 @@ class GrammarRule implements Generatable {
 			productions.add(production);
 		}
 
-		recalculateWeights();
+		recalculateWeightSum();
 	}
 
-	public void recalculateWeights() {
-		double runningWeightSum = 0;
+	public void recalculateWeightSum() {
+		weightSum = 0;
 
 		for (GrammarProduction production: productions) {
-			runningWeightSum = runningWeightSum + production.getWeight();
+			weightSum += production.getWeight();
 		}
-
-		totalWeight = runningWeightSum;
 	}
 
 	public void generate(final Context context, final Sentence<?> sentence) {
@@ -58,7 +56,7 @@ class GrammarRule implements Generatable {
 		}
 
 		GrammarProduction randomProduction = null;
-		double randomWeight = context.randomDouble() * totalWeight;
+		double randomWeight = context.randomDouble() * weightSum;
 		double runningWeight = 0;
 
 		for (GrammarProduction production: productions) {
@@ -72,7 +70,7 @@ class GrammarRule implements Generatable {
 		assert randomProduction != null;
 
 		if (context.shouldCacheRule(ruleName)) {
-			Sentence<String> cachedSentence = new Sentence<String>();
+			Sentence<?> cachedSentence = sentence.newInstance();
 
 			cachedSentence.getStack().push(randomProduction);
 
@@ -123,4 +121,3 @@ class GrammarRule implements Generatable {
 		return ruleName;
 	}
 }
-

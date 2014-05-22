@@ -31,9 +31,12 @@ final class Grammar implements Generatable {
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
 	Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
+		scanner.reset();
 		scanner.useDelimiter("");
 
 		final Pattern rulePattern;
+
+		// We use Pattern.DOTALL here because grammar rules are allowed to span multiple rows
 
 		if (flags.contains(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)) {
 			rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + STANDALONE_SEMICOLON + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);

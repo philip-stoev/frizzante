@@ -358,11 +358,11 @@ public class GrammarTest {
 		c.generateString();
 	}
 
-	@Test
+	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testEmptyCached() {
 		String g = "main: main_cached;";
 		Context c = new ContextBuilder().grammar(g).build();
-		Assert.assertEquals(c.generateString(), "");
+		c.generateString();
 	}
 
 	@Test

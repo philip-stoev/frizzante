@@ -14,7 +14,7 @@ import java.io.IOException;
  * Usually, a String Sentence is used:
  * <pre>
  * {@code
- * Sentence<String> sentence = new Sentence("\n");
+ * Sentence<String> sentence = new Sentence<String>();
  * ... perform generation
  * System.out.println(sentence.toString());
  * }
@@ -37,6 +37,10 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	private final List<T> elements = new ArrayList<T>();
 	private final Deque<Generatable> stack = new ArrayDeque<Generatable>();
 	private final List<GrammarProduction> productions = new ArrayList<GrammarProduction>();
+
+	public final Sentence<T> newInstance() {
+		return new Sentence<T>();
+	}
 
 	/**
 	Adds a new element to the Sentence

@@ -86,7 +86,7 @@ final class GrammarProduction implements Generatable {
 		this.weight = this.weight * (1 - penalty);
 		assert this.weight >= 0.0f;
 
-		parentRule.recalculateWeights();
+		parentRule.recalculateWeightSum();
 	}
 
 	void promote(final double promotion) {
@@ -103,7 +103,7 @@ final class GrammarProduction implements Generatable {
 
 		if (newWeight < initialWeight) {
 			weight = newWeight;
-			parentRule.recalculateWeights();
+			parentRule.recalculateWeightSum();
 		}
 	}
 

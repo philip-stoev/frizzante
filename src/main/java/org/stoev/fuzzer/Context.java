@@ -123,7 +123,13 @@ public final class Context {
 	}
 
 	Sentence<?> getCachedValue(final String ruleName) {
-		return cachedRules.get(ruleName);
+		Sentence<?> cachedValue = cachedRules.get(ruleName);
+
+		if (cachedValue == null) {
+			throw new ConfigurationException("Cached value for rule " + ruleName + " requested, but not available.");
+		}
+
+		return cachedValue;
 	}
 
 	void setCachedValue(final String ruleName, final Sentence<?> value) {

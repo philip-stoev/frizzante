@@ -8,10 +8,8 @@ class CachedValue implements Generatable {
 	}
 
 	public void generate(final Context context, final Sentence<?> sentence) {
-		Sentence<?> cachedSentenceFragment = context.getCachedValue(ruleName);
-		if (cachedSentenceFragment != null) {
-			sentence.addAll(cachedSentenceFragment);
-		}
+		Sentence<?> cachedValue = context.getCachedValue(ruleName);
+		sentence.addAll(cachedValue);
 	}
 
 	public String toString() {
