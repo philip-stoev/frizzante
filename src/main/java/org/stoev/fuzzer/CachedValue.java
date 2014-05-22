@@ -15,11 +15,11 @@ class CachedValue implements Generatable {
 	}
 
 	public String toString() {
-		return "$" + ruleName;
+		return ruleName + "_cached";
 	}
 
 	public String getName() {
-		return "$" + ruleName;
+		return ruleName + "_cached";
 	}
 
 	public void compile(final Grammar grammar) {

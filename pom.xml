@@ -48,7 +48,7 @@
           </instrumentation>
           <check>
             <haltOnFailure>true</haltOnFailure>
-            <totalLineRate>65</totalLineRate>
+            <totalLineRate>80</totalLineRate>
           </check>
         </configuration>
         <executions>

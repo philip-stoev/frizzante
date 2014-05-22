@@ -40,9 +40,9 @@ public final class App {
 
 				if (generated.contains("good")) {
 					assert true;
-					sentence.success(coefficient);
+					sentence.succeeded(coefficient);
 				} else if (generated.contains("bad")) {
-					sentence.fail(coefficient);
+					sentence.failed(coefficient);
 				}
 			}
 

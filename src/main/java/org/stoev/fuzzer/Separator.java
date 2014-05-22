@@ -1,6 +1,13 @@
 package org.stoev.fuzzer;
 
-class Separator implements Generatable {
+final class Separator implements Generatable {
+	private static final Separator SEPARATOR = new Separator();
+
+	private Separator() { };
+
+	public static Separator getSeparator() {
+		return SEPARATOR;
+	}
 
 	public void generate(final Context context, final Sentence<?> sentence) {
 		if (context.getSeparator() != null) {

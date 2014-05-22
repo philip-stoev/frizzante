@@ -138,17 +138,17 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 		return stack;
 	}
 
-	final void addProduction(final GrammarProduction production) {
+	final void registerProduction(final GrammarProduction production) {
 		productions.add(production);
 	}
 
-	final void fail(final double penalty) {
+	final void failed(final double penalty) {
 		for (GrammarProduction production: productions) {
-			production.penalize(penalty);
+			production.demote(penalty);
 		}
 	}
 
-	final void success(final double promotion) {
+	final void succeeded(final double promotion) {
 		for (GrammarProduction production: productions) {
 			production.promote(promotion);
 		}

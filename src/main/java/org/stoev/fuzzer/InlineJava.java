@@ -25,12 +25,12 @@ import javax.tools.FileObject;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-class JavaCode implements Generatable {
+final class InlineJava implements Generatable {
 	private final String className;
 	private final String javaString;
 	private Method javaMethod = null;
 
-        JavaCode(final String cn, final String js) {
+	InlineJava(final String cn, final String js) {
 		javaString = js;
 		className = cn;
 
@@ -75,9 +75,9 @@ class JavaCode implements Generatable {
 		}
 
 		assert javaMethod != null;
-        }
+	}
 
-	public final void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context context, final Sentence<?> sentence) {
 		try {
 			javaMethod.invoke(null, context, sentence);
 		} catch (IllegalAccessException e) {
@@ -91,11 +91,12 @@ class JavaCode implements Generatable {
 
 	}
 
-	public final String toString() {
-		return "{{" + javaString + "}};";
+	public String toString() {
+		return className + ":" + javaString + "\n";
 	}
 
-	public final String getName() {
+	public String getName() {
+		assert false;
 		return className;
 	}
 }
@@ -148,9 +149,9 @@ class FileManagerInMemory extends ForwardingJavaFileManager<JavaFileManager> {
 	public ClassLoader getClassLoader(final Location location) {
 		return new SecureClassLoader() {
 			@Override
-        		protected Class<?> findClass(final String name) throws ClassNotFoundException {
+			protected Class<?> findClass(final String name) throws ClassNotFoundException {
 				byte[] b = javaClassInMemory.getBytes();
-		                return super.defineClass(name, b, 0, b.length);
+				return super.defineClass(name, b, 0, b.length);
 			}
 		};
 	}
@@ -158,6 +159,6 @@ class FileManagerInMemory extends ForwardingJavaFileManager<JavaFileManager> {
 	@Override
 	public JavaFileObject getJavaFileForOutput(final Location location, final String className, final Kind kind, final FileObject sibling) throws IOException {
 		javaClassInMemory = new JavaClassInMemory(className, kind);
-	        return javaClassInMemory;
+		return javaClassInMemory;
 	}
 }

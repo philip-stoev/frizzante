@@ -3,7 +3,7 @@ package org.stoev.fuzzer;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-class JavaVisitor implements Generatable {
+final class JavaVisitor implements Generatable {
 	private final String methodName;
 
 	JavaVisitor(final String m) {

@@ -19,7 +19,7 @@ public final class Grammar implements Generatable {
 
 	private static final Pattern RULE_PATTERN = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + SEMICOLON_AT_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
 	private static final Pattern JAVA_PATTERN = Pattern.compile(JAVA_DOUBLE_OPENING_BRACES + ANY_STRING + JAVA_DOUBLE_CLOSING_BRACES_SEMICOLON_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
-	private static final Pattern RULE_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9_. ]*:");
+	private static final String RULE_NAME_PATTERN = "[a-zA-Z0-9_. ]*:";
 	private static final String JAVA_EXTENSION = ".java";
 
 	private final HashMap<String, Generatable> rules = new HashMap<String, Generatable>();
@@ -38,6 +38,8 @@ public final class Grammar implements Generatable {
 	}
 
 	private Grammar(final Scanner scanner) {
+		scanner.useDelimiter("");
+
 		while (true) {
 			// Trim leading whitespace
 			while (scanner.hasNext(Constants.WHITESPACE)) {
@@ -50,36 +52,39 @@ public final class Grammar implements Generatable {
 				break;
 			}
 
+			// Trim trailing colon
+			generatableName = generatableName.substring(0, generatableName.length() - 1);
+
 			if (generatableName.contains(Constants.SPACE)) {
 				throw new ConfigurationException("Rule name " + generatableName + " contains space.");
 			}
 
-			generatableName = generatableName.substring(0, generatableName.length() - 1);
+			if (rules.containsKey(generatableName)) {
+				throw new ConfigurationException("Name " + generatableName + " defined multiple times in grammar.");
+			}
+
 			Generatable generatableObject;
 
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
 				generatableName = generatableName.substring(0, generatableName.length() - JAVA_EXTENSION.length());
 				String javaString = scanner.findWithinHorizon(JAVA_PATTERN, 0);
+
 				if (javaString == null) {
 					throw new ConfigurationException("Unable to parse Java code for rule " + generatableName + " (missing '}};' terminator?)");
-				} else {
-					generatableObject = new JavaCode(generatableName, javaString);
 				}
+
+				generatableObject = new InlineJava(generatableName, javaString);
 			} else {
 				String ruleString = scanner.findWithinHorizon(RULE_PATTERN, 0);
 
 				if (ruleString == null) {
 					throw new ConfigurationException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
-				} else {
-					generatableObject = new GrammarRule(generatableName, ruleString);
 				}
+
+				generatableObject = new GrammarRule(generatableName, ruleString);
 			}
 
-			if (rules.containsKey(generatableName)) {
-				throw new ConfigurationException("Name " + generatableName + " defined multiple times in grammar.");
-			} else {
-				rules.put(generatableName, generatableObject);
-			}
+			rules.put(generatableName, generatableObject);
 		}
 
 		compile(this);
@@ -94,11 +99,11 @@ public final class Grammar implements Generatable {
 	public void generate(final Context context, final Sentence<?> sentence) {
 		Generatable startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
-		if (startingRule != null) {
-			sentence.getStack().push(startingRule);
-		} else {
+		if (startingRule == null) {
 			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
 		}
+
+		sentence.getStack().push(startingRule);
 	}
 
 	Generatable getRule(final String ruleName) {
@@ -124,6 +129,7 @@ public final class Grammar implements Generatable {
 	}
 
 	public String getName() {
+		assert false;
 		return "";
 	}
 }

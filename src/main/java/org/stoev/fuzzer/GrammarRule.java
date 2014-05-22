@@ -3,6 +3,7 @@ package org.stoev.fuzzer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Iterator;
 
 class GrammarRule implements Generatable {
 
@@ -10,11 +11,11 @@ class GrammarRule implements Generatable {
 	private final List<GrammarProduction> productions;
 	private double totalWeight;
 
-        private static final String PIPE_NOT_ESCAPED = "(?<!\\\\)\\|";
+	private static final String PIPE_NOT_ESCAPED = "(?<!\\\\)\\|";
 
 	private static final String ESCAPED_PIPE = "\\\\\\|";
 
-        private static final String PRODUCTION_SEPARATION_PATTERN =
+	private static final String PRODUCTION_SEPARATION_PATTERN =
 		  Constants.OPTIONAL_WHITESPACE + PIPE_NOT_ESCAPED
 		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.EOL + Constants.OPTIONAL_WHITESPACE
 		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.OPTIONAL_WHITESPACE + Constants.EOF;
@@ -24,10 +25,10 @@ class GrammarRule implements Generatable {
 		productions = new ArrayList<GrammarProduction>();
 		assert ruleString != null;
 
-                Scanner scanner = new Scanner(ruleString);
+		Scanner scanner = new Scanner(ruleString);
 		scanner.useDelimiter(PRODUCTION_SEPARATION_PATTERN);
 
-                while (scanner.hasNext()) {
+		while (scanner.hasNext()) {
 			String productionString = scanner.next();
 			productionString = productionString.replaceAll(ESCAPED_PIPE, "|");
 			GrammarProduction production = new GrammarProduction(this, productionString);
@@ -93,9 +94,20 @@ class GrammarRule implements Generatable {
 		sb.append(ruleName);
 		sb.append(":");
 
-		for (GrammarProduction production: productions) {
-			sb.append(production.toString());
-			sb.append("|\n");
+		if (productions.size() == 0) {
+			sb.append(";\n");
+			return sb.toString();
+		}
+
+		Iterator<GrammarProduction> i = productions.iterator();
+
+		sb.append(i.next().toString());
+		sb.append("\n");
+
+		while (i.hasNext()) {
+			sb.append("|");
+			sb.append(i.next().toString());
+			sb.append("\n");
 		}
 
 		sb.append(";\n");

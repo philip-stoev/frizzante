@@ -4,9 +4,11 @@ class GrammarLiteral implements Generatable {
 	private final String value;
 
 	GrammarLiteral(final String lv) {
+		assert lv != null;
+		assert lv.length() > 0;
+		assert !lv.matches(Constants.WHITESPACE);
+
 		value = lv;
-		assert value != null;
-		assert value.length() > 0;
 	}
 
 	public void generate(final Context context, final Sentence<?> sentence) {

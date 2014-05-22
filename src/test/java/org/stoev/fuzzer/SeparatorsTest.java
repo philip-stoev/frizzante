@@ -10,6 +10,16 @@ public class SeparatorsTest {
 	}
 
 	@Test
+	public final void testLeadingGrammarWhitespace() {
+		TestUtil.assertGenerates(" main: foo;", "foo");
+	}
+
+	@Test
+	public final void testTrailingGrammarWhitespace() {
+		TestUtil.assertGenerates("main: foo; ", "foo");
+	}
+
+	@Test
 	public final void testLeadingRuleNameWhitespace() {
 		TestUtil.assertGenerates("main: foo;\n foo: foo2;", "foo2");
 	}
@@ -68,13 +78,13 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testPipe() {
-		TestUtil.assertGenerates("main:foo|bar;", "bar");
-		TestUtil.assertGenerates("main:foo |bar;", "bar");
-		TestUtil.assertGenerates("main:foo| bar;", "bar");
-		TestUtil.assertGenerates("main:foo|\nbar;", "bar");
-		TestUtil.assertGenerates("main:foo|\n\nbar;", "bar");
-		TestUtil.assertGenerates("main:foo\n|bar;", "bar");
-		TestUtil.assertGenerates("main:foo\n\n|bar;", "bar");
+		TestUtil.assertGenerates("main:foo|foo;", "foo");
+		TestUtil.assertGenerates("main:foo |foo;", "foo");
+		TestUtil.assertGenerates("main:foo| foo;", "foo");
+		TestUtil.assertGenerates("main:foo|\nfoo;", "foo");
+		TestUtil.assertGenerates("main:foo|\n\nfoo;", "foo");
+		TestUtil.assertGenerates("main:foo\n|foo;", "foo");
+		TestUtil.assertGenerates("main:foo\n\n|foo;", "foo");
 	}
 
 	@Test
