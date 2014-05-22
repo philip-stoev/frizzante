@@ -18,8 +18,8 @@ public final class App {
 
 	public static void main(final String[] args) {
 
-                Grammar grammar = new Grammar("main: good1 | sometimes | bad1 ; sometimes: good2 | bad2 ;");
-		Context context = new Context.ContextBuilder(grammar).build();
+		String grammar = "main: good1 | sometimes | bad1 ; sometimes: good2 | bad2 ;";
+		Context context = new Context.ContextBuilder().grammar(grammar).build();
 
 		final long iterations = 1000;
 		final long cycles = 10;
@@ -55,8 +55,8 @@ public final class App {
 
 	public static void mainBenchmark(final String[] args) {
 
-                Grammar grammar = new Grammar("main: foo , main | foo , foo ; foo: foo1 | foo2 ; foo2.java: { sentence.add(\"foo4\"); };");
-		Context context = new Context.ContextBuilder(grammar).build();
+                String grammar = "main: foo , main | foo , foo ; foo: foo1 | foo2 ; foo2.java: { sentence.add(\"foo4\"); };";
+		Context context = new Context.ContextBuilder().grammar(grammar).build();
 
 		final long iterations = 10000000;
 		final long millispernano = 1000000;

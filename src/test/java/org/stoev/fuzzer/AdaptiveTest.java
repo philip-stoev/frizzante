@@ -3,6 +3,11 @@ package org.stoev.fuzzer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Scanner;
+import java.util.EnumSet;
+
+import org.stoev.fuzzer.Grammar.GrammarFlags;
+
 public class AdaptiveTest {
         public static final int HUNDRED_ITERATIONS = 100;
         public static final int SUCCESS_THRESHOLD = 90;
@@ -11,8 +16,7 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testAdaptive() {
-		Grammar g = new Grammar("main: good | bad ;");
-                Context c = new Context.ContextBuilder(g).build();
+                Context c = new Context.ContextBuilder().grammar("main: good | bad ;").build();
 
 		for (int x = 1; x <= HUNDRED_ITERATIONS; x++) {
 			Sentence<String> sentence = new Sentence<String>();
@@ -35,8 +39,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotionLimit() {
-		Grammar g = new Grammar("main: good ;");
-                Context c = new Context.ContextBuilder(g).build();
+		Grammar g = new Grammar(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+                Context c = new Context.ContextBuilder().grammar(g).build();
 		Sentence<String> s = new Sentence<String>();
 		c.generate(s);
 		s.succeeded(1.0f);
@@ -45,8 +49,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotion() {
-		Grammar g = new Grammar("main: good;");
-                Context c = new Context.ContextBuilder(g).build();
+		Grammar g = new Grammar(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+                Context c = new Context.ContextBuilder().grammar(g).build();
 		Sentence<String> s = new Sentence<String>();
 		c.generate(s);
 
@@ -59,8 +63,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testDemotion() {
-		Grammar g = new Grammar("main: bad;");
-                Context c = new Context.ContextBuilder(g).build();
+		Grammar g = new Grammar(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
+                Context c = new Context.ContextBuilder().grammar(g).build();
 		Sentence<String> s = new Sentence<String>();
 		c.generate(s);
 		s.failed(HALF_PENALTY);

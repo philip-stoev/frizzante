@@ -3,14 +3,11 @@ package org.stoev.fuzzer;
 import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
-import java.util.EnumSet;
 import java.util.Set;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileNotFoundException;
+import org.stoev.fuzzer.Grammar.GrammarFlags;
 
-public final class Grammar implements Generatable {
+final class Grammar implements Generatable {
 
 	public static enum GrammarFlags {
 		STANDALONE_SEMICOLONS_ONLY,
@@ -33,31 +30,7 @@ public final class Grammar implements Generatable {
 	private final HashMap<String, Generatable> rules = new HashMap<String, Generatable>();
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
-	Grammar(final String grammarString) {
-		this(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
-	}
-
-	Grammar(final String grammarString, final Set<GrammarFlags> flags) {
-		this(new Scanner(grammarString), flags);
-	}
-
-	Grammar(final File file) throws FileNotFoundException {
-		this(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
-	}
-
-	Grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
-		this(new Scanner(file, "UTF-8"), flags);
-	}
-
-	Grammar(final InputStream stream) {
-		this(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
-	}
-
-	Grammar(final InputStream stream, final Set<GrammarFlags> flags) {
-		this(new Scanner(stream, "UTF-8"), flags);
-	}
-
-	private Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
+	Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
 		scanner.useDelimiter("");
 
 		final Pattern rulePattern;

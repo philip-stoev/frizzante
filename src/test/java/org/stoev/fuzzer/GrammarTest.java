@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.EnumSet;
 
 import org.stoev.fuzzer.Grammar.GrammarFlags;
+import org.stoev.fuzzer.Context.ContextBuilder;
 
 public class GrammarTest {
 	public static final int ITERATIONS = 10;
@@ -19,27 +20,25 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testNoMain() {
-		Grammar g = new Grammar("");
-		Context c = new Context.ContextBuilder(g).build();
+		Context c = new ContextBuilder().grammar("").build();
 		c.generateString();
 	}
 
 	@Test
 	public final void testEmptyMain() {
-		Grammar g = new Grammar("main: ;");
-		Context c = new Context.ContextBuilder(g).build();
+		Context c = new ContextBuilder().grammar("main: ;").build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testUnterminatedRule() {
-		Grammar g = new Grammar("main: foo");
+		Context c = new ContextBuilder().grammar("main: foo").build();
 	}
 
 	@Test
 	public final void testEmptyProduction1() {
-		Grammar g = new Grammar("main:|;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:|;";
+		Context c = new ContextBuilder().grammar(g).build();
 		for (int x = 1; x < ITERATIONS; x = x + 1) {
 			Assert.assertEquals(c.generateString(), "");
 		}
@@ -47,8 +46,8 @@ public class GrammarTest {
 
 	@Test
 	public final void testEmptyProduction2() {
-		Grammar g = new Grammar("main: | | || |;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main: | | || |;";
+		Context c = new ContextBuilder().grammar(g).build();
 		for (int x = 1; x < ITERATIONS; x = x + 1) {
 			Assert.assertEquals(c.generateString(), "");
 		}
@@ -56,8 +55,8 @@ public class GrammarTest {
 
 	@Test
 	public final void testTightProductions() {
-		Grammar g = new Grammar("main:FOO|FOO;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:FOO|FOO;";
+		Context c = new ContextBuilder().grammar(g).build();
 		for (int x = 1; x < ITERATIONS; x = x + 1) {
 			Assert.assertEquals(c.generateString(), "FOO");
 		}
@@ -66,8 +65,8 @@ public class GrammarTest {
 	@Test
 	// Check that a production that is split 33/33/33 indeed produces at least remotely fair distribution
 	public final void testProductionFairness() {
-		Grammar g = new Grammar("main:FOO|BAR|BAZ;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:FOO|BAR|BAZ;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
 		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
@@ -91,19 +90,20 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testDuplicateRules() {
-		Grammar g = new Grammar("main: FOO ;\n main: BAR ;");
+		String g = "main: FOO ;\n main: BAR ;";
+		Context c = new ContextBuilder().grammar(g).build();
 	}
 
 	@Test
 	public final void testSpecialCharacters() {
-		Grammar g = new Grammar("main:\r\n\tFOO\r\n\t|\r\n\tFOO\r\n\t;\r\n\t");
-		Assert.assertEquals(new Context.ContextBuilder(g).build().generateString(), "FOO");
+		String g = "main:\r\n\tFOO\r\n\t|\r\n\tFOO\r\n\t;\r\n\t";
+		Assert.assertEquals(new ContextBuilder().grammar(g).build().generateString(), "FOO");
 	}
 
 	@Test
 	public final void testWeightedProductions() {
-		Grammar g = new Grammar("main:80% FOO |20% BAR;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:80% FOO |20% BAR;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
 		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
@@ -124,8 +124,8 @@ public class GrammarTest {
 
 	@Test
 	public final void testSingleWeightedProduction() {
-		Grammar g = new Grammar("main:20% FOO ;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:20% FOO ;";
+		Context c = new ContextBuilder().grammar(g).build();
 
 		Assert.assertEquals(c.generateString(), "FOO");
 		Assert.assertEquals(c.generateString(), "FOO");
@@ -134,8 +134,8 @@ public class GrammarTest {
 
 	@Test
 	public final void testLopsidedWeights() {
-		Grammar g = new Grammar("main:99 FOO | BAR ;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:99 FOO | BAR ;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
 		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
@@ -154,8 +154,8 @@ public class GrammarTest {
 
 	@Test
 	public final void testRecursiveWeight() {
-		Grammar g = new Grammar("main:90% foo , main |10% foo;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main:90% foo , main |10% foo;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo");
 		Assert.assertEquals(c.generateString(), "foo , foo");
 		Assert.assertEquals(c.generateString(), "foo");
@@ -175,8 +175,7 @@ public class GrammarTest {
 		};
 
 		for (String grammarString: grammarStrings) {
-			Grammar g = new Grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE));
-			Context c = new Context.ContextBuilder(g).build();
+			Context c = new ContextBuilder().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 			Assert.assertEquals(c.generateString(), "foobar", "Problematic string produced by grammar:'" + grammarString + "'");
 		}
 	}
@@ -196,16 +195,14 @@ public class GrammarTest {
 		};
 
 		for (String grammarString: grammarStrings) {
-			Grammar g = new Grammar(grammarString);
-			Context c = new Context.ContextBuilder(g).build();
+			Context c = new ContextBuilder().grammar(grammarString).build();
 			Assert.assertEquals(c.generateString(), "foo bar", "Problematic string produced by grammar:'" + grammarString + "'");
 		}
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testZeroWeight() {
-		Grammar g = new Grammar("main:0 foo;");
-		Context c = new Context.ContextBuilder(g).build();
+		Context c = new ContextBuilder().grammar("main:0 foo;").build();
 		c.generateString();
 	}
 
@@ -219,8 +216,7 @@ public class GrammarTest {
 		};
 
 		for (String grammarString: grammarStrings) {
-			Grammar g = new Grammar(grammarString);
-			Context c = new Context.ContextBuilder(g).build();
+			Context c = new ContextBuilder().grammar(grammarString).build();
 			for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
 				String generated = c.generateString();
 				Assert.assertEquals(generated, "foo", "Problematic string '" + generated + "' produced by grammar '" + grammarString + "'");
@@ -230,38 +226,33 @@ public class GrammarTest {
 
 	@Test
 	public final void testEmptyJava() {
-		Grammar g = new Grammar("main: foo ;\n foo.java: {{ }};");
-		Context c = new Context.ContextBuilder(g).build();
+		Context c = new ContextBuilder().grammar("main: foo ;\n foo.java: {{ }};").build();
 		Assert.assertEquals(c.generateString(), "");
 
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testMalformedJava() {
-		Grammar g = new Grammar("main: foo ;\n foo.java: {{ ;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main: foo ;\n foo.java: {{ ;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testInvalidJava() {
-		Grammar g = new Grammar("main: foo ;\n foo.java: {{ foo(); }};");
-		Context c = new Context.ContextBuilder(g).build();
+		Context c = new ContextBuilder().grammar("main: foo ;\n foo.java: {{ foo(); }};").build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testJavaException() {
-		Grammar g = new Grammar("main: foo ;\n foo.java: {{ int a = 0 ; int b = 2 / a; }};");
-		Context c = new Context.ContextBuilder(g).build();
+		Context c = new ContextBuilder().grammar("main: foo ;\n foo.java: {{ int a = 0 ; int b = 2 / a; }};").build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test
 	final void testVisitors() {
-		Grammar g = new Grammar("main: foo_visitor bar_visitor;");
-
 		class TestVisitor {
 			public void foo(final Context context, final Sentence<String> sentence) {
 				sentence.add("foo2");
@@ -273,14 +264,13 @@ public class GrammarTest {
 		}
 
 		Object v = new TestVisitor();
-		Context c = new Context.ContextBuilder(g).visitor(v).build();
+		Context c = new ContextBuilder().grammar("main: foo_visitor bar_visitor;").visitor(v).build();
 
 		Assert.assertEquals(c.generateString(), "foo2 bar2");
 	}
 
 	@Test
 	final void testVisitorWithType() {
-		Grammar g = new Grammar("main: foo_visitor;");
 		class TestObject {
 
 		}
@@ -292,7 +282,7 @@ public class GrammarTest {
 		}
 
 		Object v = new TestVisitor();
-		Context c = new Context.ContextBuilder(g).visitor(v).build();
+		Context c = new ContextBuilder().grammar("main: foo_visitor;").visitor(v).build();
 
 		Sentence<TestObject> sentence = new Sentence<TestObject>();
 		c.generate(sentence);
@@ -303,7 +293,7 @@ public class GrammarTest {
 
 	@Test
 	final void testVisitorCaching() {
-		Grammar g = new Grammar("main: cached_visitor cached_visitor;");
+		String g = "main: cached_visitor cached_visitor;";
 
 		class TestVisitor {
 			public void cached(final Context context, final Sentence<String> sentence) {
@@ -312,7 +302,7 @@ public class GrammarTest {
 		}
 
 		Object v = new TestVisitor();
-		Context c = new Context.ContextBuilder(g).visitor(v).build();
+		Context c = new ContextBuilder().grammar(g).visitor(v).build();
 
 		Assert.assertEquals(c.generateString(), "cached2 cached2");
 		Assert.assertNotNull(c.getCachedVisitor("cached"));
@@ -320,20 +310,20 @@ public class GrammarTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorMethod() {
-                Grammar g = new Grammar("main: missing_visitor;");
+                String g = "main: missing_visitor;";
 
                 class TestVisitor {
 
                 }
 
                 Object v = new TestVisitor();
-                Context c = new Context.ContextBuilder(g).visitor(v).build();
+                Context c = new ContextBuilder().grammar(g).visitor(v).build();
 		c.generateString();
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorMethodDefinition() {
-		Grammar g = new Grammar("main: missing_visitor;");
+		String g = "main: missing_visitor;";
 
 		class TestVisitor {
 			public int cached(final Context context, final Sentence<String> sentence) {
@@ -342,13 +332,13 @@ public class GrammarTest {
 		}
 
                 Object v = new TestVisitor();
-                Context c = new Context.ContextBuilder(g).visitor(v).build();
+                Context c = new ContextBuilder().grammar(g).visitor(v).build();
 		c.generateString();
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testNonvoidVisitor() {
-		Grammar g = new Grammar("main: missing_visitor;");
+		String g = "main: missing_visitor;";
 
 		class TestVisitor {
 			public void cached() {
@@ -357,44 +347,44 @@ public class GrammarTest {
 		}
 
                 Object v = new TestVisitor();
-                Context c = new Context.ContextBuilder(g).visitor(v).build();
+                Context c = new ContextBuilder().grammar(g).visitor(v).build();
 		c.generateString();
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	final void testMissingVisitorClass() {
-                Grammar g = new Grammar("main: missing_visitor;");
-                Context c = new Context.ContextBuilder(g).build();
+                String g = "main: missing_visitor;";
+                Context c = new ContextBuilder().grammar(g).build();
 		c.generateString();
 	}
 
 	@Test
 	public final void testEmptyCached() {
-		Grammar g = new Grammar("main: main_cached;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main: main_cached;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Assert.assertEquals(c.generateString(), "");
 	}
 
 	@Test
 	public final void testRuleTree() {
-		Grammar g = new Grammar("main: foo , bar ;\n foo: fooA , fooB ;\n bar: barA , barB ;");
-                Context c = new Context.ContextBuilder(g).build();
+		String g = "main: foo , bar ;\n foo: fooA , fooB ;\n bar: barA , barB ;";
+                Context c = new ContextBuilder().grammar(g).build();
                 Assert.assertEquals(c.generateString(), "fooA , fooB , barA , barB");
 
 	}
 
 	@Test
 	public final void testLongSentence() {
-                Grammar g = new Grammar("main:9999999 X main |1 Y;");
-                Context c = new Context.ContextBuilder(g).build();
+                String g = "main:9999999 X main |1 Y;";
+                Context c = new ContextBuilder().grammar(g).build();
 
 		Assert.assertTrue(c.generateString().length() > (TEN * TEN * TEN * TEN));
 	}
 
 	@Test
 	public final void testMassiveRecursion() {
-                Grammar g = new Grammar("main:50% main main |50% Y;");
-                Context c = new Context.ContextBuilder(g).build();
+                String g = "main:50% main main |50% Y;";
+                Context c = new ContextBuilder().grammar(g).build();
 
 		for (int x = 1; x < MANY_ITERATIONS; x = x + 1) {
 			if (c.generateString().length() > (TEN * TEN * TEN)) {
@@ -406,15 +396,15 @@ public class GrammarTest {
 
 	@Test
 	public final void testBackslash() {
-		Grammar g = new Grammar("main: foo \\ bar;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main: foo \\ bar;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Assert.assertEquals(c.generateString(), "foo \\ bar");
 	}
 
 	@Test
 	public final void testUnicodeProduction() {
-		Grammar g = new Grammar("main: тест ;");
-		Context c = new Context.ContextBuilder(g).build();
+		String g = "main: тест ;";
+		Context c = new ContextBuilder().grammar(g).build();
 		Assert.assertEquals(c.generateString(), "тест");
 	}
 }

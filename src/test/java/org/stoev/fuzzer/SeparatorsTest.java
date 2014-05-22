@@ -94,8 +94,7 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testTrailingPipe() {
-		Grammar grammar = new Grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY));
-		Context context = new Context.ContextBuilder(grammar).build();
+		Context context = new Context.ContextBuilder().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();
 
 		Assert.assertEquals(context.generateString(), "foo | bar");
 		Assert.assertEquals(context.generateString(), "foo | bar");
@@ -113,8 +112,8 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testStandaloneSemicolon() {
-		Grammar grammar = new Grammar("main: foo ; bar ;\n baz;\n;\n", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY));
-		Context context = new Context.ContextBuilder(grammar).build();
+		String grammar = "main: foo ; bar ;\n baz;\n;\n";
+		Context context = new Context.ContextBuilder().grammar(grammar, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)).build();
 
 		Assert.assertEquals(context.generateString(), "foo ; bar ;\n baz;");
 	}

@@ -3,8 +3,17 @@ package org.stoev.fuzzer;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.Deque;
+import java.util.Scanner;
+import java.util.EnumSet;
+import java.util.Set;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
 
 import java.lang.reflect.Method;
+
+import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public final class Context {
 	private final Grammar grammar;
@@ -20,31 +29,62 @@ public final class Context {
 		this.visitor = builder.visitor;
 	}
 
-	public static class ContextBuilder {
-		private final Grammar grammar;
+	public static final class ContextBuilder {
+		private Grammar grammar;
 		private Random random = new Random(1);
 		private Object visitor;
 
-		public ContextBuilder(final Grammar gr) {
+		public ContextBuilder grammar(final Grammar gr) {
 			this.grammar = gr;
+			return this;
 		}
 
-		public final ContextBuilder random(final Random r) {
+		public ContextBuilder grammar(final String grammarString) {
+			this.grammar = new Grammar(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
+			return this;
+	        }
+
+		public ContextBuilder grammar(final String grammarString, final Set<GrammarFlags> flags) {
+			this.grammar = new Grammar(new Scanner(grammarString), flags);
+			return this;
+		}
+
+		public ContextBuilder grammar(final File file) throws FileNotFoundException {
+	                this.grammar = new Grammar(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+			return this;
+	        }
+
+		public ContextBuilder grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
+			this.grammar = new Grammar(new Scanner(file, "UTF-8"), flags);
+			return this;
+		}
+
+		public ContextBuilder grammar(final InputStream stream) {
+	                this.grammar = new Grammar(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+			return this;
+		}
+
+		public ContextBuilder grammar(final InputStream stream, final Set<GrammarFlags> flags) {
+	                this.grammar = new Grammar(new Scanner(stream, "UTF-8"), flags);
+			return this;
+		}
+
+		public ContextBuilder random(final Random r) {
 			this.random = r;
 			return this;
 		}
 
-		public final ContextBuilder random(final int seed) {
+		public ContextBuilder random(final int seed) {
 			this.random = new Random(seed);
 			return this;
 		}
 
-		public final ContextBuilder visitor(final Object v) {
+		public ContextBuilder visitor(final Object v) {
 			this.visitor = v;
 			return this;
 		}
 
-		public final Context build() {
+		public Context build() {
 			return new Context(this);
 		}
 	}

@@ -23,7 +23,7 @@ final class GrammarProduction implements Generatable {
 	private final double initialWeight;
 	private double weight;
 
-        GrammarProduction(final GrammarRule parent, final String productionString, final Set<GrammarFlags> flags) {
+	GrammarProduction(final GrammarRule parent, final String productionString, final Set<GrammarFlags> flags) {
 		this.parentRule = parent;
 
 		final Scanner scanner = new Scanner(productionString);
@@ -54,8 +54,8 @@ final class GrammarProduction implements Generatable {
 			scanner.next(Constants.WHITESPACE);
 		}
 
-                while (true) {
-                        String elementString = scanner.findWithinHorizon(
+		while (true) {
+			String elementString = scanner.findWithinHorizon(
 				  Constants.WHITESPACE
 				+ Constants.OR + Constants.OPTIONAL_WHITESPACE + ALPHANUMERIC_IDENTIFIER
 				+ Constants.OR + Constants.OPTIONAL_WHITESPACE + EVERYTHING_ELSE, 0);
