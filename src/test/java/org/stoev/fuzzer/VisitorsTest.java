@@ -143,4 +143,88 @@ public class VisitorsTest {
 		Assert.assertEquals(i.next().getValue(), 1 + 2 + 2 + 1);
 	}
 
+	// Top-level production is an object visitor, but its arguments are ordinary string productions
+	@Test
+	public final void testMixedVisitorObjects() {
+		String g = "main: sum;\nsum: 1 2;";
+
+		class TestObject {
+			private int value;
+			TestObject(final int v) {
+				value = v;
+			}
+			int getValue() {
+				return value;
+			}
+		}
+
+		class TestVisitor {
+			public void sum(final Context context, final Sentence<TestObject> sentence, final Sentence<String> argument) {
+				int sum = 0;
+
+				for (String number: argument) {
+					sum = sum + Integer.parseInt(number);
+				}
+
+				sentence.add(new TestObject(sum));
+			}
+		}
+
+		Object v = new TestVisitor();
+		Context c = new ContextBuilder().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		Sentence<TestObject> s = new Sentence<TestObject>();
+		c.generate(s);
+		Iterator<TestObject> i = s.iterator();
+		Assert.assertEquals(i.next().getValue(), 1 + 2);
+	}
+
+
+	// Arguments of different types
+	@Test
+	public final void testMixedVisitorArguments() {
+		String g = "main: sum;\nsum: one 2;";
+
+		class TestObject {
+			private int value;
+			TestObject(final int v) {
+				value = v;
+			}
+			int getValue() {
+				return value;
+			}
+		}
+
+		class TestVisitor {
+			public void sum(final Context context, final Sentence<TestObject> sentence, final Sentence<?> arguments) {
+				int sum = 0;
+
+				for (Object arg: arguments) {
+					if (arg.getClass().equals(String.class)) {
+						sum = sum + Integer.parseInt((String) arg);
+					} else if (arg.getClass().equals(TestObject.class)) {
+						TestObject to = (TestObject) arg;
+						sum = sum + to.getValue();
+					} else {
+						Assert.assertTrue(false);
+					}
+				}
+
+				sentence.add(new TestObject(sum));
+			}
+
+			public void one(final Context context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
+				sentence.add(new TestObject(1));
+			}
+		}
+
+		Object v = new TestVisitor();
+		Context c = new ContextBuilder().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		Sentence<TestObject> s = new Sentence<TestObject>();
+		c.generate(s);
+		Iterator<TestObject> i = s.iterator();
+		Assert.assertEquals(i.next().getValue(), 1 + 2);
+	}
+
+
+
 }
