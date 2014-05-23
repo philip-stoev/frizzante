@@ -119,7 +119,8 @@ final class Grammar implements Generatable {
 
 		for (Method method: methods) {
 			String methodName = method.getName();
-			Generatable javaVisitor = new JavaVisitor(visitor, methodName);
+			Generatable existingGeneratable = rules.get(methodName);
+			Generatable javaVisitor = new JavaVisitor(visitor, methodName, existingGeneratable);
 			rules.put(methodName, javaVisitor);
 		}
 

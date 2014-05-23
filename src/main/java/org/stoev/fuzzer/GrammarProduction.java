@@ -116,7 +116,6 @@ final class GrammarProduction implements Generatable {
 	public void compile(final Grammar grammar) {
 		for (int i = 0; i < elements.size(); i++) {
 			String ruleName = elements.get(i).getName();
-
 			Generatable replacement = null;
 
 			if (ruleName.endsWith(CACHED_EXTENSION)) {
