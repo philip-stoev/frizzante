@@ -3,7 +3,6 @@ package org.stoev.fuzzer;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.EnumSet;
@@ -249,113 +248,6 @@ public class GrammarTest {
 	public final void testJavaException() {
 		Context c = new ContextBuilder().grammar("main: foo ;\n foo.java: {{ int a = 0 ; int b = 2 / a; }};").build();
 		Assert.assertEquals(c.generateString(), "");
-	}
-
-	@Test
-	final void testVisitors() {
-		class TestVisitor {
-			public void foo(final Context context, final Sentence<String> sentence) {
-				sentence.add("foo2");
-			}
-
-			public void bar(final Context context, final Sentence<String> sentence) {
-				sentence.add("bar2");
-			}
-		}
-
-		Object v = new TestVisitor();
-		Context c = new ContextBuilder().grammar("main: foo_visitor bar_visitor;").visitor(v).build();
-
-		Assert.assertEquals(c.generateString(), "foo2 bar2");
-	}
-
-	@Test
-	final void testVisitorWithType() {
-		class TestObject {
-
-		}
-
-		class TestVisitor {
-			public void foo(final Context context, final Sentence<TestObject> sentence) {
-				sentence.add(new TestObject());
-			}
-		}
-
-		Object v = new TestVisitor();
-		Context c = new ContextBuilder().grammar("main: foo_visitor;").visitor(v).build();
-
-		Sentence<TestObject> sentence = new Sentence<TestObject>();
-		c.generate(sentence);
-		Iterator<TestObject> iterator = sentence.iterator();
-
-		Assert.assertTrue(iterator.next() instanceof TestObject);
-	}
-
-	@Test
-	final void testVisitorCaching() {
-		String g = "main: cached_visitor cached_visitor;";
-
-		class TestVisitor {
-			public void cached(final Context context, final Sentence<String> sentence) {
-				sentence.append("cached2");
-			}
-		}
-
-		Object v = new TestVisitor();
-		Context c = new ContextBuilder().grammar(g).visitor(v).build();
-
-		Assert.assertEquals(c.generateString(), "cached2 cached2");
-		Assert.assertNotNull(c.getCachedVisitor("cached"));
-	}
-
-	@Test (expectedExceptions = ConfigurationException.class)
-	final void testMissingVisitorMethod() {
-		String g = "main: missing_visitor;";
-
-		class TestVisitor {
-
-		}
-
-		Object v = new TestVisitor();
-		Context c = new ContextBuilder().grammar(g).visitor(v).build();
-		c.generateString();
-	}
-
-	@Test (expectedExceptions = ConfigurationException.class)
-	final void testMissingVisitorMethodDefinition() {
-		String g = "main: missing_visitor;";
-
-		class TestVisitor {
-			public int cached(final Context context, final Sentence<String> sentence) {
-				return 1;
-			}
-		}
-
-		Object v = new TestVisitor();
-		Context c = new ContextBuilder().grammar(g).visitor(v).build();
-		c.generateString();
-	}
-
-	@Test (expectedExceptions = ConfigurationException.class)
-	final void testNonvoidVisitor() {
-		String g = "main: missing_visitor;";
-
-		class TestVisitor {
-			public void cached() {
-
-			}
-		}
-
-		Object v = new TestVisitor();
-		Context c = new ContextBuilder().grammar(g).visitor(v).build();
-		c.generateString();
-	}
-
-	@Test (expectedExceptions = ConfigurationException.class)
-	final void testMissingVisitorClass() {
-		String g = "main: missing_visitor;";
-		Context c = new ContextBuilder().grammar(g).build();
-		c.generateString();
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)

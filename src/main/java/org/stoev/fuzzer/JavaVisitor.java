@@ -5,39 +5,32 @@ import java.lang.reflect.InvocationTargetException;
 
 final class JavaVisitor implements Generatable {
 	private final String methodName;
+	private final Method methodObject;
+	private final Object visitor;
 
-	JavaVisitor(final String m) {
-		methodName = m;
+	JavaVisitor(final Object v, final String mn) {
+		visitor = v;
+		assert visitor != null;
 
+		methodName = mn;
 		assert methodName != null;
 		assert methodName.length() > 0;
-	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
-		Object visitor = context.getVisitor();
-
-		if (visitor == null) {
-			throw new ConfigurationException("Grammar uses Visitors, but no Visitor specified.");
+		try {
+			Class visitorClass = visitor.getClass();
+			methodObject = visitorClass.getDeclaredMethod(methodName, Context.class, Sentence.class);
+		} catch (NoSuchMethodException e) {
+			throw new ConfigurationException("Method " + methodName + " in visitor class " + visitor.getClass() + " does not have the correct signature.");
 		}
 
-		Method methodObject = context.getCachedVisitor(methodName);
-
-		if (methodObject == null) {
-			try {
-				Class visitorClass = visitor.getClass();
-				methodObject = visitorClass.getDeclaredMethod(methodName, Context.class, Sentence.class);
-				context.setCachedVisitor(methodName, methodObject);
-			} catch (NoSuchMethodException e) {
-				throw new ConfigurationException("Method " + methodName + " does not exist.");
-			}
-
-			if (!methodObject.getReturnType().equals(Void.TYPE)) {
-				throw new ConfigurationException("Visitor must be declared as void.");
-			}
+		if (!methodObject.getReturnType().equals(Void.TYPE)) {
+			throw new ConfigurationException("Visitor must be declared as void.");
 		}
 
 		assert methodObject != null;
+	}
 
+	public void generate(final Context context, final Sentence<?> sentence) {
 		try {
 			methodObject.invoke(visitor, context, sentence);
 		} catch (IllegalAccessException e) {
@@ -56,6 +49,6 @@ final class JavaVisitor implements Generatable {
 	}
 
 	public void compile(final Grammar grammar) {
-		assert false;
+
 	}
 }

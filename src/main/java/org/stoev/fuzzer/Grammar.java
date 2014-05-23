@@ -5,6 +5,8 @@ import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Set;
 
+import java.lang.reflect.Method;
+
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 final class Grammar implements Generatable {
@@ -108,6 +110,20 @@ final class Grammar implements Generatable {
 		}
 
 		sentence.getStack().push(startingRule);
+	}
+
+	void registerVisitor(final Object visitor) {
+		Class visitorClass = visitor.getClass();
+
+		Method[] methods = visitorClass.getDeclaredMethods();
+
+		for (Method method: methods) {
+			String methodName = method.getName();
+			Generatable javaVisitor = new JavaVisitor(visitor, methodName);
+			rules.put(methodName, javaVisitor);
+		}
+
+		compile(this);
 	}
 
 	Generatable getRule(final String ruleName) {

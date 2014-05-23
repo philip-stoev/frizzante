@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 
-import java.lang.reflect.Method;
-
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public final class Context {
@@ -21,12 +19,15 @@ public final class Context {
 	private final Object visitor;
 
 	private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
-	private final HashMap<String, Method> cachedVisitors = new HashMap<String, Method>();
 
 	private Context(final ContextBuilder builder) {
-		this.grammar = builder.grammar;
-		this.random = builder.random;
-		this.visitor = builder.visitor;
+		grammar = builder.grammar;
+		random = builder.random;
+		visitor = builder.visitor;
+
+		if ((grammar != null) && (visitor != null)) {
+			grammar.registerVisitor(visitor);
+		}
 	}
 
 	public static final class ContextBuilder {
@@ -134,13 +135,5 @@ public final class Context {
 
 	void setCachedValue(final String ruleName, final Sentence<?> value) {
 		cachedRules.put(ruleName, value);
-	}
-
-	Method getCachedVisitor(final String methodName) {
-		return cachedVisitors.get(methodName);
-	}
-
-	void setCachedVisitor(final String methodName, final Method methodObject) {
-		cachedVisitors.put(methodName, methodObject);
 	}
 }

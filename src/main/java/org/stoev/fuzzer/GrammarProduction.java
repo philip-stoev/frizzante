@@ -11,7 +11,6 @@ import java.util.Set;
 final class GrammarProduction implements Generatable {
 	private static final String WEIGHT_PATTERN = "^\\d+(%|)";
 	private static final int DEFAULT_WEIGHT = 1;
-	private static final String VISITOR_EXTENSION = "_visitor";
 	private static final String CACHED_EXTENSION = "_cached";
 
 	private static final String ALPHANUMERIC_IDENTIFIER = "[a-zA-Z0-9_]+";
@@ -124,9 +123,6 @@ final class GrammarProduction implements Generatable {
 				String replacementRuleName = ruleName.substring(0, ruleName.length() - CACHED_EXTENSION.length());
 				replacement = new CachedValue(replacementRuleName);
 				grammar.setRuleCached(replacementRuleName);
-			} else if (ruleName.endsWith(VISITOR_EXTENSION)) {
-				String replacementVisitorName = ruleName.substring(0, ruleName.length() - VISITOR_EXTENSION.length());
-				replacement = new JavaVisitor(replacementVisitorName);
 			} else {
 				replacement = grammar.getRule(ruleName);
 			}

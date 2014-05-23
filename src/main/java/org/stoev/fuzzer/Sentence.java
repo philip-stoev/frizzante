@@ -38,6 +38,12 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	private final Deque<Generatable> stack = new ArrayDeque<Generatable>();
 	private final List<GrammarProduction> productions = new ArrayList<GrammarProduction>();
 
+	/**
+	Creates a new empty Sentence object of the same type.
+
+	The caller could use sentence.getClass().newInstance() instead, however this will require
+	catching exceptions. Our version is exception-free.
+	**/
 	public final Sentence<T> newInstance() {
 		return new Sentence<T>();
 	}
