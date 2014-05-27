@@ -33,10 +33,10 @@ import java.io.IOException;
  * @author Philip Stoev <philip [at] stoev.org>
 **/
 
-public class Sentence<T> implements Iterable<T>, Appendable {
+public final class Sentence<T> implements Iterable<T>, Appendable {
 	private final List<T> elements = new ArrayList<T>();
-	private final Deque<Generatable> stack = new ArrayDeque<Generatable>();
-	private final List<GrammarProduction> productions = new ArrayList<GrammarProduction>();
+	private final Deque<Generatable> generatableStack = new ArrayDeque<Generatable>();
+	private final List<ProductionUse> productionUseList = new ArrayList<ProductionUse>();
 
 	/**
 	Creates a new empty Sentence object of the same type.
@@ -44,7 +44,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	The caller could use sentence.getClass().newInstance() instead, however this will require
 	catching exceptions. Our version is exception-free.
 	**/
-	public final Sentence<T> newInstance() {
+	public Sentence<T> newInstance() {
 		return new Sentence<T>();
 	}
 
@@ -54,7 +54,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	@param element the element to be added.
 	**/
 
-	public final void add(final T element) {
+	public void add(final T element) {
 		elements.add(element);
 	}
 
@@ -65,7 +65,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	@throws ClassCastException if the Sentence being added is not compatible
 	**/
 
-	final void addAll(final Sentence<?> newSentence) {
+	void addAll(final Sentence<?> newSentence) {
 		elements.addAll((List<T>) newSentence.elements);
 	}
 
@@ -76,7 +76,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	@throws ClassCastException if the Sentence is not compatible with String
 	**/
 
-	public final void append(final String string) {
+	public void append(final String string) {
 		elements.add((T) string);
 	}
 
@@ -87,7 +87,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	@throws ClassCastException if the Sentence is not compatible with String
 	**/
 
-	public final Appendable append(final CharSequence csq) throws IOException {
+	public Appendable append(final CharSequence csq) throws IOException {
 		elements.add((T) csq.toString());
 		return this;
 	}
@@ -98,7 +98,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	@throws UnsupportedOperationException
 	**/
 
-	public final Appendable append(final char c) throws IOException {
+	public Appendable append(final char c) throws IOException {
 		throw new UnsupportedOperationException("Sentence does not support append(char r)");
 	}
 
@@ -108,7 +108,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	@throws UnsupportedOperationException
 	**/
 
-	public final Appendable append(final CharSequence csq, final int start, final int end) throws IOException {
+	public Appendable append(final CharSequence csq, final int start, final int end) throws IOException {
 		throw new UnsupportedOperationException("Sentence does not support append(CharSequence csq, int start, int end)");
 	}
 
@@ -116,8 +116,8 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	Returns an iterator over the elements of the Sentence
 	**/
 
-	public final Iterator<T> iterator() {
-		assert stack.isEmpty() : "Stack was not empty at the time Iterator was accessed.";
+	public Iterator<T> iterator() {
+		assert generatableStack.isEmpty() : "Generatable stack was not empty at the time Iterator was accessed.";
 
 		return elements.iterator();
 	}
@@ -126,8 +126,7 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 	Returns the Sentence as a string, possibly with seprators between the elements
 	**/
 
-	public final String toString() {
-
+	public String toString() {
 		if (elements.size() == 0) {
 			return "";
 		} else {
@@ -144,24 +143,49 @@ public class Sentence<T> implements Iterable<T>, Appendable {
 		}
 	}
 
-	final Deque<Generatable> getStack() {
-		return stack;
+	void populate(final Context context, final Generatable startingGeneratable) {
+		assert generatableStack.size() == 0;
+
+		generatableStack.push(startingGeneratable);
+
+		while (!generatableStack.isEmpty()) {
+			Generatable generatable = generatableStack.pop();
+			generatable.generate(context, this);
+                }
 	}
 
-	final void registerProduction(final GrammarProduction production) {
-		productions.add(production);
+	void pushGeneratable(final Generatable generatable) {
+		generatableStack.push(generatable);
 	}
 
-	final void failed(final double penalty) {
-		for (GrammarProduction production: productions) {
+	void enterProduction(final GrammarProduction production) {
+		ProductionUse productionUse = new ProductionUse(production, elements.size());
+		productionUseList.add(productionUse);
+
+		GrammarFencepost grammarFencepost = new GrammarFencepost(productionUse);
+		generatableStack.push(grammarFencepost);
+	}
+
+	void leaveProduction(final ProductionUse productionUse) {
+		productionUse.setEnd(elements.size());
+	}
+
+	public List<ProductionUse> getProductionsUsed() {
+		return productionUseList;
+	}
+
+	void failed(final double penalty) {
+		for (ProductionUse productionUse: productionUseList) {
+			GrammarProduction production = productionUse.getProduction();
 			production.demote(penalty);
 		}
 	}
 
-	final void succeeded(final double promotion) {
-		for (GrammarProduction production: productions) {
+	void succeeded(final double promotion) {
+		for (ProductionUse productionUse: productionUseList) {
+			GrammarProduction production = productionUse.getProduction();
 			production.promote(promotion);
 		}
 	}
-
 }
+

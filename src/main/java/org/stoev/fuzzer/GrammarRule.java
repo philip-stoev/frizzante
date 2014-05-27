@@ -71,17 +71,12 @@ class GrammarRule implements Generatable {
 
 		if (context.shouldCacheRule(ruleName)) {
 			Sentence<?> cachedSentence = sentence.newInstance();
-
-			cachedSentence.getStack().push(randomProduction);
-
-			while (!cachedSentence.getStack().isEmpty()) {
-				cachedSentence.getStack().pop().generate(context, cachedSentence);
-			}
+			cachedSentence.populate(context, randomProduction);
 
 			context.setCachedValue(ruleName, cachedSentence);
 			sentence.addAll(cachedSentence);
 		} else {
-			sentence.getStack().push(randomProduction);
+			sentence.pushGeneratable(randomProduction);
 		}
 	}
 

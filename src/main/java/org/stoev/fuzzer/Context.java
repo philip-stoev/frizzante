@@ -2,7 +2,6 @@ package org.stoev.fuzzer;
 
 import java.util.Random;
 import java.util.HashMap;
-import java.util.Deque;
 import java.util.Scanner;
 import java.util.EnumSet;
 import java.util.Set;
@@ -91,17 +90,12 @@ public final class Context {
 	}
 
 	public void generate(final Sentence sentence) {
-		Deque<Generatable> stack = sentence.getStack();
-		stack.push(grammar);
-
-		while (!stack.isEmpty()) {
-			stack.pop().generate(this, sentence);
-		}
+		sentence.populate(this, grammar);
 	}
 
 	public String generateString() {
 		Sentence<String> sentence = new Sentence<String>();
-		generate(sentence);
+		sentence.populate(this, grammar);
 		return sentence.toString();
 	}
 

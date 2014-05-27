@@ -77,6 +77,10 @@ final class GrammarProduction implements Generatable {
 		return weight;
 	}
 
+	Generatable getParent() {
+		return parentRule;
+	}
+
 	void demote(final double penalty) {
 		if ((penalty < 0.0f) || (penalty > 1.0f)) {
 			throw new ConfigurationException("Penalty must be between 0 and 1.0.");
@@ -107,9 +111,10 @@ final class GrammarProduction implements Generatable {
 	}
 
 	public void generate(final Context context, final Sentence<?> sentence) {
-		sentence.registerProduction(this);
+		sentence.enterProduction(this);
+
 		for (Generatable element: elements) {
-			sentence.getStack().push(element);
+			sentence.pushGeneratable(element);
 		}
 	}
 

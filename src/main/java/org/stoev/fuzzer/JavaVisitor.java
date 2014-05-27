@@ -41,11 +41,7 @@ final class JavaVisitor implements Generatable {
 			// so that we can pass them to the visitor
 
 			argumentSentence = sentence.newInstance();
-			argumentSentence.getStack().push(argument);
-
-			while (!argumentSentence.getStack().isEmpty()) {
-				argumentSentence.getStack().pop().generate(context, argumentSentence);
-			}
+			argumentSentence.populate(context, argument);
 		}
 
 		try {

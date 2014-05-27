@@ -109,7 +109,7 @@ final class Grammar implements Generatable {
 			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
 		}
 
-		sentence.getStack().push(startingRule);
+		sentence.pushGeneratable(startingRule);
 	}
 
 	void registerVisitor(final Object visitor) {
