@@ -110,6 +110,10 @@ class GrammarRule implements Generatable {
 		return shortestConstantSentence;
 	}
 
+	public int getProductionCount() {
+		return productions.size();
+	}
+
 	public void compile(final Grammar grammar) {
 		for (Generatable production : productions) {
 			production.compile(grammar);

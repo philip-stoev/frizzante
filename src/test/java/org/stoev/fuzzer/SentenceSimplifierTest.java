@@ -19,23 +19,37 @@ public class SentenceSimplifierTest {
  	}
 
 	@Test
-	public final void testSimplifySimpleSentence() {
+	public final void testSimplifyNoAlternatives() {
 		Context context = new Context.ContextBuilder().grammar("main: foo bar;").build();
 		Sentence<String> sentence = new Sentence<String>();
 		context.generate(sentence);
 
 		SentenceSimplifier simplifier = new SentenceSimplifier(sentence);
 		Iterator<Sentence> iterator = simplifier.iterator();
-
-		Assert.assertTrue(iterator.hasNext());
-		iterator.next();
-		simplifier.failed();
-
 		Assert.assertFalse(iterator.hasNext());
-
-		Sentence finalSentence = simplifier.getCurrentSentence();
-		Assert.assertEquals(sentence.toString(), finalSentence.toString());
  	}
+
+	@Test
+	public final void testSimplifyEmptyProduction() {
+		Context context = new Context.ContextBuilder().grammar("main: foo bar | ;").build();
+
+		for (int i = 0; i < 10; i++) {
+			Sentence<String> sentence = new Sentence<String>();
+			context.generate(sentence);
+
+			if (sentence.toString().equals("")) {
+				continue;
+			}
+
+			SentenceSimplifier simplifier = new SentenceSimplifier(sentence);
+			Iterator<Sentence> iterator = simplifier.iterator();
+
+			Assert.assertTrue(iterator.hasNext());
+			Sentence testSentence = iterator.next();
+			Assert.assertFalse(iterator.hasNext());
+			Assert.assertEquals(testSentence.toString(), "");
+		}
+	}
 
 	@Test
 	public final void testSimplifyConstantProduction() {
@@ -64,11 +78,17 @@ public class SentenceSimplifierTest {
 
 	@Test
 	public final void testSimplifyMultipleProductions() {
-		Context context = new Context.ContextBuilder().grammar("main: foo bar bar bar bar bar bar;\nbar: bar1 | bar2 | ;").build();
+		Context context = new Context.ContextBuilder().grammar("main: foo bar bar bar bar bar bar ;\nbar: bar1 | bar2 | ;").build();
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 			Sentence<String> sentence = new Sentence<String>();
 			context.generate(sentence);
+
+			// For the purposes of this test, only initial sentences that contain bar2 are good.
+
+			if (!sentence.toString().contains("bar2")) {
+				continue;
+			}
 
 			SentenceSimplifier simplifier = new SentenceSimplifier(sentence);
 
