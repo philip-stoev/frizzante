@@ -92,6 +92,46 @@ public class SeparatorsTest {
 		TestUtil.assertGenerates("main:foo\n\n|foo;", "foo");
 	}
 
+//	@Test
+//	public final void testMultiplePipe() {
+//		TestUtil.assertToString("main:|;", "");
+//		TestUtil.assertToString("main:||;", "main:1.0\n|1.0\n;");
+//		TestUtil.assertToString("main: ||;", "main:1.0 \n|1.0 \n;\n");
+//		TestUtil.assertToString("main:| |;", "");
+//		TestUtil.assertToString("main:|||;", "");
+//		TestUtil.assertToString("main:|||;", "");
+//	}
+
+	@Test
+	public final void testEmptyLeadingProduction() {
+		// At least some of the generated strings must be empty
+
+		Context context = new Context.ContextBuilder().grammar("main: | bar ;").build();
+		Grammar grammar = context.getGrammar();
+		System.out.println("Grammar:" + grammar);
+		boolean generatedEmpty = false;
+		for (int i = 1; i <= 100; i++) {
+			if (context.generateString().equals("")) {
+				generatedEmpty = true;
+			}
+                }
+		Assert.assertTrue(generatedEmpty);
+	}
+
+	@Test
+	public final void testEmptyTrailingProduction() {
+		// At least some of the generated strings must be empty
+
+		Context context = new Context.ContextBuilder().grammar("main: bar | ;").build();
+		boolean generatedEmpty = false;
+		for (int i = 1; i <= 100; i++) {
+			if (context.generateString().equals("")) {
+				generatedEmpty = true;
+			}
+                }
+		Assert.assertTrue(generatedEmpty);
+	}
+
 	@Test
 	public final void testTrailingPipe() {
 		Context context = new Context.ContextBuilder().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();

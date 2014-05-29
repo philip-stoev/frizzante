@@ -34,4 +34,16 @@ final class TestUtil {
 		Grammar grammar = new Grammar(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
 		Assert.assertEquals(grammar.toString(), expectedString, "toString() was produced from the following grammar:\n" + grammarString + "\n");
 	}
+
+	static void assertShortestConstantSentence(final String grammarString, final String expectedShortestConstantString) {
+                Context context = new Context.ContextBuilder().grammar(grammarString).build();
+                Sentence<String> sentence = new Sentence<String>();
+                context.generate(sentence);
+
+                Grammar grammar = context.getGrammar();
+                GrammarRule rule = (GrammarRule) grammar.getRule("main");
+                Sentence constantSentence = rule.getShortestConstantSentence();
+
+                Assert.assertEquals(constantSentence.toString(), expectedShortestConstantString);
+        }
 }

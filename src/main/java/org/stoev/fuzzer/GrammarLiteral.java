@@ -25,4 +25,8 @@ class GrammarLiteral implements Generatable {
 	public void compile(final Grammar grammar) {
 		assert false;
 	}
+
+	public boolean isConstant() {
+		return true;
+	}
 }

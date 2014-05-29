@@ -12,14 +12,21 @@ class GrammarFencepost implements Generatable {
 	}
 
 	public String toString() {
+		assert false;
 		return "";
 	}
 
 	public String getName() {
+		assert false;
 		return "";
 	}
 
 	public void compile(final Grammar grammar) {
 		assert false;
+	}
+
+	public boolean isConstant() {
+		assert false;
+		return true;
 	}
 }

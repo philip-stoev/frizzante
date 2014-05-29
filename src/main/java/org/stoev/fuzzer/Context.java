@@ -107,6 +107,10 @@ public final class Context {
 		return random.nextDouble();
 	}
 
+	Grammar getGrammar() {
+		return grammar;
+	}
+
 	Object getVisitor() {
 		return visitor;
 	}

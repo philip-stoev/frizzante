@@ -66,4 +66,8 @@ final class JavaVisitor implements Generatable {
 			argument.compile(grammar);
 		}
 	}
+
+	public boolean isConstant() {
+		return false;
+	}
 }

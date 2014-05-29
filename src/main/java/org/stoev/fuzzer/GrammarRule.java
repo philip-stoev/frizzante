@@ -14,6 +14,9 @@ class GrammarRule implements Generatable {
 	private final List<GrammarProduction> productions;
 	private double weightSum;
 
+	private boolean shortestConstantCalculated;
+	private Sentence shortestConstantSentence;
+
 	GrammarRule(final String rn, final String ruleString, final Set<GrammarFlags> flags) {
 		ruleName = rn;
 		productions = new ArrayList<GrammarProduction>();
@@ -52,6 +55,10 @@ class GrammarRule implements Generatable {
 
 	public void generate(final Context context, final Sentence<?> sentence) {
 		if (productions.size() == 0) {
+			if (!shortestConstantCalculated) {
+				shortestConstantSentence = sentence.newInstance();
+				shortestConstantCalculated = true;
+			}
 			return;
 		}
 
@@ -78,11 +85,44 @@ class GrammarRule implements Generatable {
 		} else {
 			sentence.pushGeneratable(randomProduction);
 		}
+
+		if (!shortestConstantCalculated) {
+			for (GrammarProduction production: productions) {
+				if (!production.isConstant()) {
+					continue;
+				}
+
+				Sentence constantSentence = sentence.newInstance();
+				constantSentence.populate(context, production);
+
+				if ((shortestConstantSentence == null) || (shortestConstantSentence.size() > constantSentence.size())) {
+					shortestConstantSentence = constantSentence;
+				}
+			}
+
+			shortestConstantCalculated = true;
+		}
+	}
+
+	public Sentence getShortestConstantSentence() {
+		assert shortestConstantCalculated;
+
+		return shortestConstantSentence;
 	}
 
 	public void compile(final Grammar grammar) {
 		for (Generatable production : productions) {
 			production.compile(grammar);
+		}
+	}
+
+	public boolean isConstant() {
+		if (productions.size() == 0) {
+			return true;
+		} else if (productions.size() == 1) {
+			return productions.get(0).isConstant();
+		} else {
+			return false;
 		}
 	}
 

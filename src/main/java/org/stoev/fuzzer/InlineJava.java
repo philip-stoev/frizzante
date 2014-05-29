@@ -99,6 +99,10 @@ final class InlineJava implements Generatable {
 
 	}
 
+	public boolean isConstant() {
+		return false;
+	}
+
 	public String toString() {
 		return className + ":" + javaString + "\n";
 	}

@@ -137,6 +137,18 @@ final class GrammarProduction implements Generatable {
 		}
 	}
 
+	public boolean isConstant() {
+		boolean isConstant = true;
+
+		for (Generatable element: elements) {
+			if (!element.isConstant()) {
+				isConstant = false;
+			}
+		}
+
+		return isConstant;
+	}
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 

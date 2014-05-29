@@ -153,4 +153,9 @@ final class Grammar implements Generatable {
 		assert false;
 		return "";
 	}
+
+	public boolean isConstant() {
+		assert false;
+		return false;
+	}
 }

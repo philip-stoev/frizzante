@@ -5,5 +5,7 @@ interface Generatable {
 
 	void compile(Grammar grammar);
 
+	boolean isConstant();
+
 	String getName();
 }

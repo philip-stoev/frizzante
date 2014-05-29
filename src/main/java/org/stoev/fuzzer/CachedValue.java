@@ -23,4 +23,9 @@ class CachedValue implements Generatable {
 	public void compile(final Grammar grammar) {
 		assert false;
 	}
+
+	public boolean isConstant() {
+		// TODO - determine isConstant() based on the value being cached
+		return false;
+	}
 }
