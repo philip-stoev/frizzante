@@ -10,7 +10,7 @@ public class ProductionUseTest {
 	@Test
 	public final void testEmptyGrammar() {
 		Context context = new Context.ContextBuilder().grammar("main:;").build();
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = context.newSentence();
 		context.generate(sentence);
 
 		List<ProductionUse> productionUse = sentence.getProductionsUsed();
@@ -20,7 +20,7 @@ public class ProductionUseTest {
 	@Test
 	public final void testEmptyProduction() {
 		Context context = new Context.ContextBuilder().grammar("main:foo bar;\nbar:;").build();
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = context.newSentence();
 		context.generate(sentence);
 
 		List<ProductionUse> productionUse = sentence.getProductionsUsed();
@@ -32,7 +32,7 @@ public class ProductionUseTest {
 	@Test
 	public final void testOneProduction() {
 		Context context = new Context.ContextBuilder().grammar("main: foo bar;").build();
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = context.newSentence();
 		context.generate(sentence);
 		Assert.assertEquals(sentence.toString(), "foo bar");
 
@@ -50,7 +50,7 @@ public class ProductionUseTest {
 	@Test
 	public final void testTwoProductions() {
 		Context context = new Context.ContextBuilder().grammar("main: foo bar;\nfoo: foo2a foo2b;\nbar: bar2a bar2b;\n").build();
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = context.newSentence();
 		context.generate(sentence);
 		Assert.assertEquals(sentence.toString(), "foo2a foo2b bar2a bar2b");
 

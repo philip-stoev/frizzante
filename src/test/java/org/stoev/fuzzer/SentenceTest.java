@@ -9,7 +9,7 @@ import java.util.Formatter;
 public class SentenceTest {
 	@Test (expectedExceptions = ClassCastException.class)
 	public final void testIncompatibleClasses() {
-		Sentence<Boolean> s = new Sentence<Boolean>();
+		Sentence<Boolean> s = Sentence.newSentence(1);
 		s.append("abc");
 		for (Boolean b: s) {
 			Assert.fail("Iterator should have failed.");
@@ -18,7 +18,7 @@ public class SentenceTest {
 
 	@Test
 	public final void testAppendable() {
-		Sentence<String> s = new Sentence<String>();
+		Sentence<String> s = Sentence.newSentence(1);
 		Formatter formatter = new Formatter(s);
 		formatter.format("%s", "abc");
 		Assert.assertEquals(s.toString(), "abc");
@@ -26,7 +26,7 @@ public class SentenceTest {
 
 	@Test
 	public final void testObjectToString() {
-		Sentence<Long> s = new Sentence<Long>();
+		Sentence<Long> s = Sentence.newSentence(1);
 		s.add(1L);
 		s.add(2L);
 		Assert.assertEquals(s.toString(), "12");
@@ -34,7 +34,7 @@ public class SentenceTest {
 
 	@Test
 	public final void testIterator() {
-		Sentence<Boolean> s = new Sentence<Boolean>();
+		Sentence<Boolean> s = Sentence.newSentence(1);
 		s.add(Boolean.TRUE);
 		s.add(Boolean.FALSE);
 		Iterator<Boolean> i = s.iterator();
@@ -45,7 +45,7 @@ public class SentenceTest {
 
 	@Test
 	public final void testNullElements() {
-		Sentence<String> s = new Sentence<String>();
+		Sentence<String> s = Sentence.newSentence(1);
 		s.add(null);
 		s.append(null);
 		Iterator<String> i = s.iterator();

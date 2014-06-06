@@ -19,7 +19,7 @@ public class AdaptiveTest {
 		Context c = new Context.ContextBuilder().grammar("main: good | bad ;").build();
 
 		for (int x = 1; x <= HUNDRED_ITERATIONS; x++) {
-			Sentence<String> sentence = new Sentence<String>();
+			Sentence<String> sentence = c.newSentence();
 			c.generate(sentence);
 			if (sentence.toString().contains("bad")) {
 				sentence.failed(HALF_PENALTY);
@@ -41,7 +41,7 @@ public class AdaptiveTest {
 	public final void testPromotionLimit() {
 		Grammar g = new Grammar(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
 		Context c = new Context.ContextBuilder().grammar(g).build();
-		Sentence<String> s = new Sentence<String>();
+		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.succeeded(1.0f);
 		Assert.assertEquals(g.toString(), "main:1.0 good\n;\n");
@@ -51,7 +51,7 @@ public class AdaptiveTest {
 	public final void testPromotion() {
 		Grammar g = new Grammar(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
 		Context c = new Context.ContextBuilder().grammar(g).build();
-		Sentence<String> s = new Sentence<String>();
+		Sentence<String> s = c.newSentence();
 		c.generate(s);
 
 		// penalize first before promoting, as the weight is not allowed to exceed the original
@@ -65,7 +65,7 @@ public class AdaptiveTest {
 	public final void testDemotion() {
 		Grammar g = new Grammar(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
 		Context c = new Context.ContextBuilder().grammar(g).build();
-		Sentence<String> s = new Sentence<String>();
+		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.failed(HALF_PENALTY);
 		Assert.assertEquals(g.toString(), "main:0.5 bad\n;\n");

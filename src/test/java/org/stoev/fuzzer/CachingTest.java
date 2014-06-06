@@ -20,10 +20,10 @@ public class CachingTest {
 
 	@Test
         public final void testCachingObject() {
-                String grammar = "main: bar bar_cached;\n bar.java: {{ sentence.add(new Long(context.randomInt(100))); }};";
+                String grammar = "main: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
                 Context context = new Context.ContextBuilder().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 
-                Sentence<Long> sentence = new Sentence<Long>();
+                Sentence<Long> sentence = context.newSentence();
                 context.generate(sentence);
 
                 Iterator<Long> iterator = sentence.iterator();

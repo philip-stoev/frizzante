@@ -2,6 +2,22 @@ package org.stoev.fuzzer;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+
+import org.stoev.fuzzer.Grammar.GrammarFlags;
+import java.util.EnumSet;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import com.mongodb.MongoClient;
+import com.mongodb.DB;
+
+import java.util.Random;
 
 public final class App {
 /**
@@ -15,8 +31,82 @@ public final class App {
  * main().
  * @param args command-line arguments
  */
+	public static void main(final String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
+		MongoClient mongoClient = new MongoClient();
 
-	public static void main(final String[] args) {
+		DB db = mongoClient.getDB("test");
+
+		Context c = new Context.ContextBuilder()
+			.grammar(new FileInputStream(new File("mongodb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.random(new Random())
+			.build();
+
+		for (int i = 0; i < 1000; i++) {
+			JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", new String[] {
+				"com.mongodb.DB",
+				"com.mongodb.CommandFailureException",
+				"com.mongodb.WriteConcernException",
+				"com.mongodb.DBCollection",
+				"com.mongodb.DBCursor",
+				"com.mongodb.BasicDBObject",
+				"com.mongodb.BulkWriteOperation"
+			});
+
+			for (int n = 0; n < 25; n++) {
+				StringBuilder javaCode = new StringBuilder();
+				String generatedJava = c.generateString();
+
+				javaCode.append("public static void run(DB db) {\n");
+				javaCode.append(generatedJava);
+		                javaCode.append("}\n");
+
+				javaCompiler.addJava("class" + n, javaCode.toString());
+			}
+
+			long compilationStart = System.nanoTime();
+			javaCompiler.compileAll();
+			long compilationEnd = System.nanoTime();
+			System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
+
+			for (Iterator<Class> iterator = javaCompiler.iterator(); iterator.hasNext();) {
+				System.out.print("*");
+				Class javaClass = iterator.next();
+				Method javaMethod = javaClass.getDeclaredMethod("run", DB.class);
+				javaMethod.invoke(null, db);
+			}
+		}
+	}
+
+	public static void mainsimple(final String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		StringBuilder javaCode = new StringBuilder();
+
+		javaCode.append("package org.stoev.fuzzer;\n");
+		javaCode.append("public class foo {\n");
+		javaCode.append("public static String one() {\n");
+                javaCode.append("return \"one\";\n");
+                javaCode.append("}\n");
+                javaCode.append("}\n");
+
+		long start = System.nanoTime();
+		long preventOptimization = 0;
+		final long millispernano = 1000000;
+
+		System.out.println(javaCode.toString());
+
+//		for (int i = 1; i <= 1000; i = i + 1) {
+//			Class javaClass = JavaQuickCompile.compile("org.stoev.fuzzer.foo", javaCode.toString());
+//			Method javaMethod = javaClass.getDeclaredMethod("one");
+//			String output = (String) javaMethod.invoke(null);
+//			assert output.equals("one");
+//			preventOptimization = preventOptimization + output.length();
+//		}
+
+		long end = System.nanoTime();
+		System.out.println("Benchmark took " + ((end - start) / millispernano) + " msecs. " + preventOptimization);
+
+	}
+
+	public static void mainBenchmark2(final String[] args) {
 
 		String grammar = "main: good1 | sometimes | bad1 ; sometimes: good2 | bad2 ;";
 		Context context = new Context.ContextBuilder().grammar(grammar).build();
@@ -28,7 +118,7 @@ public final class App {
 		for (int c = 1; c <= cycles; c = c + 1) {
 			Map<String, Integer> map = new HashMap<String, Integer>();
 			for (int i = 1; i <= iterations; i = i + 1) {
-				Sentence<String> sentence = new Sentence<String>();
+				Sentence<String> sentence = context.newSentence();
 				context.generate(sentence);
 				String generated = sentence.toString();
 

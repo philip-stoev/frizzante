@@ -50,7 +50,7 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 	}
 
 	Sentence getCurrentSentence() {
-		Sentence sentence = new Sentence();
+		Sentence sentence = originalSentence.newInstance();
 		List<Boolean> elementInOutput = new ArrayList<Boolean>(originalSentence.size());
 		List<Sentence> constantSubstitutions = new ArrayList<Sentence>(originalSentence.size());
 

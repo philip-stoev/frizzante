@@ -10,7 +10,7 @@ public class SentenceSimplifierTest {
 	@Test
 	public final void testSimplifyEmptySentence() {
 		Context context = new Context.ContextBuilder().grammar("main:;").build();
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = context.newSentence();
 		context.generate(sentence);
 
 		SentenceSimplifier simplifier = new SentenceSimplifier(sentence);
@@ -21,7 +21,7 @@ public class SentenceSimplifierTest {
 	@Test
 	public final void testSimplifyNoAlternatives() {
 		Context context = new Context.ContextBuilder().grammar("main: foo bar;").build();
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = context.newSentence();
 		context.generate(sentence);
 
 		SentenceSimplifier simplifier = new SentenceSimplifier(sentence);
@@ -34,7 +34,7 @@ public class SentenceSimplifierTest {
 		Context context = new Context.ContextBuilder().grammar("main: foo bar | ;").build();
 
 		for (int i = 0; i < 10; i++) {
-			Sentence<String> sentence = new Sentence<String>();
+			Sentence<String> sentence = context.newSentence();
 			context.generate(sentence);
 
 			if (sentence.toString().equals("")) {
@@ -59,7 +59,7 @@ public class SentenceSimplifierTest {
 		Context context = new Context.ContextBuilder().grammar("main: SELECT COUNT(*) from_clause;\nfrom_clause: FROM DUAL |90% table;\ntable: T1 | T2;").build();
 
 		for (int i = 0; i < 100; i++) {
-			Sentence<String> sentence = new Sentence<String>();
+			Sentence<String> sentence = context.newSentence();
 			context.generate(sentence);
 			SentenceSimplifier simplifier = new SentenceSimplifier(sentence);
 
@@ -81,7 +81,7 @@ public class SentenceSimplifierTest {
 		Context context = new Context.ContextBuilder().grammar("main: foo bar bar bar bar bar bar ;\nbar: bar1 | bar2 | ;").build();
 
 		for (int i = 0; i < 100; i++) {
-			Sentence<String> sentence = new Sentence<String>();
+			Sentence<String> sentence = context.newSentence();
 			context.generate(sentence);
 
 			// For the purposes of this test, only initial sentences that contain bar2 are good.

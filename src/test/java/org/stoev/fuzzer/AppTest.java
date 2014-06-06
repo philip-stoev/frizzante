@@ -29,7 +29,7 @@ public class AppTest extends TestCase {
 	public final void testParser() {
 		String grammar = "main: THIS IS A TEXT | THIS IS SOME OTHER TEXT;";
 		Context context = new Context.ContextBuilder().grammar(grammar).build();
-		assertEquals(context.generateString(), "THIS IS SOME OTHER TEXT");
+		assertEquals(context.generateString(), "THIS IS A TEXT");
 	}
 
 	public final void testLinker() {
@@ -48,7 +48,7 @@ public class AppTest extends TestCase {
 		String grammar = "main: foo foo;\n foo.java: {{ sentence.add(new Long(2)); }};";
 		Context context = new Context.ContextBuilder().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 
-		Sentence<Long> sentence = new Sentence<Long>();
+		Sentence<Long> sentence = context.newSentence();
 		context.generate(sentence);
 		Iterator<Long> iterator = sentence.iterator();
 
@@ -59,11 +59,5 @@ public class AppTest extends TestCase {
 		assertEquals(2, longValue2.longValue());
 
 		assertFalse(iterator.hasNext());
-	}
-
-	public final void testLoops() {
-		String grammar = "main: foo | main , foo ;";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
-		assertEquals("foo , foo", context.generateString());
 	}
 }

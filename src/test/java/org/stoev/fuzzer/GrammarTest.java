@@ -155,10 +155,7 @@ public class GrammarTest {
 	public final void testRecursiveWeight() {
 		String g = "main:90% foo , main |10% foo;";
 		Context c = new ContextBuilder().grammar(g).build();
-		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo");
-		Assert.assertEquals(c.generateString(), "foo , foo");
-		Assert.assertEquals(c.generateString(), "foo");
-		Assert.assertEquals(c.generateString(), "foo");
+		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo");
 	}
 
 	@Test

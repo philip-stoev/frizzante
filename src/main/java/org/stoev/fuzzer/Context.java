@@ -89,22 +89,24 @@ public final class Context {
 		}
 	}
 
-	public void generate(final Sentence sentence) {
+	public <S> Sentence<S> newSentence() {
+		Sentence<S> sentence = Sentence.newSentence(random.nextLong());
+		return sentence;
+	}
+
+	public <S> Sentence<S> sentenceFromId(final long id) {
+		Sentence<S> sentence = Sentence.newSentence(id);
+		return sentence;
+	}
+
+	public void generate(final Sentence<?> sentence) {
 		sentence.populate(this, grammar);
 	}
 
 	public String generateString() {
-		Sentence<String> sentence = new Sentence<String>();
+		Sentence<String> sentence = newSentence();
 		sentence.populate(this, grammar);
 		return sentence.toString();
-	}
-
-	public int randomInt(final int n) {
-		return random.nextInt(n);
-	}
-
-	public double randomDouble() {
-		return random.nextDouble();
 	}
 
 	Grammar getGrammar() {

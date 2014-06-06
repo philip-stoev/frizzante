@@ -3,13 +3,18 @@ main:
 ;
 
 mongo_insert:
-	DBCollection coll = db.getCollection("testCollection");
-	BasicObject obj = basic_object;
+	DBCollection coll = db.getCollection(collection_name);
+	BasicDBObject obj = basic_object;
 	coll.insert(obj);
 ;
 
+collection_name:
+	"collection1" |
+	"collection2"
+;
+
 basic_object:
-	new BasicObject(object_parameters).append_list
+	new BasicDBObject(object_parameters).append_list
 ;
 
 append_list:
@@ -30,10 +35,7 @@ name:
 	"string"
 ;
 
-value:
-	"string" |
-	integer |
-	basic_object
+value:40% "string" |40% integer |20% basic_object
 ;
 
 string:

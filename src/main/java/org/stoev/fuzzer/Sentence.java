@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.Random;
 
 import java.io.IOException;
 
@@ -38,6 +39,26 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	private final Deque<Generatable> generatableStack = new ArrayDeque<Generatable>();
 	private final List<ProductionUse> productionUseList = new ArrayList<ProductionUse>();
 
+	private final long id;
+	private final Random random;
+
+	public static <S> Sentence<S> newSentence(final long i) {
+		return new Sentence<S>(i);
+	}
+
+	private Sentence(final long i) {
+		id = i;
+		random = new Random(id);
+	}
+
+	public int randomInt(final int n) {
+		return random.nextInt(n);
+	}
+
+	public double randomDouble() {
+		return random.nextDouble();
+	}
+
 	/**
 	Creates a new empty Sentence object of the same type.
 
@@ -45,7 +66,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	catching exceptions. Our version is exception-free.
 	**/
 	public Sentence<T> newInstance() {
-		return new Sentence<T>();
+		return new Sentence<T>(id);
 	}
 
 	/**
@@ -151,7 +172,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 		while (!generatableStack.isEmpty()) {
 			Generatable generatable = generatableStack.pop();
 			generatable.generate(context, this);
-                }
+		}
 	}
 
 	void pushGeneratable(final Generatable generatable) {
@@ -172,6 +193,10 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 
 	public List<T> getElements() {
 		return elements;
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	public int size() {

@@ -63,7 +63,7 @@ class GrammarRule implements Generatable {
 		}
 
 		GrammarProduction randomProduction = null;
-		double randomWeight = context.randomDouble() * weightSum;
+		double randomWeight = sentence.randomDouble() * weightSum;
 		double runningWeight = 0;
 
 		for (GrammarProduction production: productions) {

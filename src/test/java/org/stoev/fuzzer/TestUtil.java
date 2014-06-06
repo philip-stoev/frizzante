@@ -37,7 +37,7 @@ final class TestUtil {
 
 	static void assertShortestConstantSentence(final String grammarString, final String expectedShortestConstantString) {
                 Context context = new Context.ContextBuilder().grammar(grammarString).build();
-                Sentence<String> sentence = new Sentence<String>();
+                Sentence<String> sentence = context.newSentence();
                 context.generate(sentence);
 
                 Grammar grammar = context.getGrammar();

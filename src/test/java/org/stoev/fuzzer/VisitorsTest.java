@@ -43,7 +43,7 @@ public class VisitorsTest {
 		Object v = new TestVisitor();
 		Context c = new ContextBuilder().grammar("main: foo;").visitor(v).build();
 
-		Sentence<TestObject> sentence = new Sentence<TestObject>();
+		Sentence<TestObject> sentence = c.newSentence();
 		c.generate(sentence);
 		Iterator<TestObject> iterator = sentence.iterator();
 
@@ -137,7 +137,7 @@ public class VisitorsTest {
 
 		Object v = new TestVisitor();
 		Context c = new ContextBuilder().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
-		Sentence<TestObject> s = new Sentence<TestObject>();
+		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
 		Iterator<TestObject> i = s.iterator();
 		Assert.assertEquals(i.next().getValue(), 1 + 2 + 2 + 1);
@@ -172,7 +172,7 @@ public class VisitorsTest {
 
 		Object v = new TestVisitor();
 		Context c = new ContextBuilder().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
-		Sentence<TestObject> s = new Sentence<TestObject>();
+		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
 		Iterator<TestObject> i = s.iterator();
 		Assert.assertEquals(i.next().getValue(), 1 + 2);
@@ -219,7 +219,7 @@ public class VisitorsTest {
 
 		Object v = new TestVisitor();
 		Context c = new ContextBuilder().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
-		Sentence<TestObject> s = new Sentence<TestObject>();
+		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
 		Iterator<TestObject> i = s.iterator();
 		Assert.assertEquals(i.next().getValue(), 1 + 2);
