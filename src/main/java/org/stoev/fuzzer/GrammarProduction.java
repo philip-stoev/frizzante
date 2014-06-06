@@ -82,7 +82,7 @@ final class GrammarProduction implements Generatable {
 	}
 
 	void demote(final double penalty) {
-		if ((penalty < 0.0f) || (penalty > 1.0f)) {
+		if (penalty < 0.0f || penalty > 1.0f) {
 			throw new ConfigurationException("Penalty must be between 0 and 1.0.");
 		}
 
@@ -93,7 +93,7 @@ final class GrammarProduction implements Generatable {
 	}
 
 	void promote(final double promotion) {
-		if ((promotion < 0.0f) || (promotion > 1.0d)) {
+		if (promotion < 0.0f || promotion > 1.0d) {
 			throw new ConfigurationException("Promotion must be between 0 and 1.0.");
 		}
 

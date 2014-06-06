@@ -24,7 +24,7 @@ public final class Context {
 		random = builder.random;
 		visitor = builder.visitor;
 
-		if ((grammar != null) && (visitor != null)) {
+		if (grammar != null && visitor != null) {
 			grammar.registerVisitor(visitor);
 		}
 	}

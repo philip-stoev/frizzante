@@ -95,7 +95,7 @@ class GrammarRule implements Generatable {
 				Sentence constantSentence = sentence.newInstance();
 				constantSentence.populate(context, production);
 
-				if ((shortestConstantSentence == null) || (shortestConstantSentence.size() > constantSentence.size())) {
+				if (shortestConstantSentence == null || shortestConstantSentence.size() > constantSentence.size()) {
 					shortestConstantSentence = constantSentence;
 				}
 			}

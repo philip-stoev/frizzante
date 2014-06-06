@@ -38,10 +38,7 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 				GrammarRule rule = (GrammarRule) production.getParent();
 				Sentence shortestConstantSentence = rule.getShortestConstantSentence();
 
-				if (
-					(shortestConstantSentence == null)
-					|| (rule.getProductionCount() == 1)
-				) {
+				if (shortestConstantSentence == null || rule.getProductionCount() == 1) {
 					productionStatus.add(ProductionStatus.NONMINIMIZABLE);
 				} else {
 					productionStatus.add(ProductionStatus.ORIGINAL);
@@ -123,9 +120,9 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 			for (int i = currentPosition + 1; i < productionsUsed.size(); i++) {
 				ProductionUse productionUse = productionsUsed.get(i);
 				if (
-					(productionUse.wasProductive())
-					&& (productionUse.getStart() >= currentProductionUse.getStart())
-					&& (productionUse.getEnd() <= currentProductionUse.getEnd())
+					productionUse.wasProductive()
+					&& productionUse.getStart() >= currentProductionUse.getStart()
+					&& productionUse.getEnd() <= currentProductionUse.getEnd()
 				) {
 					productionStatus.set(i, ProductionStatus.REMOVED);
 				}
