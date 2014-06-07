@@ -4,6 +4,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Iterator;
+import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class StringMinimizerTest {
 
@@ -154,8 +157,88 @@ public class StringMinimizerTest {
 				}
 			}
 
-			Assert.assertEquals(minimizer.getCurrentString(), "a b ", "Original string:\"" + originalString + "\'");
+			Assert.assertEquals(minimizer.getCurrentString(), "a b ", "(1) Original string:\"" + originalString + "\'");
+		}
+
+		for (String originalString: strings) {
+			StringMinimizer minimizer = new StringMinimizer(originalString, " ");
+
+			for (String intermediateString: minimizer) {
+				if (intermediateString.contains("a") && intermediateString.contains("b")) {
+					minimizer.succeeded();
+				} else {
+					minimizer.failed();
+				}
+			}
+
+			Assert.assertTrue(minimizer.getCurrentString().equals("a b ") || minimizer.getCurrentString().equals("b a "), "(2) Original string:\"" + originalString + "\'");
 		}
 	}
 
+	@Test
+	public final void testRandomMinimizations() {
+		Random random = new Random();
+
+		for (int i = 0; i < 1000; i++) {
+			final int numGroups = 1 + random.nextInt(5);
+			final char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+			final List<String> groups = new ArrayList<String>();
+
+			// Generate random strings
+
+			for (int g = 0; g < numGroups; g++) {
+				StringBuilder group = new StringBuilder();
+				for (int c = 0; c < random.nextInt(10); c++) {
+					group.append(chars[random.nextInt(chars.length)]);
+				}
+				groups.add(group.toString());
+			}
+
+			StringBuilder allGroups = new StringBuilder();
+			for (String group: groups) {
+				allGroups.append(group);
+			}
+
+			// Then disperse them within a string
+
+			StringBuilder fullString = new StringBuilder();
+
+			for (int c = 0; c < random.nextInt(20); c++) {
+				fullString.append(chars[random.nextInt(chars.length)]);
+			}
+
+			for (String group: groups) {
+				fullString.append(group);
+				for (int c = 0; c < random.nextInt(20); c++) {
+					fullString.append(chars[random.nextInt(chars.length)]);
+				}
+			}
+
+			// And finally try to minimize them from the larger string
+
+			StringMinimizer minimizer = new StringMinimizer(fullString.toString(), "");
+
+			int minimizationCycles = 0;
+			for (String guess: minimizer) {
+				minimizationCycles++;
+				for (String group: groups) {
+					if (!guess.contains(group)) {
+						minimizer.failed();
+						break;
+					}
+				}
+				minimizer.succeeded();
+			}
+
+			Assert.assertTrue(minimizationCycles < (fullString.toString().length() * 2)); // NOPMD
+
+			// The minimized string must never be longer then all the groups taken together
+
+			Assert.assertTrue(minimizer.getCurrentString().length() <= allGroups.toString().length());
+
+			for (String group: groups) {
+				Assert.assertTrue(minimizer.getCurrentString().contains(group));
+			}
+		}
+	}
 }
