@@ -16,7 +16,7 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testAdaptive() {
-		Context c = new Context.ContextBuilder().grammar("main: good | bad ;").build();
+		Context<String> c = new Context.ContextBuilder<String>().grammar("main: good | bad ;").build();
 
 		for (int x = 1; x <= HUNDRED_ITERATIONS; x++) {
 			Sentence<String> sentence = c.newSentence();
@@ -39,8 +39,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotionLimit() {
-		Grammar g = new Grammar(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
-		Context c = new Context.ContextBuilder().grammar(g).build();
+		Grammar<String> g = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+		Context<String> c = new Context.ContextBuilder<String>().grammar(g).build();
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.succeeded(1.0f);
@@ -49,8 +49,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotion() {
-		Grammar g = new Grammar(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
-		Context c = new Context.ContextBuilder().grammar(g).build();
+		Grammar<String> g = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+		Context<String> c = new Context.ContextBuilder<String>().grammar(g).build();
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 
@@ -63,8 +63,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testDemotion() {
-		Grammar g = new Grammar(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
-		Context c = new Context.ContextBuilder().grammar(g).build();
+		Grammar<String> g = new Grammar<String>(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
+		Context<String> c = new Context.ContextBuilder<String>().grammar(g).build();
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.failed(HALF_PENALTY);

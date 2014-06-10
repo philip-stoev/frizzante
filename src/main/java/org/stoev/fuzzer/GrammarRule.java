@@ -8,18 +8,18 @@ import java.util.Scanner;
 import java.util.Iterator;
 import java.util.Set;
 
-class GrammarRule implements Generatable {
+class GrammarRule<T> implements Generatable<T> {
 
 	private final String ruleName;
-	private final List<GrammarProduction> productions;
+	private final List<GrammarProduction<T>> productions = new ArrayList<GrammarProduction<T>>();
+
 	private double weightSum;
 
 	private boolean shortestConstantCalculated;
-	private Sentence shortestConstantSentence;
+	private Sentence<T> shortestConstantSentence;
 
 	GrammarRule(final String rn, final String ruleString, final Set<GrammarFlags> flags) {
 		ruleName = rn;
-		productions = new ArrayList<GrammarProduction>();
 		assert ruleString != null;
 
 		final String pipePattern;
@@ -38,7 +38,7 @@ class GrammarRule implements Generatable {
 
 		while (scanner.hasNext()) {
 			String productionString = scanner.next();
-			GrammarProduction production = new GrammarProduction(this, productionString, flags);
+			GrammarProduction<T> production = new GrammarProduction<T>(this, productionString, flags);
 			productions.add(production);
 		}
 
@@ -48,12 +48,12 @@ class GrammarRule implements Generatable {
 	public void recalculateWeightSum() {
 		weightSum = 0;
 
-		for (GrammarProduction production: productions) {
+		for (GrammarProduction<T> production: productions) {
 			weightSum += production.getWeight();
 		}
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
 		if (productions.size() == 0) {
 			if (!shortestConstantCalculated) {
 				shortestConstantSentence = sentence.newInstance();
@@ -62,11 +62,11 @@ class GrammarRule implements Generatable {
 			return;
 		}
 
-		GrammarProduction randomProduction = null;
+		GrammarProduction<T> randomProduction = null;
 		double randomWeight = sentence.randomDouble() * weightSum;
 		double runningWeight = 0;
 
-		for (GrammarProduction production: productions) {
+		for (GrammarProduction<T> production: productions) {
 			runningWeight = runningWeight + production.getWeight();
 			if (runningWeight > randomWeight) {
 				randomProduction = production;
@@ -77,7 +77,7 @@ class GrammarRule implements Generatable {
 		assert randomProduction != null;
 
 		if (context.shouldCacheRule(ruleName)) {
-			Sentence<?> cachedSentence = sentence.newInstance();
+			Sentence<T> cachedSentence = sentence.newInstance();
 			cachedSentence.populate(context, randomProduction);
 
 			context.setCachedValue(ruleName, cachedSentence);
@@ -87,12 +87,12 @@ class GrammarRule implements Generatable {
 		}
 
 		if (!shortestConstantCalculated) {
-			for (GrammarProduction production: productions) {
+			for (GrammarProduction<T> production: productions) {
 				if (!production.isConstant()) {
 					continue;
 				}
 
-				Sentence constantSentence = sentence.newInstance();
+				Sentence<T> constantSentence = sentence.newInstance();
 				constantSentence.populate(context, production);
 
 				if (shortestConstantSentence == null || shortestConstantSentence.size() > constantSentence.size()) {
@@ -104,7 +104,7 @@ class GrammarRule implements Generatable {
 		}
 	}
 
-	public Sentence getShortestConstantSentence() {
+	public Sentence<T> getShortestConstantSentence() {
 		assert shortestConstantCalculated;
 
 		return shortestConstantSentence;
@@ -114,8 +114,8 @@ class GrammarRule implements Generatable {
 		return productions.size();
 	}
 
-	public void compile(final Grammar grammar) {
-		for (Generatable production : productions) {
+	public void compile(final Grammar<T> grammar) {
+		for (Generatable<T> production : productions) {
 			production.compile(grammar);
 		}
 	}
@@ -140,7 +140,7 @@ class GrammarRule implements Generatable {
 			return sb.toString();
 		}
 
-		Iterator<GrammarProduction> i = productions.iterator();
+		Iterator<GrammarProduction<T>> i = productions.iterator();
 
 		sb.append(i.next().toString());
 		sb.append("\n");

@@ -12,14 +12,14 @@ import java.io.FileNotFoundException;
 
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
-public final class Context {
-	private final Grammar grammar;
+public final class Context<T> {
+	private final Grammar<T> grammar;
 	private final Random random;
 	private final Object visitor;
 
-	private final HashMap<String, Sentence<?>> cachedRules = new HashMap<String, Sentence<?>>();
+	private final HashMap<String, Sentence<T>> cachedRules = new HashMap<String, Sentence<T>>();
 
-	private Context(final ContextBuilder builder) {
+	private Context(final ContextBuilder<T> builder) {
 		grammar = builder.grammar;
 		random = builder.random;
 		visitor = builder.visitor;
@@ -29,87 +29,87 @@ public final class Context {
 		}
 	}
 
-	public static final class ContextBuilder {
-		private Grammar grammar;
+	public static final class ContextBuilder<T> {
+		private Grammar<T> grammar;
 		private Random random = new Random(1);
 		private Object visitor;
 
-		public ContextBuilder grammar(final Grammar gr) {
+		public ContextBuilder<T> grammar(final Grammar<T> gr) {
 			this.grammar = gr;
 			return this;
 		}
 
-		public ContextBuilder grammar(final String grammarString) {
-			this.grammar = new Grammar(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
+		public ContextBuilder<T> grammar(final String grammarString) {
+			this.grammar = new Grammar<T>(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
 			return this;
 		}
 
-		public ContextBuilder grammar(final String grammarString, final Set<GrammarFlags> flags) {
-			this.grammar = new Grammar(new Scanner(grammarString), flags);
+		public ContextBuilder<T> grammar(final String grammarString, final Set<GrammarFlags> flags) {
+			this.grammar = new Grammar<T>(new Scanner(grammarString), flags);
 			return this;
 		}
 
-		public ContextBuilder grammar(final File file) throws FileNotFoundException {
-			this.grammar = new Grammar(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+		public ContextBuilder<T> grammar(final File file) throws FileNotFoundException {
+			this.grammar = new Grammar<T>(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
 			return this;
 		}
 
-		public ContextBuilder grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
-			this.grammar = new Grammar(new Scanner(file, "UTF-8"), flags);
+		public ContextBuilder<T> grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
+			this.grammar = new Grammar<T>(new Scanner(file, "UTF-8"), flags);
 			return this;
 		}
 
-		public ContextBuilder grammar(final InputStream stream) {
-			this.grammar = new Grammar(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+		public ContextBuilder<T> grammar(final InputStream stream) {
+			this.grammar = new Grammar<T>(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
 			return this;
 		}
 
-		public ContextBuilder grammar(final InputStream stream, final Set<GrammarFlags> flags) {
-			this.grammar = new Grammar(new Scanner(stream, "UTF-8"), flags);
+		public ContextBuilder<T> grammar(final InputStream stream, final Set<GrammarFlags> flags) {
+			this.grammar = new Grammar<T>(new Scanner(stream, "UTF-8"), flags);
 			return this;
 		}
 
-		public ContextBuilder random(final Random r) {
+		public ContextBuilder<T> random(final Random r) {
 			this.random = r;
 			return this;
 		}
 
-		public ContextBuilder random(final int seed) {
+		public ContextBuilder<T> random(final int seed) {
 			this.random = new Random(seed);
 			return this;
 		}
 
-		public ContextBuilder visitor(final Object v) {
+		public ContextBuilder<T> visitor(final Object v) {
 			this.visitor = v;
 			return this;
 		}
 
-		public Context build() {
-			return new Context(this);
+		public Context<T> build() {
+			return new Context<T>(this);
 		}
 	}
 
-	public <S> Sentence<S> newSentence() {
-		Sentence<S> sentence = Sentence.newSentence(random.nextLong());
+	public Sentence<T> newSentence() {
+		Sentence<T> sentence = Sentence.newSentence(random.nextLong());
 		return sentence;
 	}
 
-	public <S> Sentence<S> sentenceFromId(final long id) {
-		Sentence<S> sentence = Sentence.newSentence(id);
+	public Sentence<T> sentenceFromId(final long id) {
+		Sentence<T> sentence = Sentence.newSentence(id);
 		return sentence;
 	}
 
-	public void generate(final Sentence<?> sentence) {
+	public void generate(final Sentence<T> sentence) {
 		sentence.populate(this, grammar);
 	}
 
 	public String generateString() {
-		Sentence<String> sentence = newSentence();
+		Sentence<T> sentence = newSentence();
 		sentence.populate(this, grammar);
 		return sentence.toString();
 	}
 
-	Grammar getGrammar() {
+	Grammar<T> getGrammar() {
 		return grammar;
 	}
 
@@ -123,8 +123,8 @@ public final class Context {
 		return grammar.shouldCacheRule(ruleName);
 	}
 
-	Sentence<?> getCachedValue(final String ruleName) {
-		Sentence<?> cachedValue = cachedRules.get(ruleName);
+	Sentence<T> getCachedValue(final String ruleName) {
+		Sentence<T> cachedValue = cachedRules.get(ruleName);
 
 		if (cachedValue == null) {
 			throw new ConfigurationException("Cached value for rule " + ruleName + " requested, but not available.");
@@ -133,7 +133,7 @@ public final class Context {
 		return cachedValue;
 	}
 
-	void setCachedValue(final String ruleName, final Sentence<?> value) {
+	void setCachedValue(final String ruleName, final Sentence<T> value) {
 		cachedRules.put(ruleName, value);
 	}
 }

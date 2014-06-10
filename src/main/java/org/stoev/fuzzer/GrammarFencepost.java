@@ -1,14 +1,14 @@
 package org.stoev.fuzzer;
 
-class GrammarFencepost implements Generatable {
-	private final ProductionUse productionUse;
+class GrammarFencepost<T> implements Generatable<T> {
+	private final ProductionInstance<T> productionInstance;
 
-	GrammarFencepost(final ProductionUse p) {
-		productionUse = p;
+	GrammarFencepost(final ProductionInstance<T> p) {
+		productionInstance = p;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
-		sentence.leaveProduction(productionUse);
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
+		sentence.leaveProduction(productionInstance);
 	}
 
 	public String toString() {
@@ -21,7 +21,7 @@ class GrammarFencepost implements Generatable {
 		return "";
 	}
 
-	public void compile(final Grammar grammar) {
+	public void compile(final Grammar<T> grammar) {
 		assert false;
 	}
 

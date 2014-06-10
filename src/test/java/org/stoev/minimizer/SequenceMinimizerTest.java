@@ -1,14 +1,19 @@
-package org.stoev.fuzzer;
+package org.stoev.minimizer.test;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import org.stoev.minimizer.StringMinimizer;
+
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
 
-public class StringMinimizerTest {
+import org.stoev.minimizer.SequenceMinimizer;
+
+public class SequenceMinimizerTest {
 
 	@Test
 	public final void testZeroElements() {
@@ -32,7 +37,7 @@ public class StringMinimizerTest {
 		Assert.assertTrue(iterator.hasNext());
 		Assert.assertEquals(iterator.next(), "");
 
-		minimizer.succeeded();
+		minimizer.success();
 		Assert.assertFalse(iterator.hasNext());
  	}
 
@@ -43,15 +48,15 @@ public class StringMinimizerTest {
 
 		Assert.assertTrue(iterator.hasNext());
 		Assert.assertEquals(iterator.next(), "");
-		minimizer.failed();
-
-		Assert.assertTrue(iterator.hasNext());
-		Assert.assertEquals(iterator.next(), "a ");
-		minimizer.failed();
+		minimizer.failure();
 
 		Assert.assertTrue(iterator.hasNext());
 		Assert.assertEquals(iterator.next(), "b ");
-		minimizer.failed();
+		minimizer.failure();
+
+		Assert.assertTrue(iterator.hasNext());
+		Assert.assertEquals(iterator.next(), "a ");
+		minimizer.failure();
 
 		Assert.assertFalse(iterator.hasNext());
 		Assert.assertEquals(minimizer.getCurrentString(), "a b ");
@@ -62,7 +67,7 @@ public class StringMinimizerTest {
 		StringMinimizer minimizer = new StringMinimizer("1 2 3 4 5 6 7 8", " ");
 
 		for (String s: minimizer) {
-			minimizer.failed();
+			minimizer.failure();
 		}
 
 		Assert.assertEquals(minimizer.getCurrentString(), "1 2 3 4 5 6 7 8 ");
@@ -109,9 +114,9 @@ public class StringMinimizerTest {
 
 			for (String intermediateString: minimizer) {
 				if (intermediateString.contains("a")) {
-					minimizer.succeeded();
+					minimizer.success();
 				} else {
-					minimizer.failed();
+					minimizer.failure();
 				}
 			}
 
@@ -151,9 +156,9 @@ public class StringMinimizerTest {
 
 			for (String intermediateString: minimizer) {
 				if (intermediateString.contains("a b")) {
-					minimizer.succeeded();
+					minimizer.success();
 				} else {
-					minimizer.failed();
+					minimizer.failure();
 				}
 			}
 
@@ -165,9 +170,9 @@ public class StringMinimizerTest {
 
 			for (String intermediateString: minimizer) {
 				if (intermediateString.contains("a") && intermediateString.contains("b")) {
-					minimizer.succeeded();
+					minimizer.success();
 				} else {
-					minimizer.failed();
+					minimizer.failure();
 				}
 			}
 
@@ -188,7 +193,7 @@ public class StringMinimizerTest {
 
 			for (int g = 0; g < numGroups; g++) {
 				StringBuilder group = new StringBuilder();
-				for (int c = 0; c < random.nextInt(10); c++) {
+				for (int c = 0; c < 1 + random.nextInt(10); c++) {
 					group.append(chars[random.nextInt(chars.length)]);
 				}
 				groups.add(group.toString());
@@ -223,11 +228,11 @@ public class StringMinimizerTest {
 				minimizationCycles++;
 				for (String group: groups) {
 					if (!guess.contains(group)) {
-						minimizer.failed();
+						minimizer.failure();
 						break;
 					}
 				}
-				minimizer.succeeded();
+				minimizer.success();
 			}
 
 			Assert.assertTrue(minimizationCycles < (fullString.toString().length() * 2)); // NOPMD
@@ -240,5 +245,24 @@ public class StringMinimizerTest {
 				Assert.assertTrue(minimizer.getCurrentString().contains(group));
 			}
 		}
+	}
+
+	@Test
+	public final void testListMinimization() {
+		Integer[] initialIntegers = new Integer[] {1, 2, 3, 4, 5};
+
+		SequenceMinimizer<Integer> minimizer = new SequenceMinimizer<Integer>(Arrays.asList(initialIntegers));
+
+		for (List<Integer> currentIntegerList: minimizer) {
+			int sum = 0;
+			for (Integer currentInteger: currentIntegerList) {
+				sum = sum + currentInteger.intValue();
+			}
+			minimizer.report(sum > 5);
+		}
+
+		List<Integer> finalIntegers = minimizer.getCurrentList();
+		Assert.assertEquals(finalIntegers.get(0).intValue(), 4);
+		Assert.assertEquals(finalIntegers.get(1).intValue(), 5);
 	}
 }

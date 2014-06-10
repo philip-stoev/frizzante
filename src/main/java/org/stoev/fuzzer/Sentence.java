@@ -36,8 +36,8 @@ import java.io.IOException;
 
 public final class Sentence<T> implements Iterable<T>, Appendable {
 	private final List<T> elements = new ArrayList<T>();
-	private final Deque<Generatable> generatableStack = new ArrayDeque<Generatable>();
-	private final List<ProductionUse> productionUseList = new ArrayList<ProductionUse>();
+	private final Deque<Generatable<T>> generatableStack = new ArrayDeque<Generatable<T>>();
+	private final List<ProductionInstance<T>> productionInstances = new ArrayList<ProductionInstance<T>>();
 
 	private final long id;
 	private final Random random;
@@ -86,8 +86,8 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	@throws ClassCastException if the Sentence being added is not compatible
 	**/
 
-	void addAll(final Sentence<?> newSentence) {
-		elements.addAll((List<T>) newSentence.elements);
+	void addAll(final Sentence<T> newSentence) {
+		elements.addAll(newSentence.elements);
 	}
 
 	/**
@@ -97,6 +97,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	@throws ClassCastException if the Sentence is not compatible with String
 	**/
 
+	@SuppressWarnings("unchecked")
 	public void append(final String string) {
 		elements.add((T) string);
 	}
@@ -108,6 +109,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	@throws ClassCastException if the Sentence is not compatible with String
 	**/
 
+	@SuppressWarnings("unchecked")
 	public Appendable append(final CharSequence csq) throws IOException {
 		elements.add((T) csq.toString());
 		return this;
@@ -164,31 +166,31 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 		}
 	}
 
-	void populate(final Context context, final Generatable startingGeneratable) {
+	void populate(final Context<T> context, final Generatable<T> startingGeneratable) {
 		assert generatableStack.size() == 0;
 
 		generatableStack.push(startingGeneratable);
 
 		while (!generatableStack.isEmpty()) {
-			Generatable generatable = generatableStack.pop();
+			Generatable<T> generatable = generatableStack.pop();
 			generatable.generate(context, this);
 		}
 	}
 
-	void pushGeneratable(final Generatable generatable) {
+	void pushGeneratable(final Generatable<T> generatable) {
 		generatableStack.push(generatable);
 	}
 
-	void enterProduction(final GrammarProduction production) {
-		ProductionUse productionUse = new ProductionUse(production, elements.size());
-		productionUseList.add(productionUse);
+	void enterProduction(final GrammarProduction<T> production) {
+		ProductionInstance<T> productionInstance = new ProductionInstance<T>(production, elements.size());
+		productionInstances.add(productionInstance);
 
-		GrammarFencepost grammarFencepost = new GrammarFencepost(productionUse);
+		GrammarFencepost<T> grammarFencepost = new GrammarFencepost<T>(productionInstance);
 		generatableStack.push(grammarFencepost);
 	}
 
-	void leaveProduction(final ProductionUse productionUse) {
-		productionUse.setEnd(elements.size() - 1);
+	void leaveProduction(final ProductionInstance<T> productionInstance) {
+		productionInstance.setEnd(elements.size() - 1);
 	}
 
 	public List<T> getElements() {
@@ -203,20 +205,20 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 		return elements.size();
 	}
 
-	public List<ProductionUse> getProductionsUsed() {
-		return productionUseList;
+	public List<ProductionInstance<T>> getProductionInstances() {
+		return productionInstances;
 	}
 
 	void failed(final double penalty) {
-		for (ProductionUse productionUse: productionUseList) {
-			GrammarProduction production = productionUse.getProduction();
+		for (ProductionInstance<T> productionInstance: productionInstances) {
+			GrammarProduction<T> production = productionInstance.getProduction();
 			production.demote(penalty);
 		}
 	}
 
 	void succeeded(final double promotion) {
-		for (ProductionUse productionUse: productionUseList) {
-			GrammarProduction production = productionUse.getProduction();
+		for (ProductionInstance<T> productionInstance: productionInstances) {
+			GrammarProduction<T> production = productionInstance.getProduction();
 			production.promote(promotion);
 		}
 	}

@@ -13,7 +13,7 @@ public class CachingTest {
 	@Test
         public final void testCachingSentence() {
                 String grammar = "main: foo , foo_cached ;\n foo: foo2 ;";
-                Context context = new Context.ContextBuilder().grammar(grammar).build();
+                Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
                 Assert.assertEquals(context.generateString(), "foo2 , foo2");
                 Assert.assertEquals(context.generateString(), "foo2 , foo2");
         }
@@ -21,7 +21,7 @@ public class CachingTest {
 	@Test
         public final void testCachingObject() {
                 String grammar = "main: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
-                Context context = new Context.ContextBuilder().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		Context<Long> context = new Context.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 
                 Sentence<Long> sentence = context.newSentence();
                 context.generate(sentence);

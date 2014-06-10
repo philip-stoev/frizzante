@@ -1,18 +1,18 @@
 package org.stoev.fuzzer;
 
-class ProductionUse {
-	private final GrammarProduction production;
+class ProductionInstance<T> {
+	private final GrammarProduction<T> production;
 	private final int start;
 	private int end;
 
-	ProductionUse(final GrammarProduction p, final int s) {
+	ProductionInstance(final GrammarProduction<T> p, final int s) {
 		assert p != null;
 
 		production = p;
 		start = s;
 	}
 
-	GrammarProduction getProduction() {
+	GrammarProduction<T> getProduction() {
 		return production;
 	}
 

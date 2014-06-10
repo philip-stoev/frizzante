@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
-final class Grammar implements Generatable {
+final class Grammar<T> implements Generatable<T> {
 
 	public static enum GrammarFlags {
 		STANDALONE_SEMICOLONS_ONLY,
@@ -29,7 +29,7 @@ final class Grammar implements Generatable {
 	private static final String RULE_NAME_PATTERN = "[a-zA-Z0-9_. ]*:";
 	private static final String JAVA_EXTENSION = ".java";
 
-	private final HashMap<String, Generatable> rules = new HashMap<String, Generatable>();
+	private final HashMap<String, Generatable<T>> rules = new HashMap<String, Generatable<T>>();
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
 	Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
@@ -69,7 +69,7 @@ final class Grammar implements Generatable {
 				throw new ConfigurationException("Name " + generatableName + " defined multiple times in grammar.");
 			}
 
-			Generatable generatableObject;
+			Generatable<T> generatableObject;
 
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
 				generatableName = generatableName.substring(0, generatableName.length() - JAVA_EXTENSION.length());
@@ -79,7 +79,7 @@ final class Grammar implements Generatable {
 					throw new ConfigurationException("Unable to parse Java code for rule " + generatableName + " (missing '}};' terminator?)");
 				}
 
-				generatableObject = new InlineJava(generatableName, javaString);
+				generatableObject = new InlineJava<T>(generatableName, javaString);
 			} else {
 				String ruleString = scanner.findWithinHorizon(rulePattern, 0);
 
@@ -87,7 +87,7 @@ final class Grammar implements Generatable {
 					throw new ConfigurationException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
 				}
 
-				generatableObject = new GrammarRule(generatableName, ruleString, flags);
+				generatableObject = new GrammarRule<T>(generatableName, ruleString, flags);
 			}
 
 			rules.put(generatableName, generatableObject);
@@ -96,14 +96,14 @@ final class Grammar implements Generatable {
 		compile(this);
 	}
 
-	public void compile(final Grammar grammar) {
-		for (Generatable rule : rules.values()) {
+	public void compile(final Grammar<T> grammar) {
+		for (Generatable<T> rule : rules.values()) {
 			rule.compile(grammar);
 		}
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
-		Generatable startingRule = rules.get(STARTING_GRAMMAR_RULE);
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
+		Generatable<T> startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
 		if (startingRule == null) {
 			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
@@ -113,21 +113,21 @@ final class Grammar implements Generatable {
 	}
 
 	void registerVisitor(final Object visitor) {
-		Class visitorClass = visitor.getClass();
+		Class<?> visitorClass = visitor.getClass();
 
 		Method[] methods = visitorClass.getDeclaredMethods();
 
 		for (Method method: methods) {
 			String methodName = method.getName();
-			Generatable existingGeneratable = rules.get(methodName);
-			Generatable javaVisitor = new JavaVisitor(visitor, methodName, existingGeneratable);
+			Generatable<T> existingGeneratable = rules.get(methodName);
+			Generatable<T> javaVisitor = new JavaVisitor<T>(visitor, methodName, existingGeneratable);
 			rules.put(methodName, javaVisitor);
 		}
 
 		compile(this);
 	}
 
-	Generatable getRule(final String ruleName) {
+	Generatable<T> getRule(final String ruleName) {
 		return rules.get(ruleName);
 	}
 
@@ -142,7 +142,7 @@ final class Grammar implements Generatable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		for (Generatable rule: rules.values()) {
+		for (Generatable<T> rule: rules.values()) {
 			sb.append(rule.toString());
 		}
 

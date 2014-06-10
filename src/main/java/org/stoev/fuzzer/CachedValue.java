@@ -1,15 +1,14 @@
 package org.stoev.fuzzer;
 
-class CachedValue implements Generatable {
+class CachedValue<T> implements Generatable<T> {
 	private final String ruleName;
 
 	CachedValue(final String rn) {
 		ruleName = rn;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
-		Sentence<?> cachedValue = context.getCachedValue(ruleName);
-		sentence.addAll(cachedValue);
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
+		sentence.addAll(context.getCachedValue(ruleName));
 	}
 
 	public String toString() {
@@ -20,7 +19,7 @@ class CachedValue implements Generatable {
 		return ruleName + "_cached";
 	}
 
-	public void compile(final Grammar grammar) {
+	public void compile(final Grammar<T> grammar) {
 		assert false;
 	}
 

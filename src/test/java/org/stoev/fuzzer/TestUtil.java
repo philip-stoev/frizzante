@@ -15,7 +15,7 @@ final class TestUtil {
 	}
 
 	static void assertGenerates(final String grammarString, final String expectedString) {
-		Context context = new Context.ContextBuilder().grammar(grammarString).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammarString).build();
 
 		for (int i = 1; i <= ITERATIONS; i++) {
 			Assert.assertEquals(context.generateString(), expectedString, "String was generated using the following grammar:\n" + grammarString + "\n");
@@ -23,7 +23,7 @@ final class TestUtil {
 	}
 
 	static void assertGeneratesSkipWhitespace(final String grammarString, final String expectedString) {
-		Context context = new Context.ContextBuilder().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 
 		for (int i = 1; i <= ITERATIONS; i++) {
 			Assert.assertEquals(context.generateString(), expectedString, "String was generated using the following grammar:\n" + grammarString + "\n");
@@ -31,18 +31,18 @@ final class TestUtil {
 	}
 
 	static void assertToString(final String grammarString, final String expectedString) {
-		Grammar grammar = new Grammar(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
+		Grammar<String> grammar = new Grammar<String>(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
 		Assert.assertEquals(grammar.toString(), expectedString, "toString() was produced from the following grammar:\n" + grammarString + "\n");
 	}
 
 	static void assertShortestConstantSentence(final String grammarString, final String expectedShortestConstantString) {
-                Context context = new Context.ContextBuilder().grammar(grammarString).build();
+                Context<String> context = new Context.ContextBuilder<String>().grammar(grammarString).build();
                 Sentence<String> sentence = context.newSentence();
                 context.generate(sentence);
 
-                Grammar grammar = context.getGrammar();
-                GrammarRule rule = (GrammarRule) grammar.getRule("main");
-                Sentence constantSentence = rule.getShortestConstantSentence();
+                Grammar<String> grammar = context.getGrammar();
+                GrammarRule<String> rule = (GrammarRule<String>) grammar.getRule("main");
+                Sentence<String> constantSentence = rule.getShortestConstantSentence();
 
                 Assert.assertEquals(constantSentence.toString(), expectedShortestConstantString);
         }

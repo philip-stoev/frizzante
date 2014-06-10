@@ -8,7 +8,7 @@ import java.util.Scanner;
 import java.util.ListIterator;
 import java.util.Set;
 
-final class GrammarProduction implements Generatable {
+final class GrammarProduction<T> implements Generatable<T> {
 	private static final String WEIGHT_PATTERN = "^\\d+(%|)";
 	private static final int DEFAULT_WEIGHT = 1;
 	private static final String CACHED_EXTENSION = "_cached";
@@ -16,19 +16,18 @@ final class GrammarProduction implements Generatable {
 	private static final String ALPHANUMERIC_IDENTIFIER = "[a-zA-Z0-9_]+";
 	private static final String EVERYTHING_ELSE = "[^a-zA-Z0-9_\\s]+";
 
-	private final GrammarRule parentRule;
-	private final List<Generatable> elements;
+	private final GrammarRule<T> parentRule;
+	private final List<Generatable<T>> elements = new ArrayList<Generatable<T>>();
+
 
 	private final double initialWeight;
 	private double weight;
 
-	GrammarProduction(final GrammarRule parent, final String productionString, final Set<GrammarFlags> flags) {
+	GrammarProduction(final GrammarRule<T> parent, final String productionString, final Set<GrammarFlags> flags) {
 		this.parentRule = parent;
 
 		final Scanner scanner = new Scanner(productionString);
 		scanner.useDelimiter("");
-
-		elements = new ArrayList<Generatable>();
 
 		String weightString = scanner.findWithinHorizon(WEIGHT_PATTERN, 0);
 
@@ -66,9 +65,9 @@ final class GrammarProduction implements Generatable {
 			// We populate the elements array backwards as this is how items will be inserted into the stack during generation
 
 			if (!flags.contains(GrammarFlags.SKIP_WHITESPACE)) {
-				elements.add(0, new GrammarLiteral(elementString));
+				elements.add(0, new GrammarLiteral<T>(elementString));
 			} else if (!elementString.matches(Constants.WHITESPACE)) {
-				elements.add(0, new GrammarLiteral(elementString));
+				elements.add(0, new GrammarLiteral<T>(elementString));
 			}
 		}
 	}
@@ -77,7 +76,7 @@ final class GrammarProduction implements Generatable {
 		return weight;
 	}
 
-	Generatable getParent() {
+	GrammarRule<T> getParent() {
 		return parentRule;
 	}
 
@@ -110,22 +109,22 @@ final class GrammarProduction implements Generatable {
 		}
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
 		sentence.enterProduction(this);
 
-		for (Generatable element: elements) {
+		for (Generatable<T> element: elements) {
 			sentence.pushGeneratable(element);
 		}
 	}
 
-	public void compile(final Grammar grammar) {
+	public void compile(final Grammar<T> grammar) {
 		for (int i = 0; i < elements.size(); i++) {
 			String ruleName = elements.get(i).getName();
-			Generatable replacement = null;
+			Generatable<T> replacement = null;
 
 			if (ruleName.endsWith(CACHED_EXTENSION)) {
 				String replacementRuleName = ruleName.substring(0, ruleName.length() - CACHED_EXTENSION.length());
-				replacement = new CachedValue(replacementRuleName);
+				replacement = new CachedValue<T>(replacementRuleName);
 				grammar.setRuleCached(replacementRuleName);
 			} else {
 				replacement = grammar.getRule(ruleName);
@@ -140,7 +139,7 @@ final class GrammarProduction implements Generatable {
 	public boolean isConstant() {
 		boolean isConstant = true;
 
-		for (Generatable element: elements) {
+		for (Generatable<T> element: elements) {
 			if (!element.isConstant()) {
 				isConstant = false;
 			}
@@ -160,7 +159,7 @@ final class GrammarProduction implements Generatable {
 		}
 
 		// As we store the elements in reverse order, this iterator works backwards
-		ListIterator<Generatable> i = elements.listIterator(elements.size());
+		ListIterator<Generatable<T>> i = elements.listIterator(elements.size());
 
 		sb.append(i.previous().getName());
 

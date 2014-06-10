@@ -21,7 +21,7 @@ public class MongoTest {
 
 		DB db = mongoClient.getDB("test");
 
-		Context c = new Context.ContextBuilder()
+		Context<String> c = new Context.ContextBuilder<String>()
 			.grammar(Thread.currentThread().getContextClassLoader().getResourceAsStream("mongodb.grammar"), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
 
@@ -50,4 +50,3 @@ public class MongoTest {
 		}
 	}
 }
-

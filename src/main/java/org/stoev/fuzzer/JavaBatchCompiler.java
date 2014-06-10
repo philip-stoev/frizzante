@@ -27,14 +27,14 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.FileObject;
 
-final class JavaBatchCompiler implements Iterable {
+final class JavaBatchCompiler implements Iterable<Class<?>> {
 	static final String[] COMPILER_OPTIONS = new String[] {"-Xlint:all", "-Werror", "-source", "1.6", "-g:none", "-proc:none", "-implicit:none" };
 	static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
 
 	private final String packageName;
 	private final String[] imports;
 	private final Deque<JavaSource> javaSources = new ArrayDeque<JavaSource>();
-	private final Deque<Class> javaClasses = new ArrayDeque<Class>();
+	private final Deque<Class<?>> javaClasses = new ArrayDeque<Class<?>>();
 
 	static class JavaSource {
 		private final String className;
@@ -78,7 +78,7 @@ final class JavaBatchCompiler implements Iterable {
 		javaStringBuilder.append(javaString);
 		javaStringBuilder.append("}\n");
 
-		javaSources.push(new JavaSource(className, javaStringBuilder.toString()));
+		javaSources.addLast(new JavaSource(className, javaStringBuilder.toString()));
 	}
 
 	void compileAll() {
@@ -100,7 +100,7 @@ final class JavaBatchCompiler implements Iterable {
 
 		for (String className: classNames) {
 			try {
-				Class javaClass = fileManager.getClassLoader(null).loadClass(packageName + "." + className);
+				Class<?> javaClass = fileManager.getClassLoader(null).loadClass(packageName + "." + className);
 				assert javaClass != null;
 
 				javaClasses.addLast(javaClass);
@@ -110,7 +110,7 @@ final class JavaBatchCompiler implements Iterable {
 		}
 	}
 
-	public Iterator<Class> iterator() {
+	public Iterator<Class<?>> iterator() {
 		return javaClasses.iterator();
 	}
 }

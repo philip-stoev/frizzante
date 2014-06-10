@@ -8,7 +8,7 @@ import org.stoev.fuzzer.Context.ContextBuilder;
 public class SentenceIdTest {
 	@Test
 	public final void test() {
-		Context context = new ContextBuilder().grammar("main: foo foo foo foo foo;\nfoo: foo1 | foo2;").build();
+		Context<String> context = new ContextBuilder<String>().grammar("main: foo foo foo foo foo;\nfoo: foo1 | foo2;").build();
 		Sentence<String> sentence1 = context.newSentence();
 		context.generate(sentence1);
 

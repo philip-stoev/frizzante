@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import java.util.Iterator;
 
-final class InlineJava implements Generatable {
+final class InlineJava<T> implements Generatable<T> {
 	private final String className;
 	private final String javaString;
 	private Method javaMethod = null;
@@ -24,17 +24,17 @@ final class InlineJava implements Generatable {
 		});
 
 		StringBuilder javaCode = new StringBuilder();
-		javaCode.append("	public static void generate(final Context context, final Sentence<Object> sentence) {\n");
+		javaCode.append("	public static void generate(final Context<Object> context, final Sentence<Object> sentence) {\n");
 		javaCode.append(javaString);
 		javaCode.append("	}\n");
 
 		javaCompiler.addJava(className, javaCode.toString());
 		javaCompiler.compileAll();
 
-		Iterator<Class> classIterator = javaCompiler.iterator();
+		Iterator<Class<?>> classIterator = javaCompiler.iterator();
 		assert classIterator.hasNext();
 
-		Class javaClass = classIterator.next();
+		Class<?> javaClass = classIterator.next();
 		assert javaClass != null;
 
 		try {
@@ -46,11 +46,11 @@ final class InlineJava implements Generatable {
 		assert javaMethod != null;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
 		try {
 
 			if (context.shouldCacheRule(className)) {
-				Sentence<?> cachedSentence = sentence.newInstance();
+				Sentence<T> cachedSentence = sentence.newInstance();
 				javaMethod.invoke(null, context, cachedSentence);
 	                        context.setCachedValue(className, cachedSentence);
 				sentence.addAll(cachedSentence);
@@ -64,7 +64,7 @@ final class InlineJava implements Generatable {
 		}
 	}
 
-	public void compile(final Grammar grammar) {
+	public void compile(final Grammar<T> grammar) {
 
 	}
 

@@ -106,8 +106,8 @@ public class SeparatorsTest {
 	public final void testEmptyLeadingProduction() {
 		// At least some of the generated strings must be empty
 
-		Context context = new Context.ContextBuilder().grammar("main: | bar ;").build();
-		Grammar grammar = context.getGrammar();
+		Context<String> context = new Context.ContextBuilder<String>().grammar("main: | bar ;").build();
+		Grammar<String> grammar = context.getGrammar();
 		System.out.println("Grammar:" + grammar);
 		boolean generatedEmpty = false;
 		for (int i = 1; i <= 100; i++) {
@@ -122,7 +122,7 @@ public class SeparatorsTest {
 	public final void testEmptyTrailingProduction() {
 		// At least some of the generated strings must be empty
 
-		Context context = new Context.ContextBuilder().grammar("main: bar | ;").build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar("main: bar | ;").build();
 		boolean generatedEmpty = false;
 		for (int i = 1; i <= 100; i++) {
 			if (context.generateString().equals("")) {
@@ -134,7 +134,7 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testTrailingPipe() {
-		Context context = new Context.ContextBuilder().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();
 
 		Assert.assertEquals(context.generateString(), "foo | bar");
 		Assert.assertEquals(context.generateString(), "foo | bar");
@@ -153,7 +153,7 @@ public class SeparatorsTest {
 	@Test
 	public final void testStandaloneSemicolon() {
 		String grammar = "main: foo ; bar ;\n baz;\n;\n";
-		Context context = new Context.ContextBuilder().grammar(grammar, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)).build();
 
 		Assert.assertEquals(context.generateString(), "foo ; bar ;\n baz;");
 	}

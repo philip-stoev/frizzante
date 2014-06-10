@@ -1,9 +1,9 @@
 package org.stoev.fuzzer;
 
-interface Generatable {
-	void generate(final Context context, final Sentence<?> sentence);
+interface Generatable<T> {
+	void generate(final Context<T> context, final Sentence<T> sentence);
 
-	void compile(Grammar grammar);
+	void compile(Grammar<T> grammar);
 
 	boolean isConstant();
 

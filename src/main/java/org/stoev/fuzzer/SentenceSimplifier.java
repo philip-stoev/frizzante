@@ -4,39 +4,39 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public final class SentenceSimplifier implements Iterable<Sentence> {
-	private final Sentence originalSentence;
+public final class SentenceSimplifier<T> implements Iterable<Sentence<T>> {
+	private final Sentence<T> originalSentence;
 
-	private Iterator<Sentence> iterator;
-	private List<?> originalElements;
-	private List<ProductionUse> productionsUsed;
+	private Iterator<Sentence<T>> iterator;
+	private List<T> originalElements;
+	private List<ProductionInstance<T>> productionInstances;
 
 	private final List<ProductionStatus> productionStatus;
-	private int currentPosition = -1; // "-1" means the Iterator has not been used yet
+	private int currentPosition = -1; // "-1" means the Iterator has not been Instanced yet
 
 	enum ProductionStatus {
 		ORIGINAL,		// The original production, suitable for replacement with a constant
 		NONMINIMIZABLE,		// Production that has no alternatives, so can not be minimized
 		REPLACED,		// A production that was successfully replaced with a constant
-		REMOVED,		// A nested production that was removed by success() because a higher-level production was minimized
+		REMOVED,		// A nested production that was removed by success() becaInstance a higher-level production was minimized
 		EMPTY			// A production that did not produce any output, can be skipped
 	};
 
-	SentenceSimplifier(final Sentence orig) {
+	SentenceSimplifier(final Sentence<T> orig) {
 		originalSentence = orig;
 		originalElements = originalSentence.getElements();
-		productionsUsed = originalSentence.getProductionsUsed();
-		productionStatus = new ArrayList<ProductionStatus>(productionsUsed.size());
+		productionInstances = originalSentence.getProductionInstances();
+		productionStatus = new ArrayList<ProductionStatus>(productionInstances.size());
 
 		// Loop through the productions and categorize them as per the ProductionStatus enum above
 
-		for (ProductionUse productionUse : productionsUsed) {
-			if (!productionUse.wasProductive()) {
+		for (ProductionInstance<T> productionInstance : productionInstances) {
+			if (!productionInstance.wasProductive()) {
 				productionStatus.add(ProductionStatus.EMPTY);
 			} else {
-				GrammarProduction production = productionUse.getProduction();
-				GrammarRule rule = (GrammarRule) production.getParent();
-				Sentence shortestConstantSentence = rule.getShortestConstantSentence();
+				GrammarProduction<T> production = productionInstance.getProduction();
+				GrammarRule<T> rule = production.getParent();
+				Sentence<T> shortestConstantSentence = rule.getShortestConstantSentence();
 
 				if (shortestConstantSentence == null || rule.getProductionCount() == 1) {
 					productionStatus.add(ProductionStatus.NONMINIMIZABLE);
@@ -46,13 +46,13 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 			}
 		}
 
-		assert productionsUsed.size() == productionStatus.size();
+		assert productionInstances.size() == productionStatus.size();
 	}
 
-	Sentence getCurrentSentence() {
-		Sentence sentence = originalSentence.newInstance();
+	Sentence<T> getCurrentSentence() {
+		Sentence<T> sentence = originalSentence.newInstance();
 		List<Boolean> elementInOutput = new ArrayList<Boolean>(originalSentence.size());
-		List<Sentence> constantSubstitutions = new ArrayList<Sentence>(originalSentence.size());
+		List<Sentence<T>> constantSubstitutions = new ArrayList<Sentence<T>>(originalSentence.size());
 
 		// Assume initially that all elements from the original Sentence will make it into the new one
 		// and no substitutions are taking place
@@ -64,8 +64,8 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 
 		// Then go though the productions and modify the output as per the status of the individual productions
 
-		for (int i = 0; i < productionsUsed.size(); i++) {
-			ProductionUse productionUse = productionsUsed.get(i);
+		for (int i = 0; i < productionInstances.size(); i++) {
+			ProductionInstance<T> productionInstance = productionInstances.get(i);
 
 			switch(productionStatus.get(i)) {
 				case EMPTY:
@@ -73,21 +73,21 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 				case NONMINIMIZABLE:
 					break;
 				case REMOVED:
-					for (int x = productionUse.getStart(); x <= productionUse.getEnd(); x++) {
+					for (int x = productionInstance.getStart(); x <= productionInstance.getEnd(); x++) {
 						elementInOutput.set(x, false);
 	                                }
 
 					break;
 				case REPLACED:
-					for (int x = productionUse.getStart(); x <= productionUse.getEnd(); x++) {
+					for (int x = productionInstance.getStart(); x <= productionInstance.getEnd(); x++) {
 						elementInOutput.set(x, false);
 	                                }
 
-					GrammarProduction production = productionUse.getProduction();
-					GrammarRule rule = (GrammarRule) production.getParent();
-					Sentence shortestConstantSentence = rule.getShortestConstantSentence();
+					GrammarProduction<T> production = productionInstance.getProduction();
+					GrammarRule<T> rule = production.getParent();
+					Sentence<T> shortestConstantSentence = rule.getShortestConstantSentence();
 
-					constantSubstitutions.set(productionUse.getStart(), shortestConstantSentence);
+					constantSubstitutions.set(productionInstance.getStart(), shortestConstantSentence);
 
 					break;
 				default:
@@ -112,17 +112,17 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 	void succeeded() {
 		assert productionStatus.get(currentPosition) == ProductionStatus.REPLACED;
 
-		ProductionUse currentProductionUse = productionsUsed.get(currentPosition);
+		ProductionInstance<T> currentProductionInstance = productionInstances.get(currentPosition);
 
-		if (currentProductionUse.wasProductive()) {
+		if (currentProductionInstance.wasProductive()) {
 			// Mark as REMOVED all productions that are completely enclosed within the current one
 
-			for (int i = currentPosition + 1; i < productionsUsed.size(); i++) {
-				ProductionUse productionUse = productionsUsed.get(i);
+			for (int i = currentPosition + 1; i < productionInstances.size(); i++) {
+				ProductionInstance<T> productionInstance = productionInstances.get(i);
 				if (
-					productionUse.wasProductive()
-					&& productionUse.getStart() >= currentProductionUse.getStart()
-					&& productionUse.getEnd() <= currentProductionUse.getEnd()
+					productionInstance.wasProductive()
+					&& productionInstance.getStart() >= currentProductionInstance.getStart()
+					&& productionInstance.getEnd() <= currentProductionInstance.getEnd()
 				) {
 					productionStatus.set(i, ProductionStatus.REMOVED);
 				}
@@ -136,13 +136,13 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 	}
 
 	@Override
-	public Iterator<Sentence> iterator() {
+	public Iterator<Sentence<T>> iterator() {
 		if (iterator == null) {
-			iterator = new Iterator<Sentence>() {
+			iterator = new Iterator<Sentence<T>>() {
 				@Override
 				public boolean hasNext() {
 					// Check if there are any productions that are potential targets for minimization
-					for (int i = currentPosition + 1; i < productionsUsed.size(); i++) {
+					for (int i = currentPosition + 1; i < productionInstances.size(); i++) {
 						if (productionStatus.get(i) == ProductionStatus.ORIGINAL) {
 							return true;
 						}
@@ -152,9 +152,9 @@ public final class SentenceSimplifier implements Iterable<Sentence> {
 				}
 
 				@Override
-				public Sentence next() {
+				public Sentence<T> next() {
 					// We advance the position to the next production that can be worked on
-					for (currentPosition++; currentPosition < productionsUsed.size(); currentPosition++) {
+					for (currentPosition++; currentPosition < productionInstances.size(); currentPosition++) {
 						if (productionStatus.get(currentPosition) == ProductionStatus.ORIGINAL) {
 							productionStatus.set(currentPosition, ProductionStatus.REPLACED);
 							break;

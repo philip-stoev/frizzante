@@ -1,6 +1,6 @@
 package org.stoev.fuzzer;
 
-class GrammarLiteral implements Generatable {
+class GrammarLiteral<T> implements Generatable<T> {
 	private final String value;
 
 	GrammarLiteral(final String lv) {
@@ -10,7 +10,7 @@ class GrammarLiteral implements Generatable {
 		value = lv;
 	}
 
-	public void generate(final Context context, final Sentence<?> sentence) {
+	public void generate(final Context<T> context, final Sentence<T> sentence) {
 		sentence.append(value);
 	}
 
@@ -22,7 +22,7 @@ class GrammarLiteral implements Generatable {
 		return value;
 	}
 
-	public void compile(final Grammar grammar) {
+	public void compile(final Grammar<T> grammar) {
 		assert false;
 	}
 

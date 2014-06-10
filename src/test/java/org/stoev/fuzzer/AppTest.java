@@ -28,25 +28,25 @@ public class AppTest extends TestCase {
 
 	public final void testParser() {
 		String grammar = "main: THIS IS A TEXT | THIS IS SOME OTHER TEXT;";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
 		assertEquals(context.generateString(), "THIS IS A TEXT");
 	}
 
 	public final void testLinker() {
 		String grammar = "main: linker1 , linker2 ;\n linker1: linkerA ;\n linker2: linkerB;";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
 		assertEquals("linkerA , linkerB", context.generateString());
 	}
 
 	public final void testJavaCode() {
 		String grammar = "main: foo ;\n foo.java: {{ sentence.append(\"foo2\"); }};";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
 		assertEquals("foo2", context.generateString());
 	}
 
 	public final void testForeignGeneratable() {
 		String grammar = "main: foo foo;\n foo.java: {{ sentence.add(new Long(2)); }};";
-		Context context = new Context.ContextBuilder().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		Context<Long> context = new Context.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
 
 		Sentence<Long> sentence = context.newSentence();
 		context.generate(sentence);

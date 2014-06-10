@@ -19,6 +19,11 @@ import com.mongodb.DB;
 
 import java.util.Random;
 
+import com.foundationdb.FDB;
+import com.foundationdb.Database;
+
+import java.io.FileNotFoundException;
+
 public final class App {
 /**
  * Not called.
@@ -31,12 +36,68 @@ public final class App {
  * main().
  * @param args command-line arguments
  */
-	public static void main(final String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
+	public static void main(final String[] args) throws FileNotFoundException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		class FoundationDBWorker implements Runnable {
+
+			public void run() {
+				try {
+				FDB fdb = FDB.selectAPIVersion(200);
+				Database db = fdb.open();
+				Context<String> c = new Context.ContextBuilder<String>()
+					.grammar(new FileInputStream(new File("foundationdb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+					.random(new Random())
+					.build();
+
+				Random random = new Random();
+				for (int i = 0; i < 10000; i++) {
+					JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", new String[] {
+						"com.foundationdb.async.Function",
+						"com.foundationdb.async.PartialFunction",
+						"com.foundationdb.tuple.Tuple",
+						"com.foundationdb.Transaction",
+						"com.foundationdb.Database",
+						"com.foundationdb.async.Future",
+						"java.util.*"
+					});
+
+					for (int n = 0; n < 100; n++) {
+						StringBuilder javaCode = new StringBuilder();
+						String generatedJava = c.generateString();
+						javaCompiler.addJava("class" + n, generatedJava);
+					}
+
+					long compilationStart = System.nanoTime();
+					javaCompiler.compileAll();
+					long compilationEnd = System.nanoTime();
+//					System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
+	
+					for (Iterator<Class<?>> iterator = javaCompiler.iterator(); iterator.hasNext();) {
+						Class<?> javaClass = iterator.next();
+						Method javaMethod = javaClass.getDeclaredMethod("run", Database.class, Random.class);
+						javaMethod.invoke(null, db, random);
+					}
+				}}
+				catch (Exception e) { assert false; };
+			}
+
+			public void start () {
+				Thread t = new Thread (this);
+				t.start();
+			}
+		}
+
+		for (int i = 0; i < 25; i++) {
+			FoundationDBWorker worker = new FoundationDBWorker();
+			worker.start();
+		}
+	}
+
+	public static void mainMongo(final String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
 		MongoClient mongoClient = new MongoClient();
 
 		DB db = mongoClient.getDB("test");
 
-		Context c = new Context.ContextBuilder()
+		Context<String> c = new Context.ContextBuilder<String>()
 			.grammar(new FileInputStream(new File("mongodb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.random(new Random())
 			.build();
@@ -52,7 +113,7 @@ public final class App {
 				"com.mongodb.BulkWriteOperation"
 			});
 
-			for (int n = 0; n < 25; n++) {
+			for (int n = 0; n < 100; n++) {
 				StringBuilder javaCode = new StringBuilder();
 				String generatedJava = c.generateString();
 
@@ -68,9 +129,8 @@ public final class App {
 			long compilationEnd = System.nanoTime();
 			System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
 
-			for (Iterator<Class> iterator = javaCompiler.iterator(); iterator.hasNext();) {
-				System.out.print("*");
-				Class javaClass = iterator.next();
+			for (Iterator<Class<?>> iterator = javaCompiler.iterator(); iterator.hasNext();) {
+				Class<?> javaClass = iterator.next();
 				Method javaMethod = javaClass.getDeclaredMethod("run", DB.class);
 				javaMethod.invoke(null, db);
 			}
@@ -109,7 +169,7 @@ public final class App {
 	public static void mainBenchmark2(final String[] args) {
 
 		String grammar = "main: good1 | sometimes | bad1 ; sometimes: good2 | bad2 ;";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
 
 		final long iterations = 1000;
 		final long cycles = 10;
@@ -146,7 +206,7 @@ public final class App {
 	public static void mainBenchmark(final String[] args) {
 
 		String grammar = "main: foo , main | foo , foo ; foo: foo1 | foo2 ; foo2.java: { sentence.add(\"foo4\"); };";
-		Context context = new Context.ContextBuilder().grammar(grammar).build();
+		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
 
 		final long iterations = 10000000;
 		final long millispernano = 1000000;
