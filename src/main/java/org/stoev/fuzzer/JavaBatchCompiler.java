@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.net.URI;
 
@@ -27,14 +28,22 @@ import javax.tools.JavaFileObject.Kind;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.FileObject;
 
-final class JavaBatchCompiler implements Iterable<Class<?>> {
-	static final String[] COMPILER_OPTIONS = new String[] {"-Xlint:all", "-Werror", "-source", "1.6", "-g:none", "-proc:none", "-implicit:none" };
-	static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
+
+final class JavaBatchCompiler implements Iterable<Method> {
+	private static final String[] COMPILER_OPTIONS = new String[] {"-Xlint:all", "-Werror", "-source", "1.6", "-g:none", "-proc:none", "-implicit:none" };
+	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
+
+	private static final ConcurrentHashMap<String, SoftReference<Method>> METHOD_CACHE = new ConcurrentHashMap<String, SoftReference<Method>>();
 
 	private final String packageName;
 	private final String[] imports;
+	private final String methodName;
+	private final Class[] methodParameters;
+
 	private final Deque<JavaSource> javaSources = new ArrayDeque<JavaSource>();
-	private final Deque<Class<?>> javaClasses = new ArrayDeque<Class<?>>();
+	private final Deque<Method> javaMethods = new ArrayDeque<Method>();
 
 	static class JavaSource {
 		private final String className;
@@ -54,8 +63,10 @@ final class JavaBatchCompiler implements Iterable<Class<?>> {
 		}
 	}
 
-	JavaBatchCompiler(final String pn, final String[] imp) {
+	JavaBatchCompiler(final String pn, final String mn, final Class[] mp, final String[] imp) {
 		packageName = pn;
+		methodName = mn;
+		methodParameters = mp;
 		imports = imp;
 	};
 
@@ -72,11 +83,11 @@ final class JavaBatchCompiler implements Iterable<Class<?>> {
 			javaStringBuilder.append(";\n");
 		}
 
-		javaStringBuilder.append("\npublic class ");
+		javaStringBuilder.append("public class ");
 		javaStringBuilder.append(className);
-		javaStringBuilder.append(" {\n");
+		javaStringBuilder.append("{");
 		javaStringBuilder.append(javaString);
-		javaStringBuilder.append("}\n");
+                javaStringBuilder.append("}");
 
 		javaSources.addLast(new JavaSource(className, javaStringBuilder.toString()));
 	}
@@ -84,34 +95,87 @@ final class JavaBatchCompiler implements Iterable<Class<?>> {
 	void compileAll() {
 		final List<JavaFileObject> javaFileObjects = new ArrayList<JavaFileObject>();
 		final JavaFileManager fileManager = new FileManagerInMemory(COMPILER.getStandardFileManager(null, null, null));
-		final List<String> classNames = new ArrayList<String>();
+
+		final Map<String, Method> methodMap = new HashMap<String, Method>();
+
+		// For each Class to be compiled, check if it exists in the global cache, or if it was seen already in the current batch
+
+		for (JavaSource javaSource: javaSources) {
+			String className = javaSource.getClassName();
+
+			if (!methodMap.containsKey(className)) {
+				Method javaMethod = getCachedMethod(className);
+
+				if (javaMethod == null) {
+					javaFileObjects.add(new JavaSourceInMemory(className, javaSource.getJavaString()));
+					// Put null in the methodMap now to signal that we need to fetch the method from the compiler later
+					methodMap.put(className, null);
+				} else {
+					methodMap.put(className, javaMethod);
+				}
+			}
+		}
+
+		if (!javaFileObjects.isEmpty()) {
+			boolean compilationSuccess = COMPILER.getTask(null, fileManager, null, Arrays.asList(COMPILER_OPTIONS), null, javaFileObjects).call();
+
+			if (!compilationSuccess) {
+				throw new ConfigurationException("Java code compilation failed.");
+			}
+
+			for (Map.Entry<String, Method> entry : methodMap.entrySet()) {
+				if (entry.getValue() != null) {
+					continue;
+				}
+
+				try {
+					String className = entry.getKey();
+					Class<?> javaClass = fileManager.getClassLoader(null).loadClass(packageName + "." + className);
+					assert javaClass != null;
+
+					Method javaMethod = javaClass.getDeclaredMethod(methodName, methodParameters);
+					assert javaMethod != null;
+
+					methodMap.put(className, javaMethod);
+					setCachedMethod(className, javaMethod);
+				} catch (ClassNotFoundException e) {
+					assert false : e.getMessage();
+				} catch (NoSuchMethodException e) {
+					assert false : e.getMessage();
+				}
+			}
+		}
 
 		while (!javaSources.isEmpty()) {
 			JavaSource javaSource = javaSources.removeFirst();
-			javaFileObjects.add(new JavaSourceInMemory(javaSource.getClassName(), javaSource.getJavaString()));
-			classNames.add(javaSource.getClassName());
-		}
-
-		boolean compilationSuccess = COMPILER.getTask(null, fileManager, null, Arrays.asList(COMPILER_OPTIONS), null, javaFileObjects).call();
-
-		if (!compilationSuccess) {
-			throw new ConfigurationException("Java code compilation failed.");
-		}
-
-		for (String className: classNames) {
-			try {
-				Class<?> javaClass = fileManager.getClassLoader(null).loadClass(packageName + "." + className);
-				assert javaClass != null;
-
-				javaClasses.addLast(javaClass);
-			} catch (ClassNotFoundException e) {
-				assert false : e.getMessage();
-			}
+			Method javaMethod = methodMap.get(javaSource.getClassName());
+			assert javaMethod != null : javaSource.getClassName();
+			javaMethods.addLast(javaMethod);
 		}
 	}
 
-	public Iterator<Class<?>> iterator() {
-		return javaClasses.iterator();
+	public Iterator<Method> iterator() {
+		return javaMethods.iterator();
+	}
+
+	void setCachedMethod(final String className, final Method method) {
+		SoftReference<Method> softReference = new SoftReference<Method>(method);
+		METHOD_CACHE.putIfAbsent(className, softReference);
+	}
+
+	Method getCachedMethod(final String className) {
+		SoftReference<Method> softReference = METHOD_CACHE.get(className);
+
+		if (softReference != null) {
+			final Method method = softReference.get();
+			if (method != null) {
+				return method;
+			} else {
+				METHOD_CACHE.remove(className);
+			}
+		}
+
+		return null;
 	}
 }
 

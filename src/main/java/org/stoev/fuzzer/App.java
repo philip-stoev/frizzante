@@ -36,48 +36,63 @@ public final class App {
  * main().
  * @param args command-line arguments
  */
-	public static void main(final String[] args) throws FileNotFoundException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+	public static void mainFoundationDB(final String[] args) throws FileNotFoundException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		class FoundationDBWorker implements Runnable {
 
 			public void run() {
-				try {
 				FDB fdb = FDB.selectAPIVersion(200);
 				Database db = fdb.open();
-				Context<String> c = new Context.ContextBuilder<String>()
-					.grammar(new FileInputStream(new File("foundationdb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
-					.random(new Random())
-					.build();
 
+				Context<String> context = null;
+				try {
+					context = new Context.ContextBuilder<String>()
+						.grammar(new FileInputStream(new File("foundationdb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+						.random(new Random())
+						.idRange(0, 1000000L)
+						.build();
+				} catch (Exception e) {
+					assert false: e;
+				}
+	
 				Random random = new Random();
-				for (int i = 0; i < 10000; i++) {
-					JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", new String[] {
+				for (int q = 0; q < 100000; q++) {
+					System.out.println("Q is " + q);
+					JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", "run", new Class<?>[] {
+						Database.class,
+						Random.class
+					}
+					, new String[] {
 						"com.foundationdb.async.Function",
 						"com.foundationdb.async.PartialFunction",
 						"com.foundationdb.tuple.Tuple",
 						"com.foundationdb.Transaction",
 						"com.foundationdb.Database",
 						"com.foundationdb.async.Future",
-						"java.util.*"
+						"java.util.Random"
 					});
 
 					for (int n = 0; n < 100; n++) {
-						StringBuilder javaCode = new StringBuilder();
-						String generatedJava = c.generateString();
-						javaCompiler.addJava("class" + n, generatedJava);
+						Sentence<String> javaSentence = context.newSentence();
+						context.generate(javaSentence);
+						Long id = javaSentence.getId();
+						javaCompiler.addJava("Class" + id, "public static void run(final Database db, final Random random) {" + javaSentence.toString() + "}");
 					}
-
 					long compilationStart = System.nanoTime();
 					javaCompiler.compileAll();
 					long compilationEnd = System.nanoTime();
-//					System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
+					System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
 	
-					for (Iterator<Class<?>> iterator = javaCompiler.iterator(); iterator.hasNext();) {
-						Class<?> javaClass = iterator.next();
-						Method javaMethod = javaClass.getDeclaredMethod("run", Database.class, Random.class);
-						javaMethod.invoke(null, db, random);
+					long executionStart = System.nanoTime();
+					for (Method javaMethod: javaCompiler) {
+						try {
+							javaMethod.invoke(null, db, random);
+						} catch (Exception e) {
+							assert false: e;
+						}
 					}
-				}}
-				catch (Exception e) { assert false; };
+					long executionEnd = System.nanoTime();
+					System.out.println("Execution took " + ((executionEnd - executionStart) / 1000000) + " ms.");
+				}
 			}
 
 			public void start () {
@@ -86,54 +101,84 @@ public final class App {
 			}
 		}
 
-		for (int i = 0; i < 25; i++) {
+		for (int i = 0; i < 5; i++) {
 			FoundationDBWorker worker = new FoundationDBWorker();
 			worker.start();
 		}
 	}
 
-	public static void mainMongo(final String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
-		MongoClient mongoClient = new MongoClient();
+	public static void main(final String[] args) {
+		class MongoDBWorker implements Runnable {
+			public void run() {
 
-		DB db = mongoClient.getDB("test");
+				MongoClient mongoClient = null;
+				try {
+					mongoClient = new MongoClient();
+				} catch (Exception e) {
+					assert false: e;
+				}
 
-		Context<String> c = new Context.ContextBuilder<String>()
-			.grammar(new FileInputStream(new File("mongodb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
-			.random(new Random())
-			.build();
+				DB db = mongoClient.getDB("test2");
 
-		for (int i = 0; i < 1000; i++) {
-			JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", new String[] {
-				"com.mongodb.DB",
-				"com.mongodb.CommandFailureException",
-				"com.mongodb.WriteConcernException",
-				"com.mongodb.DBCollection",
-				"com.mongodb.DBCursor",
-				"com.mongodb.BasicDBObject",
-				"com.mongodb.BulkWriteOperation"
-			});
+				Context<String> context = null;
+				try {
+					context = new Context.ContextBuilder<String>()
+					.grammar(new FileInputStream(new File("mongodb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+					.random(new Random())
+					.idRange(0, 10000L)
+					.build();
+				} catch (Exception e) {
+					assert false: e;
+				}
 
-			for (int n = 0; n < 100; n++) {
-				StringBuilder javaCode = new StringBuilder();
-				String generatedJava = c.generateString();
+				while (true) {
+					JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", "run", new Class<?>[] {
+						DB.class
+					}
+					, new String[] {
+						"com.mongodb.DB",
+						"com.mongodb.CommandFailureException",
+						"com.mongodb.WriteConcernException",
+						"com.mongodb.DBCollection",
+						"com.mongodb.DBCursor",
+						"com.mongodb.BasicDBObject",
+						"com.mongodb.BulkWriteOperation"
+					});
 
-				javaCode.append("public static void run(DB db) {\n");
-				javaCode.append(generatedJava);
-		                javaCode.append("}\n");
+					for (int n = 0; n < 100; n++) {
+						Sentence<String> javaSentence = context.newSentence();
+						context.generate(javaSentence);
+						Long id = javaSentence.getId();
+						javaCompiler.addJava("Class" + id, "public static void run(final DB db) {" + javaSentence.toString() + "}");
+					}
 
-				javaCompiler.addJava("class" + n, javaCode.toString());
+					long compilationStart = System.nanoTime();
+					javaCompiler.compileAll();
+					long compilationEnd = System.nanoTime();
+					System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
+	
+					long executionStart = System.nanoTime();
+					for (Method javaMethod: javaCompiler) {
+						try {
+							javaMethod.invoke(null, db);
+						} catch (Exception e) {
+							assert false: e;
+						}
+					}
+					long executionEnd = System.nanoTime();
+					System.out.println("Execution took " + ((executionEnd - executionStart) / 1000000) + " ms.");
+				}
 			}
 
-			long compilationStart = System.nanoTime();
-			javaCompiler.compileAll();
-			long compilationEnd = System.nanoTime();
-			System.out.println("Compilation took " + ((compilationEnd - compilationStart) / 1000000) + " ms.");
-
-			for (Iterator<Class<?>> iterator = javaCompiler.iterator(); iterator.hasNext();) {
-				Class<?> javaClass = iterator.next();
-				Method javaMethod = javaClass.getDeclaredMethod("run", DB.class);
-				javaMethod.invoke(null, db);
+			public void start () {
+				Thread t = new Thread (this);
+				t.start();
 			}
+		}
+
+		for (int i = 0; i < 5; i++) {
+			MongoDBWorker worker = new MongoDBWorker();
+			worker.start();
 		}
 	}
 

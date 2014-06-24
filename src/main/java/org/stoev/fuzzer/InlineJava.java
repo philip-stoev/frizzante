@@ -10,6 +10,8 @@ final class InlineJava<T> implements Generatable<T> {
 	private final String javaString;
 	private Method javaMethod = null;
 
+	private static final String METHOD_NAME = "generate";
+
 	InlineJava(final String cn, final String js) {
 		javaString = js;
 		className = cn;
@@ -18,31 +20,29 @@ final class InlineJava<T> implements Generatable<T> {
 		assert className != null;
 		assert className.length() > 0;
 
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer.embedded", new String[] {
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer.embedded", METHOD_NAME,
+		new Class<?>[] {
+			Context.class,
+			Sentence.class
+		}, new String[] {
 			"org.stoev.fuzzer.Context"
 			, "org.stoev.fuzzer.Sentence"
 		});
 
 		StringBuilder javaCode = new StringBuilder();
-		javaCode.append("	public static void generate(final Context<Object> context, final Sentence<Object> sentence) {\n");
+		javaCode.append("	public static void ");
+		javaCode.append(METHOD_NAME);
+		javaCode.append("(final Context<Object> context, final Sentence<Object> sentence) {\n");
 		javaCode.append(javaString);
 		javaCode.append("	}\n");
 
 		javaCompiler.addJava(className, javaCode.toString());
 		javaCompiler.compileAll();
 
-		Iterator<Class<?>> classIterator = javaCompiler.iterator();
+		Iterator<Method> classIterator = javaCompiler.iterator();
 		assert classIterator.hasNext();
 
-		Class<?> javaClass = classIterator.next();
-		assert javaClass != null;
-
-		try {
-			javaMethod = javaClass.getDeclaredMethod("generate", Context.class, Sentence.class);
-		} catch (NoSuchMethodException e) {
-			assert false : e.getMessage();
-		}
-
+		javaMethod = classIterator.next();
 		assert javaMethod != null;
 	}
 

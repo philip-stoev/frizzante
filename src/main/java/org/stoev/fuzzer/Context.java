@@ -16,6 +16,7 @@ public final class Context<T> {
 	private final Grammar<T> grammar;
 	private final Random random;
 	private final Object visitor;
+	private long idRangeStart, idRangeLength;
 
 	private final HashMap<String, Sentence<T>> cachedRules = new HashMap<String, Sentence<T>>();
 
@@ -23,6 +24,9 @@ public final class Context<T> {
 		grammar = builder.grammar;
 		random = builder.random;
 		visitor = builder.visitor;
+
+		idRangeStart = builder.idRangeStart;
+		idRangeLength = builder.idRangeLength;
 
 		if (grammar != null && visitor != null) {
 			grammar.registerVisitor(visitor);
@@ -33,6 +37,8 @@ public final class Context<T> {
 		private Grammar<T> grammar;
 		private Random random = new Random(1);
 		private Object visitor;
+		private long idRangeStart = 0;
+		private long idRangeLength = Long.MAX_VALUE;
 
 		public ContextBuilder<T> grammar(final Grammar<T> gr) {
 			this.grammar = gr;
@@ -84,13 +90,19 @@ public final class Context<T> {
 			return this;
 		}
 
+		public ContextBuilder<T> idRange(final long start, final long length) {
+			this.idRangeStart = start;
+			this.idRangeLength = length;
+			return this;
+		}
+
 		public Context<T> build() {
 			return new Context<T>(this);
 		}
 	}
 
 	public Sentence<T> newSentence() {
-		Sentence<T> sentence = Sentence.newSentence(random.nextLong());
+		Sentence<T> sentence = Sentence.newSentence(getNewId());
 		return sentence;
 	}
 
@@ -107,6 +119,16 @@ public final class Context<T> {
 		Sentence<T> sentence = newSentence();
 		sentence.populate(this, grammar);
 		return sentence.toString();
+	}
+
+	public void setIdRange(final long start, final long length) {
+                        this.idRangeStart = start;
+			this.idRangeLength = length;
+	}
+
+	long getNewId() {
+		// Return an ID between idRangeStart and (idRangeStart + idRangeLength) inclusive
+		return idRangeStart + (long) (random.nextDouble() * (idRangeLength + 1));
 	}
 
 	Grammar<T> getGrammar() {
