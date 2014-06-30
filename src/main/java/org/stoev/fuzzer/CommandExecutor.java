@@ -36,9 +36,8 @@ public class CommandExecutor implements Executor<String> {
 				errorReader = new BufferedReader(new InputStreamReader(errorStream, "UTF-8"));
 
 				String errorLine;
-				while ((errorLine = errorReader.readLine()) != null) {
-					System.err.println("STDERR output: " + errorLine);
-				}
+//				while ((errorLine = errorReader.readLine()) != null) {
+//				}
 
 				if (returnCode == 0) {
 					return 1;
@@ -46,24 +45,21 @@ public class CommandExecutor implements Executor<String> {
 			}
 
 			if (returnCode != 0) {
-				System.err.println("Non-zero exit code: " + returnCode);
 				return returnCode;
 			}
 
 			process.destroy();
 			return 0;
 		} catch (IOException e) {
-			System.err.println("IOException: " + e);
 			return 2;
 		} catch (InterruptedException e) {
-			System.err.println("InterruptedException: " + e);
 			return 3;
 		} finally {
 			try {
 				if (errorReader != null) {
 					errorReader.close();
 				}
-	
+
 				if (errorStream != null) {
 					errorStream.close();
 				}

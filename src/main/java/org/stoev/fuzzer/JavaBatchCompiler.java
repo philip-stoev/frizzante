@@ -36,9 +36,10 @@ final class JavaBatchCompiler implements Iterable<Method> {
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
 
 	private static final ConcurrentHashMap<String, SoftReference<Method>> METHOD_CACHE = new ConcurrentHashMap<String, SoftReference<Method>>();
+	private final boolean useCache;
 
 	private final String packageName;
-	private final String[] imports;
+	private final String[] packageImports;
 	private final String methodName;
 	private final Class[] methodParameters;
 
@@ -63,11 +64,12 @@ final class JavaBatchCompiler implements Iterable<Method> {
 		}
 	}
 
-	JavaBatchCompiler(final String pn, final String mn, final Class[] mp, final String[] imp) {
-		packageName = pn;
-		methodName = mn;
-		methodParameters = mp;
-		imports = imp;
+	JavaBatchCompiler(final boolean caching, final String javaPackage, final String method, final Class[] parameters, final String[] imports) {
+		useCache = caching;
+		packageName = javaPackage;
+		methodName = method;
+		methodParameters = parameters;
+		packageImports = imports;
 	};
 
 	void addJava(final String className, final String javaString) {
@@ -77,10 +79,12 @@ final class JavaBatchCompiler implements Iterable<Method> {
 		javaStringBuilder.append(packageName);
 		javaStringBuilder.append(";\n\n");
 
-		for (String importDeclaration: imports) {
-			javaStringBuilder.append("import ");
-			javaStringBuilder.append(importDeclaration);
-			javaStringBuilder.append(";\n");
+		if (packageImports != null) {
+			for (String packageImport: packageImports) {
+				javaStringBuilder.append("import ");
+				javaStringBuilder.append(packageImport);
+				javaStringBuilder.append(";\n");
+			}
 		}
 
 		javaStringBuilder.append("public class ");
@@ -104,7 +108,11 @@ final class JavaBatchCompiler implements Iterable<Method> {
 			String className = javaSource.getClassName();
 
 			if (!methodMap.containsKey(className)) {
-				Method javaMethod = getCachedMethod(className);
+				Method javaMethod = null;
+
+				if (useCache) {
+					javaMethod = getCachedMethod(className);
+				}
 
 				if (javaMethod == null) {
 					javaFileObjects.add(new JavaSourceInMemory(className, javaSource.getJavaString()));
@@ -137,7 +145,9 @@ final class JavaBatchCompiler implements Iterable<Method> {
 					assert javaMethod != null;
 
 					methodMap.put(className, javaMethod);
-					setCachedMethod(className, javaMethod);
+					if (useCache) {
+						setCachedMethod(className, javaMethod);
+					}
 				} catch (ClassNotFoundException e) {
 					assert false : e.getMessage();
 				} catch (NoSuchMethodException e) {

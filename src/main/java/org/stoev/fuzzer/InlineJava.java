@@ -20,7 +20,7 @@ final class InlineJava<T> implements Generatable<T> {
 		assert className != null;
 		assert className.length() > 0;
 
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer.embedded", METHOD_NAME,
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer.embedded", METHOD_NAME,
 		new Class<?>[] {
 			Context.class,
 			Sentence.class

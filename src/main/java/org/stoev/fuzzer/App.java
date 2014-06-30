@@ -44,20 +44,30 @@ public final class App {
 				Database db = fdb.open();
 
 				Context<String> context = null;
+				FileInputStream fileInputStream = null;
+
 				try {
+					fileInputStream = new FileInputStream(new File("foundationdb.grammar"));
+
 					context = new Context.ContextBuilder<String>()
-						.grammar(new FileInputStream(new File("foundationdb.grammar")), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+						.grammar(fileInputStream, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 						.random(new Random())
 						.idRange(0, 1000000L)
 						.build();
 				} catch (Exception e) {
 					assert false: e;
+				} finally {
+					if (fileInputStream != null) {
+						try {
+							fileInputStream.close();
+						} catch(IOException e2) { }
+					}
 				}
 	
 				Random random = new Random();
 				for (int q = 0; q < 100000; q++) {
 					System.out.println("Q is " + q);
-					JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", "run", new Class<?>[] {
+					JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", "run", new Class<?>[] {
 						Database.class,
 						Random.class
 					}
@@ -132,7 +142,7 @@ public final class App {
 				}
 
 				while (true) {
-					JavaBatchCompiler javaCompiler = new JavaBatchCompiler("org.stoev.fuzzer", "run", new Class<?>[] {
+					JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", "run", new Class<?>[] {
 						DB.class
 					}
 					, new String[] {

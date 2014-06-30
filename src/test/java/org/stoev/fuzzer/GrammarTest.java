@@ -153,9 +153,9 @@ public class GrammarTest {
 
 	@Test
 	public final void testRecursiveWeight() {
-		String g = "main:90% foo , main |10% foo;";
+		String g = "main:95% foo , main |5% foo;";
 		Context<String> c = new ContextBuilder<String>().grammar(g).build();
-		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo");
+		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo");
 	}
 
 	@Test

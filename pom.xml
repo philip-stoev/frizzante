@@ -9,6 +9,11 @@
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
+      <groupId>com.foundationdb</groupId>
+      <artifactId>fdb-java</artifactId>
+      <version>2.0.4</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
@@ -111,6 +116,8 @@
         <configuration>
           <compilerArgs>
             <arg>-Xlint:-options</arg>
+            <arg>-Xlint:-path</arg>
+            <arg>-Xlint:all</arg>
             <arg>-Werror</arg>
           </compilerArgs>
           <showWarnings>true</showWarnings>
