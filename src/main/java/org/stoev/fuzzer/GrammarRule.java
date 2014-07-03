@@ -53,7 +53,7 @@ class GrammarRule<T> implements Generatable<T> {
 		}
 	}
 
-	public void generate(final Context<T> context, final Sentence<T> sentence) {
+	public void generate(final ThreadContext<T> threadContext, final Sentence<T> sentence) {
 		if (productions.size() == 0) {
 			if (!shortestConstantCalculated) {
 				shortestConstantSentence = sentence.newInstance();
@@ -76,11 +76,11 @@ class GrammarRule<T> implements Generatable<T> {
 
 		assert randomProduction != null;
 
-		if (context.shouldCacheRule(ruleName)) {
+		if (threadContext.getGlobalContext().getGrammar().shouldCacheRule(ruleName)) {
 			Sentence<T> cachedSentence = sentence.newInstance();
-			cachedSentence.populate(context, randomProduction);
+			cachedSentence.populate(threadContext, randomProduction);
 
-			context.setCachedValue(ruleName, cachedSentence);
+			threadContext.setCachedValue(ruleName, cachedSentence);
 			sentence.addAll(cachedSentence);
 		} else {
 			sentence.pushGeneratable(randomProduction);
@@ -93,7 +93,7 @@ class GrammarRule<T> implements Generatable<T> {
 				}
 
 				Sentence<T> constantSentence = sentence.newInstance();
-				constantSentence.populate(context, production);
+				constantSentence.populate(threadContext, production);
 
 				if (shortestConstantSentence == null || shortestConstantSentence.size() > constantSentence.size()) {
 					shortestConstantSentence = constantSentence;

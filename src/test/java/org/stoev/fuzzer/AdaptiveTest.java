@@ -16,7 +16,8 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testAdaptive() {
-		Context<String> c = new Context.ContextBuilder<String>().grammar("main: good | bad ;").build();
+		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar("main: good | bad ;").build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 
 		for (int x = 1; x <= HUNDRED_ITERATIONS; x++) {
 			Sentence<String> sentence = c.newSentence();
@@ -39,18 +40,22 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotionLimit() {
-		Grammar<String> g = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
-		Context<String> c = new Context.ContextBuilder<String>().grammar(g).build();
+		Grammar<String> grammar = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
+
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.succeeded(1.0f);
-		Assert.assertEquals(g.toString(), "main:1.0 good\n;\n");
+		Assert.assertEquals(grammar.toString(), "main:1.0 good\n;\n");
 	}
 
 	@Test
 	public final void testPromotion() {
-		Grammar<String> g = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
-		Context<String> c = new Context.ContextBuilder<String>().grammar(g).build();
+		Grammar<String> grammar = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
+
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 
@@ -58,16 +63,18 @@ public class AdaptiveTest {
 		s.failed(HALF_PENALTY);
 		s.succeeded(QUARTER_PENALTY);
 
-		Assert.assertEquals(g.toString(), "main:0.6666666666666666 good\n;\n");
+		Assert.assertEquals(grammar.toString(), "main:0.6666666666666666 good\n;\n");
 	}
 
 	@Test
 	public final void testDemotion() {
-		Grammar<String> g = new Grammar<String>(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
-		Context<String> c = new Context.ContextBuilder<String>().grammar(g).build();
+		Grammar<String> grammar = new Grammar<String>(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
+		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
+
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.failed(HALF_PENALTY);
-		Assert.assertEquals(g.toString(), "main:0.5 bad\n;\n");
+		Assert.assertEquals(grammar.toString(), "main:0.5 bad\n;\n");
 	}
 }

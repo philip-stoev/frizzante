@@ -8,9 +8,9 @@ import java.lang.reflect.InvocationTargetException;
 public class JavaBatchCompilerTest {
 	@Test
 	public final void testImports() throws IllegalAccessException, InvocationTargetException {
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer", "testImports", null, new String[] {"java.util.ArrayList"});
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer", new String[] {"java.util.ArrayList"});
 
-		javaCompiler.addJava("TestImports", "public static void testImports() {ArrayList<String> foo = new ArrayList<String>(); }");
+		javaCompiler.addJavaClass("TestImports", "public static void testImports() {ArrayList<String> foo = new ArrayList<String>(); }");
 		javaCompiler.compileAll();
 
 		for (Method javaMethod: javaCompiler) {
@@ -20,10 +20,10 @@ public class JavaBatchCompilerTest {
 
 	@Test
 	public final void testCache1() throws IllegalAccessException, InvocationTargetException {
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", "testCache", null, null);
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", null);
 
-		javaCompiler.addJava("TestCache1", "public static void testCache() { assert true; }");
-		javaCompiler.addJava("TestCache1", "public static void testCache() { assert false; }");
+		javaCompiler.addJavaClass("TestCache1", "public static void testCache() { assert true; }");
+		javaCompiler.addJavaClass("TestCache1", "public static void testCache() { assert false; }");
 		javaCompiler.compileAll();
 
                 for (Method javaMethod: javaCompiler) {
@@ -33,11 +33,11 @@ public class JavaBatchCompilerTest {
 
 	@Test
 	public final void testCache2() throws IllegalAccessException, InvocationTargetException {
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", "testCache", null, null);
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", null);
 
-		javaCompiler.addJava("TestCache2", "public static void testCache() { assert true; }");
+		javaCompiler.addJavaClass("TestCache2", "public static void testCache() { assert true; }");
 		javaCompiler.compileAll();
-		javaCompiler.addJava("TestCache2", "public static void testCache() { assert false; }");
+		javaCompiler.addJavaClass("TestCache2", "public static void testCache() { assert false; }");
 		javaCompiler.compileAll();
 
                 for (Method javaMethod: javaCompiler) {

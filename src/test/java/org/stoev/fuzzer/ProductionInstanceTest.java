@@ -9,9 +9,10 @@ import java.util.Iterator;
 public class ProductionInstanceTest {
 	@Test
 	public final void testEmptyGrammar() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main:;").build();
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main:;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		List<ProductionInstance<String>> productionInstances = sentence.getProductionInstances();
 		Assert.assertTrue(productionInstances.isEmpty());
@@ -19,9 +20,11 @@ public class ProductionInstanceTest {
 
 	@Test
 	public final void testEmptyProduction() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main:foo bar;\nbar:;").build();
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main:foo bar;\nbar:;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		List<ProductionInstance<String>> productionInstances = sentence.getProductionInstances();
 		Assert.assertEquals(productionInstances.size(), 1);
@@ -31,9 +34,11 @@ public class ProductionInstanceTest {
 
 	@Test
 	public final void testOneProduction() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo bar;").build();
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo bar;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 		Assert.assertEquals(sentence.toString(), "foo bar");
 
 		List<ProductionInstance<String>> productionInstances = sentence.getProductionInstances();
@@ -49,9 +54,11 @@ public class ProductionInstanceTest {
 
 	@Test
 	public final void testTwoProductions() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo bar;\nfoo: foo2a foo2b;\nbar: bar2a bar2b;\n").build();
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo bar;\nfoo: foo2a foo2b;\nbar: bar2a bar2b;\n").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 		Assert.assertEquals(sentence.toString(), "foo2a foo2b bar2a bar2b");
 
 		List<ProductionInstance<String>> productionInstances = sentence.getProductionInstances();

@@ -40,8 +40,6 @@ final class JavaBatchCompiler implements Iterable<Method> {
 
 	private final String packageName;
 	private final String[] packageImports;
-	private final String methodName;
-	private final Class[] methodParameters;
 
 	private final Deque<JavaSource> javaSources = new ArrayDeque<JavaSource>();
 	private final Deque<Method> javaMethods = new ArrayDeque<Method>();
@@ -64,15 +62,13 @@ final class JavaBatchCompiler implements Iterable<Method> {
 		}
 	}
 
-	JavaBatchCompiler(final boolean caching, final String javaPackage, final String method, final Class[] parameters, final String[] imports) {
+	JavaBatchCompiler(final boolean caching, final String javaPackage, final String[] imports) {
 		useCache = caching;
 		packageName = javaPackage;
-		methodName = method;
-		methodParameters = parameters;
 		packageImports = imports;
 	};
 
-	void addJava(final String className, final String javaString) {
+	void addJavaClass(final String className, final String javaString) {
 		StringBuilder javaStringBuilder = new StringBuilder();
 
 		javaStringBuilder.append("package ");
@@ -96,7 +92,7 @@ final class JavaBatchCompiler implements Iterable<Method> {
 		javaSources.addLast(new JavaSource(className, javaStringBuilder.toString()));
 	}
 
-	void compileAll() {
+	public Iterable<Method> compileAll() {
 		final List<JavaFileObject> javaFileObjects = new ArrayList<JavaFileObject>();
 		final JavaFileManager fileManager = new FileManagerInMemory(COMPILER.getStandardFileManager(null, null, null));
 
@@ -141,7 +137,8 @@ final class JavaBatchCompiler implements Iterable<Method> {
 					Class<?> javaClass = fileManager.getClassLoader(null).loadClass(packageName + "." + className);
 					assert javaClass != null;
 
-					Method javaMethod = javaClass.getDeclaredMethod(methodName, methodParameters);
+					Method[] javaMethods = javaClass.getDeclaredMethods();
+					Method javaMethod = javaMethods[0];
 					assert javaMethod != null;
 
 					methodMap.put(className, javaMethod);
@@ -149,8 +146,6 @@ final class JavaBatchCompiler implements Iterable<Method> {
 						setCachedMethod(className, javaMethod);
 					}
 				} catch (ClassNotFoundException e) {
-					assert false : e.getMessage();
-				} catch (NoSuchMethodException e) {
 					assert false : e.getMessage();
 				}
 			}
@@ -162,6 +157,8 @@ final class JavaBatchCompiler implements Iterable<Method> {
 			assert javaMethod != null : javaSource.getClassName();
 			javaMethods.addLast(javaMethod);
 		}
+	
+		return javaMethods;
 	}
 
 	public Iterator<Method> iterator() {

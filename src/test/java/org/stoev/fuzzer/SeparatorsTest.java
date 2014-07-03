@@ -106,12 +106,14 @@ public class SeparatorsTest {
 	public final void testEmptyLeadingProduction() {
 		// At least some of the generated strings must be empty
 
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: | bar ;").build();
-		Grammar<String> grammar = context.getGrammar();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: | bar ;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Grammar<String> grammar = globalContext.getGrammar();
 		System.out.println("Grammar:" + grammar);
 		boolean generatedEmpty = false;
 		for (int i = 1; i <= 100; i++) {
-			if (context.generateString().equals("")) {
+			if (threadContext.generateString().equals("")) {
 				generatedEmpty = true;
 			}
                 }
@@ -122,10 +124,12 @@ public class SeparatorsTest {
 	public final void testEmptyTrailingProduction() {
 		// At least some of the generated strings must be empty
 
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: bar | ;").build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: bar | ;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
 		boolean generatedEmpty = false;
 		for (int i = 1; i <= 100; i++) {
-			if (context.generateString().equals("")) {
+			if (threadContext.generateString().equals("")) {
 				generatedEmpty = true;
 			}
                 }
@@ -134,10 +138,11 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testTrailingPipe() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
-		Assert.assertEquals(context.generateString(), "foo | bar");
-		Assert.assertEquals(context.generateString(), "foo | bar");
+		Assert.assertEquals(threadContext.generateString(), "foo | bar");
+		Assert.assertEquals(threadContext.generateString(), "foo | bar");
 	}
 
 	@Test
@@ -153,9 +158,10 @@ public class SeparatorsTest {
 	@Test
 	public final void testStandaloneSemicolon() {
 		String grammar = "main: foo ; bar ;\n baz;\n;\n";
-		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)).build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
-		Assert.assertEquals(context.generateString(), "foo ; bar ;\n baz;");
+		Assert.assertEquals(threadContext.generateString(), "foo ; bar ;\n baz;");
 	}
 
 	@Test

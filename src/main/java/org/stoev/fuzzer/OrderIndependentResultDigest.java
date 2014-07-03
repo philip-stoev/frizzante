@@ -20,7 +20,7 @@ public class OrderIndependentResultDigest implements ResultDigest {
 				hashCode = NULL_STRING_HASHCODE;
 			}
 
-			rowDigest = rowDigest + ((i + 1) * hashCode);
+			rowDigest = rowDigest + ((i + 1) * hashCode); // NOPMD
 		}
 
 		digest = digest ^ rowDigest;

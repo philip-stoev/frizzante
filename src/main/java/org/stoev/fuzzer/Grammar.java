@@ -102,7 +102,7 @@ final class Grammar<T> implements Generatable<T> {
 		}
 	}
 
-	public void generate(final Context<T> context, final Sentence<T> sentence) {
+	public void generate(final ThreadContext<T> threadContext, final Sentence<T> sentence) {
 		Generatable<T> startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
 		if (startingRule == null) {

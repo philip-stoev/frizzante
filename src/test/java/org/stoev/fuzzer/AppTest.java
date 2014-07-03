@@ -28,28 +28,34 @@ public class AppTest extends TestCase {
 
 	public final void testParser() {
 		String grammar = "main: THIS IS A TEXT | THIS IS SOME OTHER TEXT;";
-		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
-		assertEquals(context.generateString(), "THIS IS A TEXT");
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+		assertEquals(threadContext.generateString(), "THIS IS A TEXT");
 	}
 
 	public final void testLinker() {
 		String grammar = "main: linker1 , linker2 ;\n linker1: linkerA ;\n linker2: linkerB;";
-		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
-		assertEquals("linkerA , linkerB", context.generateString());
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		assertEquals("linkerA , linkerB", threadContext.generateString());
 	}
 
 	public final void testJavaCode() {
 		String grammar = "main: foo ;\n foo.java: {{ sentence.append(\"foo2\"); }};";
-		Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
-		assertEquals("foo2", context.generateString());
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		assertEquals("foo2", threadContext.generateString());
 	}
 
 	public final void testForeignGeneratable() {
 		String grammar = "main: foo foo;\n foo.java: {{ sentence.add(new Long(2)); }};";
-		Context<Long> context = new Context.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		GlobalContext<Long> globalContext = new GlobalContext.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		ThreadContext<Long> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
-		Sentence<Long> sentence = context.newSentence();
-		context.generate(sentence);
+		Sentence<Long> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 		Iterator<Long> iterator = sentence.iterator();
 
 		Long longValue1 = iterator.next();

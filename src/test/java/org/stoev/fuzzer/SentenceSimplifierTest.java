@@ -9,9 +9,10 @@ public class SentenceSimplifierTest {
 
 	@Test
 	public final void testSimplifyEmptySentence() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main:;").build();
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main:;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		SentenceSimplifier<String> simplifier = new SentenceSimplifier<String>(sentence);
 		Iterator<Sentence<String>> iterator = simplifier.iterator();
@@ -20,9 +21,11 @@ public class SentenceSimplifierTest {
 
 	@Test
 	public final void testSimplifyNoAlternatives() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo bar;").build();
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo bar;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		SentenceSimplifier<String> simplifier = new SentenceSimplifier<String>(sentence);
 		Iterator<Sentence<String>> iterator = simplifier.iterator();
@@ -31,11 +34,12 @@ public class SentenceSimplifierTest {
 
 	@Test
 	public final void testSimplifyEmptyProduction() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo bar | ;").build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo bar | ;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		for (int i = 0; i < 10; i++) {
-			Sentence<String> sentence = context.newSentence();
-			context.generate(sentence);
+			Sentence<String> sentence = threadContext.newSentence();
+			threadContext.generate(sentence);
 
 			if (sentence.toString().equals("")) {
 				continue;
@@ -56,11 +60,12 @@ public class SentenceSimplifierTest {
 		// If we signal to the Simplifier that the important characteristics of the generated Sentence<String> is the presence of COUNT
 		// we expect that the simplifier will choose to retain the FROM DUAL constant production.
 
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: SELECT COUNT(*) from_clause;\nfrom_clause: FROM DUAL |90% table;\ntable: T1 | T2;").build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: SELECT COUNT(*) from_clause;\nfrom_clause: FROM DUAL |90% table;\ntable: T1 | T2;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		for (int i = 0; i < 100; i++) {
-			Sentence<String> sentence = context.newSentence();
-			context.generate(sentence);
+			Sentence<String> sentence = threadContext.newSentence();
+			threadContext.generate(sentence);
 			SentenceSimplifier<String> simplifier = new SentenceSimplifier<String>(sentence);
 
 			for (Sentence<String> testSentence : simplifier) {
@@ -78,11 +83,12 @@ public class SentenceSimplifierTest {
 
 	@Test
 	public final void testSimplifyMultipleProductions() {
-		Context<String> context = new Context.ContextBuilder<String>().grammar("main: foo bar bar bar bar bar bar ;\nbar: bar1 | bar2 | ;").build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo bar bar bar bar bar bar ;\nbar: bar1 | bar2 | ;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		for (int i = 0; i < 100; i++) {
-			Sentence<String> sentence = context.newSentence();
-			context.generate(sentence);
+			Sentence<String> sentence = threadContext.newSentence();
+			threadContext.generate(sentence);
 
 			// For the purposes of this test, only initial sentences that contain bar2 are good.
 

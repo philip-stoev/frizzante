@@ -35,7 +35,7 @@ public class CommandExecutor implements Executor<String> {
 			if (errorStream.available() > 0) {
 				errorReader = new BufferedReader(new InputStreamReader(errorStream, "UTF-8"));
 
-				String errorLine;
+//				String errorLine;
 //				while ((errorLine = errorReader.readLine()) != null) {
 //				}
 

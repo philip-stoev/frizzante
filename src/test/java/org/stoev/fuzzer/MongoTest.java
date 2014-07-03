@@ -21,9 +21,12 @@ public class MongoTest {
 
 		DB db = mongoClient.getDB("test");
 
-		Context<String> c = new Context.ContextBuilder<String>()
+		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>()
 			.grammar(Thread.currentThread().getContextClassLoader().getResourceAsStream("mongodb.grammar"), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
+
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
+			
 
 		for (int i = 0; i < 100000; i++) {
 			String generatedJava = c.generateString();

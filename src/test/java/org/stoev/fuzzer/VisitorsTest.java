@@ -6,24 +6,25 @@ import org.testng.annotations.Test;
 import java.util.Iterator;
 import java.util.EnumSet;
 
-import org.stoev.fuzzer.Context.ContextBuilder;
+import org.stoev.fuzzer.GlobalContext.ContextBuilder;
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public class VisitorsTest {
 	@Test
 	public final void testVisitorSimple() {
 		class TestVisitor {
-			public void foo(final Context<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
+			public void foo(final ThreadContext<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
 				sentence.add("foo2");
 			}
 
-			public void bar(final Context<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
+			public void bar(final ThreadContext<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
 				sentence.add("bar2");
 			}
 		}
 
 		Object v = new TestVisitor();
-		Context<String> c = new ContextBuilder<String>().grammar("main: foo bar;").visitor(v).build();
+		GlobalContext<String> g = new ContextBuilder<String>().grammar("main: foo bar;").visitor(v).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 
 		Assert.assertEquals(c.generateString(), "foo2 bar2");
 	}
@@ -35,13 +36,14 @@ public class VisitorsTest {
 		}
 
 		class TestVisitor {
-			public void foo(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
+			public void foo(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
 				sentence.add(new TestObject());
 			}
 		}
 
 		Object v = new TestVisitor();
-		Context<TestObject> c = new ContextBuilder<TestObject>().grammar("main: foo;").visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar("main: foo;").visitor(v).build();
+		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 
 		Sentence<TestObject> sentence = c.newSentence();
 		c.generate(sentence);
@@ -52,22 +54,24 @@ public class VisitorsTest {
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testNonvoidVisitor() {
-		String g = "main: nonvoid;";
+		String grammar = "main: nonvoid;";
 
 		class TestVisitor {
-			public boolean nonvoid(final Context<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
+			public boolean nonvoid(final ThreadContext<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
 				return true;
 			}
 		}
 
 		Object v = new TestVisitor();
-		Context<String> c = new ContextBuilder<String>().grammar(g).visitor(v).build();
+		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).visitor(v).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
+
 		c.generateString();
 	}
 
 	@Test (expectedExceptions = ConfigurationException.class)
 	public final void testInvalidVisitorSignature() {
-		String g = "main: visitor;";
+		String grammar = "main: visitor;";
 
 		class TestVisitor {
 			public void visitor() {
@@ -76,16 +80,17 @@ public class VisitorsTest {
 		}
 
 		Object v = new TestVisitor();
-		Context<String> c = new ContextBuilder<String>().grammar(g).visitor(v).build();
+		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).visitor(v).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 		c.generateString();
 	}
 
 	@Test
 	public final void testVisitorArguments() {
-		String g = "main: visitor;\nvisitor: TWO FOUR;";
+		String grammar = "main: visitor;\nvisitor: TWO FOUR;";
 
 		class TestVisitor {
-			public void visitor(final Context<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
+			public void visitor(final ThreadContext<String> context, final Sentence<String> sentence, final Sentence<String> argument) {
 				sentence.append("ONE");
 				Iterator<String> i = argument.iterator();
 				sentence.append(i.next());
@@ -97,13 +102,15 @@ public class VisitorsTest {
 		}
 
 		Object v = new TestVisitor();
-		Context<String> c = new ContextBuilder<String>().grammar(g).visitor(v).build();
+		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).visitor(v).build();
+		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
+
 		Assert.assertEquals(c.generateString(), "ONETWOTHREEFOURFIVE");
 	}
 
 	@Test
 	public final void testVisitorObjectArguments() {
-		String g = "main: sum;\nsum: one two two one;";
+		String grammar = "main: sum;\nsum: one two two one;";
 
 		class TestObject {
 			private int value;
@@ -116,7 +123,7 @@ public class VisitorsTest {
 		}
 
 		class TestVisitor {
-			public void sum(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
+			public void sum(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
 				int sum = 0;
 
 				for (TestObject to: argument) {
@@ -126,17 +133,18 @@ public class VisitorsTest {
 				sentence.add(new TestObject(sum));
 			}
 
-			public void one(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
+			public void one(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
 				sentence.add(new TestObject(1));
 			}
 
-			public void two(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
+			public void two(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
 				sentence.add(new TestObject(2));
 			}
 		}
 
 		Object v = new TestVisitor();
-		Context<TestObject> c = new ContextBuilder<TestObject>().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
 		Iterator<TestObject> i = s.iterator();
@@ -146,7 +154,7 @@ public class VisitorsTest {
 	// Top-level production is an object visitor, but its arguments are ordinary string productions
 	@Test
 	public final void testMixedVisitorObjects() {
-		String g = "main: sum;\nsum: 1 2;";
+		String grammar = "main: sum;\nsum: 1 2;";
 
 		class TestObject {
 			private int value;
@@ -159,7 +167,7 @@ public class VisitorsTest {
 		}
 
 		class TestVisitor {
-			public void sum(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<String> argument) {
+			public void sum(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<String> argument) {
 				int sum = 0;
 
 				for (String number: argument) {
@@ -171,7 +179,8 @@ public class VisitorsTest {
 		}
 
 		Object v = new TestVisitor();
-		Context<TestObject> c = new ContextBuilder<TestObject>().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
 		Iterator<TestObject> i = s.iterator();
@@ -182,7 +191,7 @@ public class VisitorsTest {
 	// Arguments of different types
 	@Test
 	public final void testMixedVisitorArguments() {
-		String g = "main: sum;\nsum: one 2;";
+		String grammar = "main: sum;\nsum: one 2;";
 
 		class TestObject {
 			private int value;
@@ -195,7 +204,7 @@ public class VisitorsTest {
 		}
 
 		class TestVisitor {
-			public void sum(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<?> arguments) {
+			public void sum(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<?> arguments) {
 				int sum = 0;
 
 				for (Object arg: arguments) {
@@ -212,13 +221,14 @@ public class VisitorsTest {
 				sentence.add(new TestObject(sum));
 			}
 
-			public void one(final Context<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
+			public void one(final ThreadContext<TestObject> context, final Sentence<TestObject> sentence, final Sentence<TestObject> argument) {
 				sentence.add(new TestObject(1));
 			}
 		}
 
 		Object v = new TestVisitor();
-		Context<TestObject> c = new ContextBuilder<TestObject>().grammar(g, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
 		Iterator<TestObject> i = s.iterator();

@@ -7,7 +7,7 @@ class GrammarFencepost<T> implements Generatable<T> {
 		productionInstance = p;
 	}
 
-	public void generate(final Context<T> context, final Sentence<T> sentence) {
+	public void generate(final ThreadContext<T> threadContext, final Sentence<T> sentence) {
 		sentence.leaveProduction(productionInstance);
 	}
 

@@ -7,8 +7,8 @@ class CachedValue<T> implements Generatable<T> {
 		ruleName = rn;
 	}
 
-	public void generate(final Context<T> context, final Sentence<T> sentence) {
-		sentence.addAll(context.getCachedValue(ruleName));
+	public void generate(final ThreadContext<T> threadContext, final Sentence<T> sentence) {
+		sentence.addAll(threadContext.getCachedValue(ruleName));
 	}
 
 	public String toString() {

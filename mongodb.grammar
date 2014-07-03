@@ -1,0 +1,185 @@
+main:
+	public static void run(ThreadContext<String> threadContext, DB db) {
+		DBCollection coll1 = db.getCollection(collection_name);
+		DBCollection coll2 = db.getCollection(collection_name);
+		operation_list;
+	}
+;
+
+collection_object:
+	coll1 | coll2
+;
+
+operation_list:
+	operation ; operation ; operation ; |
+	operation ; operation_list ;
+;
+
+operation:100
+	mongo_insert |100 mongo_findone |10 mongo_getcount |100 mongo_find |100 mongo_builder |5 mongo_index
+;
+
+foo2:
+	|1 mongo_drop
+;
+
+mongo_drop:
+	collection_object.drop()
+;
+
+mongo_index:10
+	mongo_create_index |1 mongo_drop_index
+;
+
+mongo_create_index:
+	try {
+		collection_object.createIndex(index_object);
+	} catch (WriteConcernException e) {
+		assert e.toString().contains("too many indexes");
+	}
+;
+
+mongo_drop_index:
+	try {
+		collection_object.dropIndex(index_object);
+	} catch (CommandFailureException e) {
+		assert e.toString().contains("index not found");
+	}
+;
+
+index_object:
+	new BasicDBObject(name, index_dir).append_index
+;
+
+index_dir:
+	0 | 1
+;
+
+append_index:
+	append(name, index_dir)
+;
+
+mongo_find:
+	{
+		DBCursor cursor = collection_object.find(basic_object_simple);
+		try {
+			while(cursor.hasNext()) {
+				cursor.next();
+			}
+		} finally {
+			cursor.close();
+		}
+	}
+;
+
+mongo_builder:
+	{
+		BulkWriteOperation builder = collection_object.builder_initialize();
+		builder_operation_list;
+		builder.execute();
+	}
+;
+
+builder_operation_list:
+	builder_operation ; builder_operation |
+	builder_operation ; builder_operation_list
+;
+
+builder_operation:
+	builder_updateone | builder_removeone | builder_replaceone | builder_remove | builder_insert | builder_update ;
+;
+
+foo3:
+| builder_upsert
+;
+
+builder_updateone:
+	builder.find(basic_object_simple).updateOne(new BasicDBObject("$set", basic_object));
+;
+
+builder_update:
+	builder.find(basic_object_simple).update(new BasicDBObject("$set", basic_object));
+;
+
+builder_removeone:
+	builder.find(basic_object_simple).removeOne();
+;
+
+builder_upsert:
+	builder.find(basic_object_simple).upsert().update(new BasicDBObject("$set", basic_object)) | 
+	builder.find(basic_object_simple).upsert().updateOne(new BasicDBObject("$set", basic_object)) |
+	builder.find(basic_object_simple).upsert().replaceOne(basic_object)
+;
+	
+
+builder_remove:
+	builder.find(basic_object_simple).remove();
+;
+
+builder_insert:
+	builder.insert(basic_object);
+;
+
+builder_replaceone:
+	builder.find(basic_object_simple).replaceOne(basic_object);
+;
+
+builder_initialize:
+	initializeOrderedBulkOperation | initializeUnorderedBulkOperation
+;
+
+mongo_findone:
+	collection_object.findOne()
+;
+
+mongo_getcount:
+	collection_object.getCount()
+;
+	
+mongo_insert:
+	{
+		BasicDBObject obj = basic_object;
+		collection_object.insert(obj);
+	}
+;
+
+collection_name:
+	"collection1" |
+	"collection2"
+;
+
+basic_object:
+	new BasicDBObject(object_parameters).append_list
+;
+
+basic_object_simple:
+	new BasicDBObject(object_parameters)
+;
+
+append_list:
+	append_item |
+	append_list.append_item
+;
+
+append_item:
+	append(object_parameters)
+;
+
+object_parameters:
+	name, value
+;
+
+name:
+	"string"
+;
+
+value:40% "string" |40% integer
+;
+
+string:
+	ABC | XYZ | KLM | CDE | ZZZ | AAA | XXX | YYY | ZZZ
+;
+
+integer:
+	1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+;

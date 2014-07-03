@@ -6,14 +6,15 @@ import org.testng.annotations.Test;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.stoev.fuzzer.Context.ContextBuilder;
+import org.stoev.fuzzer.GlobalContext.ContextBuilder;
 
 public class SentenceIdRangeTest {
 	@Test
 	public final void testZeroRange() {
-		Context<String> context = new ContextBuilder<String>().grammar("main: foo foo foo foo foo;\nfoo: foo1 | foo2;").idRange(0, 0).build();
-		String string1 = context.generateString();
-		String string2 = context.generateString();
+		GlobalContext<String> globalContext = new ContextBuilder<String>().grammar("main: foo foo foo foo foo;\nfoo: foo1 | foo2;").idRange(0, 0).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+		String string1 = threadContext.generateString();
+		String string2 = threadContext.generateString();
 
 		Assert.assertEquals(string1, string2);
 	}
@@ -23,10 +24,11 @@ public class SentenceIdRangeTest {
 
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
-		Context<String> context = new ContextBuilder<String>().grammar("main: foo foo foo foo foo foo foo foo;\nfoo: foo1 | foo2;").idRange(0, 3).build();
+		GlobalContext<String> globalContext = new ContextBuilder<String>().grammar("main: foo foo foo foo foo foo foo foo;\nfoo: foo1 | foo2;").idRange(0, 3).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		for (int i = 0; i < 1000; i++) {
-			String string = context.generateString();
+			String string = threadContext.generateString();
 			if (map.get(string) == null) {
 				map.put(string, 0);
 			} else {
@@ -41,10 +43,11 @@ public class SentenceIdRangeTest {
 	public final void testFullRange() {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
-		Context<String> context = new ContextBuilder<String>().grammar("main: foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo;\nfoo: foo1 | foo2;").build();
+		GlobalContext<String> globalContext = new ContextBuilder<String>().grammar("main: foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo;\nfoo: foo1 | foo2;").build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		for (int i = 0; i < 100; i++) {
-			String string = context.generateString();
+			String string = threadContext.generateString();
 			if (map.get(string) == null) {
 				map.put(string, 0);
 			} else {

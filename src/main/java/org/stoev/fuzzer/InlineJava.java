@@ -10,8 +10,6 @@ final class InlineJava<T> implements Generatable<T> {
 	private final String javaString;
 	private Method javaMethod = null;
 
-	private static final String METHOD_NAME = "generate";
-
 	InlineJava(final String cn, final String js) {
 		javaString = js;
 		className = cn;
@@ -20,23 +18,17 @@ final class InlineJava<T> implements Generatable<T> {
 		assert className != null;
 		assert className.length() > 0;
 
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer.embedded", METHOD_NAME,
-		new Class<?>[] {
-			Context.class,
-			Sentence.class
-		}, new String[] {
-			"org.stoev.fuzzer.Context"
-			, "org.stoev.fuzzer.Sentence"
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer.embedded", new String[] {
+			"org.stoev.fuzzer.ThreadContext",
+			"org.stoev.fuzzer.Sentence"
 		});
 
 		StringBuilder javaCode = new StringBuilder();
-		javaCode.append("	public static void ");
-		javaCode.append(METHOD_NAME);
-		javaCode.append("(final Context<Object> context, final Sentence<Object> sentence) {\n");
+		javaCode.append("public static void generate(final ThreadContext<Object> threadContext, final Sentence<Object> sentence) {\n");
 		javaCode.append(javaString);
-		javaCode.append("	}\n");
+		javaCode.append("}\n");
 
-		javaCompiler.addJava(className, javaCode.toString());
+		javaCompiler.addJavaClass(className, javaCode.toString());
 		javaCompiler.compileAll();
 
 		Iterator<Method> classIterator = javaCompiler.iterator();
@@ -46,16 +38,16 @@ final class InlineJava<T> implements Generatable<T> {
 		assert javaMethod != null;
 	}
 
-	public void generate(final Context<T> context, final Sentence<T> sentence) {
+	public void generate(final ThreadContext<T> threadContext, final Sentence<T> sentence) {
 		try {
 
-			if (context.shouldCacheRule(className)) {
+			if (threadContext.getGlobalContext().getGrammar().shouldCacheRule(className)) {
 				Sentence<T> cachedSentence = sentence.newInstance();
-				javaMethod.invoke(null, context, cachedSentence);
-	                        context.setCachedValue(className, cachedSentence);
+				javaMethod.invoke(null, threadContext, cachedSentence);
+	                        threadContext.setCachedValue(className, cachedSentence);
 				sentence.addAll(cachedSentence);
 			} else {
-				javaMethod.invoke(null, context, sentence);
+				javaMethod.invoke(null, threadContext, sentence);
 			}
 		} catch (IllegalAccessException e) {
 			assert false : e.getMessage();

@@ -10,12 +10,14 @@ import java.io.File;
 public class CommandExecutorTest {
 	@Test
 	public final void testSuccessfullExecution() {
-		Context<String> context = new Context.ContextBuilder<String>()
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar("main: ls -la\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
 
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		Executor<String> executor = new CommandExecutor();
 
@@ -25,12 +27,14 @@ public class CommandExecutorTest {
 
 	@Test
 	public final void testFailedExecution() {
-		Context<String> context = new Context.ContextBuilder<String>()
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar("main: exit 10\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
 
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		Executor<String> executor = new CommandExecutor();
 
@@ -40,12 +44,14 @@ public class CommandExecutorTest {
 
 	@Test
 	public final void testBashError() {
-		Context<String> context = new Context.ContextBuilder<String>()
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar("main: no_such_command\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
 
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		Executor<String> executor = new CommandExecutor();
 
@@ -55,12 +61,14 @@ public class CommandExecutorTest {
 
 	@Test
 	public final void testStderrExecution() {
-		Context<String> context = new Context.ContextBuilder<String>()
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar("main: echo foo 1>&2\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
 
-		Sentence<String> sentence = context.newSentence();
-		context.generate(sentence);
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Sentence<String> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
 		Executor<String> executor = new CommandExecutor();
 
@@ -69,15 +77,17 @@ public class CommandExecutorTest {
 	}
 
 	public final void testRealExecution() {
-		Context<String> context = new Context.ContextBuilder<String>()
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar(Thread.currentThread().getContextClassLoader().getResourceAsStream("filesystem.grammar"), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.build();
+
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		Executor<String> executor = new CommandExecutor(null, new File("/tmp/foo"));
 
 		for (int i = 0; i < 10000; i++) {
-			Sentence<String> sentence = context.newSentence();
-			context.generate(sentence);
+			Sentence<String> sentence = threadContext.newSentence();
+			threadContext.generate(sentence);
 			executor.execute(sentence);
 		}
 	}

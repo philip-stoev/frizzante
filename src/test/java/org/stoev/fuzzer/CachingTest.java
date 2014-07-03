@@ -11,25 +11,28 @@ import org.stoev.fuzzer.Grammar.GrammarFlags;
 public class CachingTest {
 
 	@Test
-        public final void testCachingSentence() {
-                String grammar = "main: foo , foo_cached ;\n foo: foo2 ;";
-                Context<String> context = new Context.ContextBuilder<String>().grammar(grammar).build();
-                Assert.assertEquals(context.generateString(), "foo2 , foo2");
-                Assert.assertEquals(context.generateString(), "foo2 , foo2");
-        }
+	public final void testCachingSentence() {
+		String grammar = "main: foo , foo_cached ;\n foo: foo2 ;";
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
+		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
+
+		Assert.assertEquals(threadContext.generateString(), "foo2 , foo2");
+		Assert.assertEquals(threadContext.generateString(), "foo2 , foo2");
+	}
 
 	@Test
-        public final void testCachingObject() {
-                String grammar = "main: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
-		Context<Long> context = new Context.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+	public final void testCachingObject() {
+		String grammar = "main: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
+		GlobalContext<Long> globalContext = new GlobalContext.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		ThreadContext<Long> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
-                Sentence<Long> sentence = context.newSentence();
-                context.generate(sentence);
+		Sentence<Long> sentence = threadContext.newSentence();
+		threadContext.generate(sentence);
 
-                Iterator<Long> iterator = sentence.iterator();
-                Long longValue1 = iterator.next();
-                Long longValue2 = iterator.next();
+		Iterator<Long> iterator = sentence.iterator();
+		Long longValue1 = iterator.next();
+		Long longValue2 = iterator.next();
 
-                Assert.assertEquals(longValue1.longValue(), longValue2.longValue());
-        }
+		Assert.assertEquals(longValue1.longValue(), longValue2.longValue());
+	}
 }

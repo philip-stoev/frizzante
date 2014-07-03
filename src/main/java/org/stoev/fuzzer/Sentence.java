@@ -166,14 +166,14 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 		}
 	}
 
-	void populate(final Context<T> context, final Generatable<T> startingGeneratable) {
+	void populate(final ThreadContext<T> threadContext, final Generatable<T> startingGeneratable) {
 		assert generatableStack.size() == 0;
 
 		generatableStack.push(startingGeneratable);
 
 		while (!generatableStack.isEmpty()) {
 			Generatable<T> generatable = generatableStack.pop();
-			generatable.generate(context, this);
+			generatable.generate(threadContext, this);
 		}
 	}
 

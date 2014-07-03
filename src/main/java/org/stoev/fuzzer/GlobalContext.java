@@ -7,26 +7,37 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
-public final class Context<T> {
+public final class GlobalContext<T> {
 	private final Grammar<T> grammar;
 	private final Random random;
 	private final Object visitor;
-	private long idRangeStart, idRangeLength;
 
-	private final HashMap<String, Sentence<T>> cachedRules = new HashMap<String, Sentence<T>>();
+	private final long idRangeStart;
+	private final long idRangeLength;
 
-	private Context(final ContextBuilder<T> builder) {
+	private Class<? extends FuzzRunnable> runnableClass;
+	private int threadCount;
+	private int duration;
+	private long count;
+
+	private GlobalContext(final ContextBuilder<T> builder) {
 		grammar = builder.grammar;
 		random = builder.random;
 		visitor = builder.visitor;
 
 		idRangeStart = builder.idRangeStart;
 		idRangeLength = builder.idRangeLength;
+
+		runnableClass = builder.runnableClass;
+		threadCount = builder.threadCount;
+		duration = builder.duration;
+		count = builder.count;
 
 		if (grammar != null && visitor != null) {
 			grammar.registerVisitor(visitor);
@@ -38,7 +49,12 @@ public final class Context<T> {
 		private Random random = new Random(1);
 		private Object visitor;
 		private long idRangeStart = 0;
-		private long idRangeLength = Long.MAX_VALUE;
+		private long idRangeLength = Long.MAX_VALUE - 1;
+
+		private Class<? extends FuzzRunnable> runnableClass = null;
+		private int threadCount = 1;
+		private int duration = Integer.MAX_VALUE;
+		private long count = Long.MAX_VALUE;
 
 		public ContextBuilder<T> grammar(final Grammar<T> gr) {
 			this.grammar = gr;
@@ -56,12 +72,16 @@ public final class Context<T> {
 		}
 
 		public ContextBuilder<T> grammar(final File file) throws FileNotFoundException {
-			this.grammar = new Grammar<T>(new Scanner(file, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
+			this.grammar(file, EnumSet.noneOf(GrammarFlags.class));
 			return this;
 		}
 
-		public ContextBuilder<T> grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
-			this.grammar = new Grammar<T>(new Scanner(file, "UTF-8"), flags);
+		public ContextBuilder<T> grammar(final File file, final Set<GrammarFlags> flags) {
+			try {
+				this.grammar = new Grammar<T>(new Scanner(file, "UTF-8"), flags);
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
 			return this;
 		}
 
@@ -96,14 +116,29 @@ public final class Context<T> {
 			return this;
 		}
 
-		public Context<T> build() {
-			return new Context<T>(this);
+		public ContextBuilder<T> runnable(final Class<? extends FuzzRunnable> runnableClass) {
+			this.runnableClass = runnableClass;
+			return this;
 		}
-	}
 
-	public Sentence<T> newSentence() {
-		Sentence<T> sentence = Sentence.newSentence(getNewId());
-		return sentence;
+		public ContextBuilder<T> threads(final int threadCount) {
+			this.threadCount = threadCount;
+			return this;
+		}
+
+		public ContextBuilder<T> duration(final int duration) {
+			this.duration = duration;
+			return this;
+		}
+
+		public ContextBuilder<T> count(final long count) {
+			this.count = count;
+			return this;
+		}
+
+		public GlobalContext<T> build() {
+			return new GlobalContext<T>(this);
+		}
 	}
 
 	public Sentence<T> sentenceFromId(final long id) {
@@ -111,24 +146,43 @@ public final class Context<T> {
 		return sentence;
 	}
 
-	public void generate(final Sentence<T> sentence) {
-		sentence.populate(this, grammar);
+	public ThreadContext<T> newThreadContext(final int id) {
+                ThreadContext<T> threadContext = ThreadContext.newThreadContext(this, id);
+                return threadContext;
+        }
+
+
+	public void run() {
+		if (runnableClass == null) {
+			throw new IllegalArgumentException("Global context has no runnable, so can not call run() on it.");
+		}
+
+		RunnableManager manager = new RunnableManager(this);
+		manager.run();
 	}
 
-	public String generateString() {
-		Sentence<T> sentence = newSentence();
-		sentence.populate(this, grammar);
-		return sentence.toString();
+	long getIdRangeStart() {
+		return idRangeStart;
 	}
 
-	public void setIdRange(final long start, final long length) {
-                        this.idRangeStart = start;
-			this.idRangeLength = length;
+	long getIdRangeLength() {
+		return idRangeLength;
 	}
 
-	long getNewId() {
-		// Return an ID between idRangeStart and (idRangeStart + idRangeLength) inclusive
-		return idRangeStart + (long) (random.nextDouble() * (idRangeLength + 1));
+	Class<? extends FuzzRunnable> getRunnableClass() {
+		return runnableClass;
+	}
+
+	int getThreadCount() {
+		return threadCount;
+	}
+
+	long getCount() {
+		return count;
+	}
+
+	int getDuration() {
+		return duration;
 	}
 
 	Grammar<T> getGrammar() {
@@ -139,23 +193,7 @@ public final class Context<T> {
 		return visitor;
 	}
 
-	boolean shouldCacheRule(final String ruleName) {
-		assert grammar != null;
-
-		return grammar.shouldCacheRule(ruleName);
-	}
-
-	Sentence<T> getCachedValue(final String ruleName) {
-		Sentence<T> cachedValue = cachedRules.get(ruleName);
-
-		if (cachedValue == null) {
-			throw new ConfigurationException("Cached value for rule " + ruleName + " requested, but not available.");
-		}
-
-		return cachedValue;
-	}
-
-	void setCachedValue(final String ruleName, final Sentence<T> value) {
-		cachedRules.put(ruleName, value);
+	Random getRandom() {
+		return random;
 	}
 }

@@ -21,7 +21,7 @@ final class JavaVisitor<T> implements Generatable<T> {
 
 		try {
 			Class<?> visitorClass = visitor.getClass();
-			methodObject = visitorClass.getDeclaredMethod(methodName, Context.class, Sentence.class, Sentence.class);
+			methodObject = visitorClass.getDeclaredMethod(methodName, ThreadContext.class, Sentence.class, Sentence.class);
 		} catch (NoSuchMethodException e) {
 			throw new ConfigurationException("Method " + methodName + " in visitor class " + visitor.getClass() + " does not have the correct signature.");
 		}
@@ -33,7 +33,7 @@ final class JavaVisitor<T> implements Generatable<T> {
 		assert methodObject != null;
 	}
 
-	public void generate(final Context<T> context, final Sentence<T> sentence) {
+	public void generate(final ThreadContext<T> threadContext, final Sentence<T> sentence) {
 		Sentence<T> argumentSentence = null;
 
 		if (argument != null) {
@@ -41,11 +41,11 @@ final class JavaVisitor<T> implements Generatable<T> {
 			// so that we can pass them to the visitor
 
 			argumentSentence = sentence.newInstance();
-			argumentSentence.populate(context, argument);
+			argumentSentence.populate(threadContext, argument);
 		}
 
 		try {
-			methodObject.invoke(visitor, context, sentence, argumentSentence);
+			methodObject.invoke(visitor, threadContext, sentence, argumentSentence);
 		} catch (IllegalAccessException e) {
 			throw new ConfigurationException("Attempting to invoke visitor " + methodName + " in class " + visitor.getClass() + " caused an IllegalAccessException");
 		} catch (InvocationTargetException e) {
