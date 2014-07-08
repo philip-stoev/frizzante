@@ -17,7 +17,7 @@ public class GrammarTest {
 	public static final int TEN = 10;
 	public static final int MANY_ITERATIONS_QUARTER = MANY_ITERATIONS / FOUR;
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testNoMain() {
 		GlobalContext<String> g = new ContextBuilder<String>().grammar("").build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
@@ -31,7 +31,7 @@ public class GrammarTest {
 		Assert.assertEquals(c.generateString(), "");
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testUnterminatedRule() {
 		GlobalContext<String> g = new ContextBuilder<String>().grammar("main: foo").build();
 	}
@@ -96,7 +96,7 @@ public class GrammarTest {
 		}
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testDuplicateRules() {
 		String grammar = "main: FOO ;\n main: BAR ;";
 		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).build();
@@ -219,7 +219,7 @@ public class GrammarTest {
 		}
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testZeroWeight() {
 		GlobalContext<String> g = new ContextBuilder<String>().grammar("main:0 foo;").build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
@@ -256,7 +256,7 @@ public class GrammarTest {
 
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testMalformedJava() {
 		String grammar = "main: foo ;\n foo.java: {{ ;";
 		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).build();
@@ -265,14 +265,14 @@ public class GrammarTest {
 	}
 
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testInvalidJava() {
 		GlobalContext<String> g = new ContextBuilder<String>().grammar("main: foo ;\n foo.java: {{ foo(); }};").build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 		Assert.assertEquals(c.generateString(), "");
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testJavaException() {
 		GlobalContext<String> g = new ContextBuilder<String>().grammar("main: foo ;\n foo.java: {{ int a = 0 ; int b = 2 / a; }};").build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
@@ -280,7 +280,7 @@ public class GrammarTest {
 		Assert.assertEquals(c.generateString(), "");
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testEmptyCached() {
 		String grammar = "main: main_cached;";
 		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).build();

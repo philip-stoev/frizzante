@@ -52,7 +52,7 @@ public class VisitorsTest {
 		Assert.assertTrue(iterator.next() instanceof TestObject);
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testNonvoidVisitor() {
 		String grammar = "main: nonvoid;";
 
@@ -69,7 +69,7 @@ public class VisitorsTest {
 		c.generateString();
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testInvalidVisitorSignature() {
 		String grammar = "main: visitor;";
 

@@ -1,0 +1,66 @@
+main:90%creating_command |10%destroying_command
+;
+
+creating_command:
+	cat_command | echo_command | dd_command | mkdir_command
+;
+
+destroying_command:
+	del_command | rmdir_command | rm_command
+;
+
+del_command:
+	del file_name
+;
+
+rmdir_command:
+	rmdir dir_name
+;
+
+rm_command:
+	rm file_name |
+	rm -rf dir_name
+;
+
+cat_command:
+	cat file_name >> file_name
+;
+
+echo_command:
+	echo "some_string" >> file_name
+;
+
+dd_command:
+	dd if=dd_input_file of=file_name bs=dd_block_size count=dd_count
+;
+
+dd_input_file:
+	/dev/urandom |
+	/dev/null
+;
+
+dd_block_size:
+	1K | 64K | 1M
+;
+
+dd_count:
+	1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+;
+
+mkdir_command:
+	mkdir -p dir_name 
+;
+
+file_name:
+	path_component |
+	path_component/path_component |
+	path_component/path_component/path_component
+;
+
+dir_name:
+	file_name | .
+;
+
+path_component:
+	 ABC | XYZ | KLM
+;

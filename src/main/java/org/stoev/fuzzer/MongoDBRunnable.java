@@ -6,25 +6,26 @@ import com.mongodb.DB;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-public class MongoDBRunnable extends JavaBatchRunnable {
+public final class MongoDBRunnable extends JavaBatchRunnable {
 
-	String[] getImports() {
+	protected String[] getImports() {
 		return new String[] {
-			"com.mongodb.DB",
-			"com.mongodb.CommandFailureException",
-			"com.mongodb.WriteConcernException",
-			"com.mongodb.DBCollection",
-			"com.mongodb.DBCursor",
-			"com.mongodb.BasicDBObject",
-			"com.mongodb.BulkWriteOperation"
+			"import org.stoev.fuzzer.ThreadContext",
+			"import com.mongodb.DB",
+			"import com.mongodb.CommandFailureException",
+			"import com.mongodb.WriteConcernException",
+			"import com.mongodb.DBCollection",
+			"import com.mongodb.DBCursor",
+			"import com.mongodb.BasicDBObject",
+			"import com.mongodb.BulkWriteOperation"
 		};
 	};
 
-	final MongoClient mongoClient;
-	final DB db;
+	private final MongoClient mongoClient;
+	private final DB db;
 
-	public MongoDBRunnable(ThreadContext<String> threadContext) {
-		super(threadContext);
+	public MongoDBRunnable(final RunnableManager runnableManager, final ThreadContext<String> threadContext) {
+		super(runnableManager, threadContext);
 
 		try {
 			mongoClient = new MongoClient();
@@ -34,7 +35,7 @@ public class MongoDBRunnable extends JavaBatchRunnable {
 		}
 	}
 
-	public void invoke(Method method) throws IllegalAccessException, InvocationTargetException {
+	public void invoke(final Method method) throws IllegalAccessException, InvocationTargetException {
 		method.invoke(null, threadContext, db);
 	}
 }

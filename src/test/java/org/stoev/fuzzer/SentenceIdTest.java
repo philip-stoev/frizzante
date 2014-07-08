@@ -10,7 +10,7 @@ public class SentenceIdTest {
 	public final void test() {
 		GlobalContext<String> globalContext = new ContextBuilder<String>().grammar("main: foo foo foo foo foo;\nfoo: foo1 | foo2;").build();
 		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
-		
+
 		Sentence<String> sentence1 = threadContext.newSentence();
 		threadContext.generate(sentence1);
 

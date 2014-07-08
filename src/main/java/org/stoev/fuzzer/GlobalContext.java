@@ -1,7 +1,6 @@
 package org.stoev.fuzzer;
 
 import java.util.Random;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.EnumSet;
 import java.util.Set;
@@ -152,7 +151,7 @@ public final class GlobalContext<T> {
         }
 
 
-	public void run() {
+	public void run() throws Exception {
 		if (runnableClass == null) {
 			throw new IllegalArgumentException("Global context has no runnable, so can not call run() on it.");
 		}

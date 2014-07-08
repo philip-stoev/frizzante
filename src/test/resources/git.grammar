@@ -1,0 +1,7 @@
+init:
+	cd $(mktemp -d) ;
+;
+
+main:
+	cd $(mktemp -d)cd $(mktemp -d)cd $(mktemp -d)cd $(mktemp -d)
+	

@@ -9,7 +9,6 @@ public final class ThreadContext<T> {
 	private final Random random;
 
 	private final int contextId;
-	private final long threadId;
 
 	private final HashMap<String, Sentence<T>> ruleCache = new HashMap<String, Sentence<T>>();
 
@@ -22,7 +21,6 @@ public final class ThreadContext<T> {
 		this.randomSeed = globalContext.getRandom().nextLong();
 		this.random = new Random(randomSeed);
 		this.contextId = contextId;
-		this.threadId = Thread.currentThread().getId();
 	}
 
 	public Sentence<T> newSentence() {
@@ -34,7 +32,7 @@ public final class ThreadContext<T> {
 		Sentence<T> sentence = newSentence();
 		sentence.populate(this, globalContext.getGrammar());
 		return sentence;
-	}	
+	}
 
 	public void generate(final Sentence<T> sentence) {
 		sentence.populate(this, globalContext.getGrammar());
@@ -50,8 +48,7 @@ public final class ThreadContext<T> {
 		// Return an ID between idRangeStart and (idRangeStart + idRangeLength) inclusive
 		long newId = globalContext.getIdRangeStart() + (long) (random.nextDouble() * (globalContext.getIdRangeLength() + 1));
 
-		assert threadId == Thread.currentThread().getId();
-		assert newId >= globalContext.getIdRangeStart(): newId + " - " + globalContext.getIdRangeStart();
+		assert newId >= globalContext.getIdRangeStart();
 		assert newId <= globalContext.getIdRangeStart() + globalContext.getIdRangeLength();
 
 		return newId;
@@ -77,7 +74,7 @@ public final class ThreadContext<T> {
 		Sentence<T> cachedValue = ruleCache.get(ruleName);
 
 		if (cachedValue == null) {
-			throw new ConfigurationException("Cached value for rule " + ruleName + " requested, but not available.");
+			throw new IllegalArgumentException("Cached value for rule '" + ruleName + "' was requested, but not available.");
 		}
 
 		return cachedValue;

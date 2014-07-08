@@ -29,7 +29,7 @@ public class SeparatorsTest {
 		TestUtil.assertGenerates("main: foo;\n foo: foo2;", "foo2");
 	}
 
-	@Test (expectedExceptions = ConfigurationException.class)
+	@Test (expectedExceptions = IllegalArgumentException.class)
 	public final void testTrailingRuleNameWhitespace() {
 		TestUtil.assertGenerates("main: foo;\nfoo : foo2;", "foo2");
 	}

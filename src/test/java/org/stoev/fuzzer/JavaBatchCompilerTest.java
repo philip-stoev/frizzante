@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 public class JavaBatchCompilerTest {
 	@Test
 	public final void testImports() throws IllegalAccessException, InvocationTargetException {
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer", new String[] {"java.util.ArrayList"});
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, new String[] {"import java.util.ArrayList"});
 
 		javaCompiler.addJavaClass("TestImports", "public static void testImports() {ArrayList<String> foo = new ArrayList<String>(); }");
 		javaCompiler.compileAll();
@@ -18,12 +18,33 @@ public class JavaBatchCompilerTest {
 		}
 	}
 
-	@Test
-	public final void testCache1() throws IllegalAccessException, InvocationTargetException {
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", null);
+//	@Test
+	public final void testPackageDeclaration() throws IllegalAccessException, InvocationTargetException {
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, new String[] {"package foo.bar"});
 
-		javaCompiler.addJavaClass("TestCache1", "public static void testCache() { assert true; }");
-		javaCompiler.addJavaClass("TestCache1", "public static void testCache() { assert false; }");
+		javaCompiler.addJavaClass("TestPackageDeclaration", "public static void testPackageDeclaration() {assert true; }");
+		javaCompiler.compileAll();
+
+		for (Method javaMethod: javaCompiler) {
+			javaMethod.invoke(null);
+		}
+	}
+
+
+	@Test (expectedExceptions = IllegalArgumentException.class)
+	public final void testCompilationFailure() throws IllegalAccessException, InvocationTargetException {
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, null);
+
+		javaCompiler.addJavaClass("TestCompilationFailure", "invalid_java");
+		javaCompiler.compileAll();
+	}
+
+	@Test
+	public final void testInternalCaching() throws IllegalAccessException, InvocationTargetException {
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, null);
+
+		javaCompiler.addJavaClass("TestInternalCaching", "public static void testCache() { assert true; }");
+		javaCompiler.addJavaClass("TestInternalCaching", "public static void testCache() { assert false; }");
 		javaCompiler.compileAll();
 
                 for (Method javaMethod: javaCompiler) {
@@ -32,12 +53,26 @@ public class JavaBatchCompilerTest {
 	}
 
 	@Test
-	public final void testCache2() throws IllegalAccessException, InvocationTargetException {
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(true, "org.stoev.fuzzer", null);
+	public final void testExternalCaching() throws IllegalAccessException, InvocationTargetException {
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(JavaBatchCompiler.GLOBAL_METHOD_CACHE, null);
 
-		javaCompiler.addJavaClass("TestCache2", "public static void testCache() { assert true; }");
+		javaCompiler.addJavaClass("TestExternalCaching", "public static void testCache() { assert true; }");
 		javaCompiler.compileAll();
-		javaCompiler.addJavaClass("TestCache2", "public static void testCache() { assert false; }");
+		javaCompiler.addJavaClass("TestExternalCaching", "public static void testCache() { assert false; }");
+		javaCompiler.compileAll();
+
+                for (Method javaMethod: javaCompiler) {
+                        javaMethod.invoke(null);
+                }
+	}
+
+	@Test (expectedExceptions = InvocationTargetException.class)
+	public final void testNoCaching() throws IllegalAccessException, InvocationTargetException {
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, null);
+
+		javaCompiler.addJavaClass("TestNoCaching", "public static void testCache() { assert true; }");
+		javaCompiler.compileAll();
+		javaCompiler.addJavaClass("TestNoCaching", "public static void testCache() { assert false; }");
 		javaCompiler.compileAll();
 
                 for (Method javaMethod: javaCompiler) {

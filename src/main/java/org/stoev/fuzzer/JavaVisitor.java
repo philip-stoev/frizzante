@@ -23,11 +23,11 @@ final class JavaVisitor<T> implements Generatable<T> {
 			Class<?> visitorClass = visitor.getClass();
 			methodObject = visitorClass.getDeclaredMethod(methodName, ThreadContext.class, Sentence.class, Sentence.class);
 		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Method " + methodName + " in visitor class " + visitor.getClass() + " does not have the correct signature.");
+			throw new IllegalArgumentException("Method " + methodName + " in visitor class " + visitor.getClass() + " does not have the correct signature.", e);
 		}
 
 		if (!methodObject.getReturnType().equals(Void.TYPE)) {
-			throw new ConfigurationException("Visitor must be declared as void.");
+			throw new IllegalArgumentException("Visitor must be declared as void.");
 		}
 
 		assert methodObject != null;
@@ -47,9 +47,9 @@ final class JavaVisitor<T> implements Generatable<T> {
 		try {
 			methodObject.invoke(visitor, threadContext, sentence, argumentSentence);
 		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Attempting to invoke visitor " + methodName + " in class " + visitor.getClass() + " caused an IllegalAccessException");
+			throw new IllegalArgumentException("IllegalAccessException when attempting to invoke visitor " + methodName + " in class " + visitor.getClass(), e);
 		} catch (InvocationTargetException e) {
-			throw new ConfigurationException("Visitor " + methodName + " in class " +  visitor.getClass() + " threw an exception: " + e.getMessage());
+			throw new IllegalArgumentException("Visitor " + methodName + " in class " +  visitor.getClass() + " threw an exception.", e);
 		}
 	}
 

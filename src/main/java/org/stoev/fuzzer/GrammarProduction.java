@@ -41,7 +41,7 @@ final class GrammarProduction<T> implements Generatable<T> {
 		}
 
 		if (weight < 1) {
-			throw new ConfigurationException("Weight must be positive.");
+			throw new IllegalArgumentException("Grammar production weight must be positive.");
 		}
 
 		initialWeight = weight;
@@ -82,7 +82,7 @@ final class GrammarProduction<T> implements Generatable<T> {
 
 	void demote(final double penalty) {
 		if (penalty < 0.0f || penalty > 1.0f) {
-			throw new ConfigurationException("Penalty must be between 0 and 1.0.");
+			throw new IllegalArgumentException("Demotion penalty must be between 0 and 1.0.");
 		}
 
 		this.weight = this.weight * (1 - penalty);
@@ -93,7 +93,7 @@ final class GrammarProduction<T> implements Generatable<T> {
 
 	void promote(final double promotion) {
 		if (promotion < 0.0f || promotion > 1.0d) {
-			throw new ConfigurationException("Promotion must be between 0 and 1.0.");
+			throw new IllegalArgumentException("Promotion must be between 0 and 1.0.");
 		}
 
 

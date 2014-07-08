@@ -18,9 +18,9 @@ final class InlineJava<T> implements Generatable<T> {
 		assert className != null;
 		assert className.length() > 0;
 
-		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(false, "org.stoev.fuzzer.embedded", new String[] {
-			"org.stoev.fuzzer.ThreadContext",
-			"org.stoev.fuzzer.Sentence"
+		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, new String[] {
+			"import org.stoev.fuzzer.ThreadContext",
+			"import org.stoev.fuzzer.Sentence"
 		});
 
 		StringBuilder javaCode = new StringBuilder();
@@ -49,10 +49,10 @@ final class InlineJava<T> implements Generatable<T> {
 			} else {
 				javaMethod.invoke(null, threadContext, sentence);
 			}
-		} catch (IllegalAccessException e) {
-			assert false : e.getMessage();
-		} catch (InvocationTargetException e) {
-			throw new ConfigurationException("Inline Java code threw an exception: " + e.getMessage());
+		} catch (IllegalAccessException illegalAccessException) {
+			assert false : illegalAccessException.getMessage();
+		} catch (InvocationTargetException invocationTargetException) {
+			throw new IllegalArgumentException("Inline Java code threw an exception.", invocationTargetException.getCause());
 		}
 	}
 

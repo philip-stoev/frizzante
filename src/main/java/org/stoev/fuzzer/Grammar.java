@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 
 import org.stoev.fuzzer.Grammar.GrammarFlags;
 
-final class Grammar<T> implements Generatable<T> {
+public final class Grammar<T> implements Generatable<T> {
 
 	public static enum GrammarFlags {
 		STANDALONE_SEMICOLONS_ONLY,
@@ -62,11 +62,11 @@ final class Grammar<T> implements Generatable<T> {
 			generatableName = generatableName.substring(0, generatableName.length() - 1);
 
 			if (generatableName.contains(Constants.SPACE)) {
-				throw new ConfigurationException("Rule name " + generatableName + " contains space.");
+				throw new IllegalArgumentException("Rule name " + generatableName + " contains space.");
 			}
 
 			if (rules.containsKey(generatableName)) {
-				throw new ConfigurationException("Name " + generatableName + " defined multiple times in grammar.");
+				throw new IllegalArgumentException("Name " + generatableName + " defined multiple times in grammar.");
 			}
 
 			Generatable<T> generatableObject;
@@ -76,7 +76,7 @@ final class Grammar<T> implements Generatable<T> {
 				String javaString = scanner.findWithinHorizon(JAVA_PATTERN, 0);
 
 				if (javaString == null) {
-					throw new ConfigurationException("Unable to parse Java code for rule " + generatableName + " (missing '}};' terminator?)");
+					throw new IllegalArgumentException("Unable to parse Java code for rule " + generatableName + " (missing '}};' terminator?)");
 				}
 
 				generatableObject = new InlineJava<T>(generatableName, javaString);
@@ -84,7 +84,7 @@ final class Grammar<T> implements Generatable<T> {
 				String ruleString = scanner.findWithinHorizon(rulePattern, 0);
 
 				if (ruleString == null) {
-					throw new ConfigurationException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
+					throw new IllegalArgumentException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
 				}
 
 				generatableObject = new GrammarRule<T>(generatableName, ruleString, flags);
@@ -106,7 +106,7 @@ final class Grammar<T> implements Generatable<T> {
 		Generatable<T> startingRule = rules.get(STARTING_GRAMMAR_RULE);
 
 		if (startingRule == null) {
-			throw new ConfigurationException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
+			throw new IllegalArgumentException("Grammar does not have a starting grammar rule named " + STARTING_GRAMMAR_RULE);
 		}
 
 		sentence.pushGeneratable(startingRule);

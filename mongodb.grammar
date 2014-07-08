@@ -86,7 +86,7 @@ builder_operation_list:
 ;
 
 builder_operation:
-	builder_updateone | builder_removeone | builder_replaceone | builder_remove | builder_insert | builder_update ;
+	builder_updateone | builder_removeone | builder_replaceone | builder_remove | builder_insert | builder_update | builder_upsert ;
 ;
 
 foo3:
