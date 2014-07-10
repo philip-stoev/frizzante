@@ -1,0 +1,58 @@
+package org.stoev.fuzzer;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import java.lang.reflect.Constructor;
+
+public class RunnableManager {
+	final int runnableCount;
+	final Class<?> runnableClass;
+	final List<FuzzRunnable> runnables = new ArrayList<FuzzRunnable>();
+	final List<Thread> threads = new ArrayList<Thread>();
+	final Timer timer = new Timer(true);
+
+	RunnableManager(final Context<?> context, final Class<?> runnableClass, final int count, final long duration) {
+		Constructor<FuzzRunnable> constructor = runnableClass.getConstructor(Context.class);
+
+		this.runnableClass = runnableClass;
+		this.runnableCount = count;
+	}
+
+	void run() {
+		System.out.println("Starting " + count + " threads...");
+
+		for (int i = 0; i < count; i++) {
+			FuzzRunnable runnable = constructor.newInstance(context);
+			runnables.add(runnable);
+
+                        Thread thread = new Thread(runnable);
+			threads.add(thread);
+
+                        thread.start();
+		}
+
+		System.out.println("Scheduling termination in " + duration + " seconds.");
+
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				System.out.println("Desired execution duration reached.");
+                                for (FuzzRunnable runnable: runnables) {
+                                        runnable.interrupt();
+                                }
+                        }
+                }, duration * 1000L);
+
+		System.out.println("Waiting for threads to complete...");
+
+		for (Thread thread : threads) {
+			thread.join();
+		}
+
+		System.out.println("Execution completed.");
+	}
+}

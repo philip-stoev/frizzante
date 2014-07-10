@@ -1,1 +1,1 @@
-package org.stoev.fuzzer.mongotest;
+package org.stoev.fuzzer.test.mongo;

@@ -10,69 +10,68 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-class JavaBatchRunnable extends FuzzRunnable {
+public class JavaBatchRunnable extends FuzzRunnable {
+	private static final ConcurrentMap<GlobalContext<?>, ConcurrentMap<String, SoftReference<Class<?>>>> CLASS_CACHES = new ConcurrentHashMap<GlobalContext<?>, ConcurrentMap<String, SoftReference<Class<?>>>>();
+	public static final String CLASS_PREFIX = "GeneratedClass";
 
-	int getBatchSize() {
+	private final JavaBatchCompiler javaCompiler;
+
+	public JavaBatchRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
+		super(runnableManager, threadContext);
+
+		ConcurrentMap<String, SoftReference<Class<?>>> classCache = new ConcurrentHashMap<String, SoftReference<Class<?>>>();
+		CLASS_CACHES.putIfAbsent(threadContext.getGlobalContext(), classCache);
+		classCache = CLASS_CACHES.get(threadContext.getGlobalContext());
+		assert classCache != null;
+
+		javaCompiler = new JavaBatchCompiler(classCache, getHeaders());
+	}
+
+	@SuppressWarnings("checkstyle:designforextension")
+	protected int getBatchSize() {
 		return 100;
 	}
 
-	String[] getImports() {
+	@SuppressWarnings("checkstyle:designforextension")
+	protected String[] getHeaders() {
 		return new String[]{
 			"import org.stoev.fuzzer.ThreadContext"
 		};
 	}
 
-	private static final ConcurrentMap<GlobalContext<?>, ConcurrentMap<String, SoftReference<Method>>> METHOD_CACHES = new ConcurrentHashMap<GlobalContext<?>, ConcurrentMap<String, SoftReference<Method>>>();
-
-	private final JavaBatchCompiler javaCompiler;
-
-	public JavaBatchRunnable(final RunnableManager runnableManager, final ThreadContext<String> threadContext) {
-		super(runnableManager, threadContext);
-
-		ConcurrentMap<String, SoftReference<Method>> methodCache = new ConcurrentHashMap<String, SoftReference<Method>>();
-		METHOD_CACHES.putIfAbsent(threadContext.getGlobalContext(), methodCache);
-		methodCache = METHOD_CACHES.get(threadContext.getGlobalContext());
-		assert methodCache != null;
-
-		javaCompiler = new JavaBatchCompiler(methodCache, getImports());
-	}
-
-	public void run() {
-		while (currentCount < threadContext.getGlobalContext().getCount()) {
+	@Override
+	public final void run() {
+		while (executionCounter < threadContext.getGlobalContext().getCount()) {
 			Map<String, Sentence<?>> classNameToSentence = new HashMap<String, Sentence<?>>();
 
-			for (int n = 0; n < getBatchSize(); n++) {
+			long currentBatchSize = Math.min(getBatchSize(), threadContext.getGlobalContext().getCount() - executionCounter);
+
+			for (int n = 0; n < currentBatchSize; n++) {
 				if (interrupted) {
 					return;
 				}
 
-				if (currentCount >= threadContext.getGlobalContext().getCount()) {
-					break;
-				}
-
-				currentCount++;
-
 				Sentence<?> javaSentence = threadContext.generateSentence();
-				String className = "Class" + javaSentence.getId();
+				String className = CLASS_PREFIX + javaSentence.getId();
 
 				classNameToSentence.put(className, javaSentence);
 				javaCompiler.addJavaClass(className, javaSentence.toString());
 			}
 
-			Iterable<Method> methodIterable;
-
 			try {
-				methodIterable = javaCompiler.compileAll();
-
-				for (Method javaMethod: methodIterable) {
+				for (Class<?> javaClass: javaCompiler.compileAll()) {
 					if (interrupted) {
 						return;
 					}
 
+					Method[] javaMethods = javaClass.getDeclaredMethods();
+					Method javaMethod = javaMethods[0];
+
 					Sentence<?> sentence = null;
 
 					try {
-						sentence = classNameToSentence.get(javaMethod.getDeclaringClass().getName());
+						sentence = classNameToSentence.get(javaClass.getName());
+						executionCounter++;
 						this.invoke(javaMethod);
 					} catch (InvocationTargetException invocationTargetException) {
 						if (!interrupted) {
@@ -88,12 +87,11 @@ class JavaBatchRunnable extends FuzzRunnable {
 				runtimeException(runtimeException);
 				return;
 			}
-
-
 		}
 	}
 
+	@SuppressWarnings("checkstyle:designforextension")
 	public void invoke(final Method method) throws IllegalAccessException, InvocationTargetException {
-		method.invoke(null, threadContext);
+		method.invoke(null);
 	}
 }

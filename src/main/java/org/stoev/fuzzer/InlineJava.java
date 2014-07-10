@@ -31,10 +31,17 @@ final class InlineJava<T> implements Generatable<T> {
 		javaCompiler.addJavaClass(className, javaCode.toString());
 		javaCompiler.compileAll();
 
-		Iterator<Method> classIterator = javaCompiler.iterator();
+		Iterator<Class<?>> classIterator = javaCompiler.iterator();
 		assert classIterator.hasNext();
 
-		javaMethod = classIterator.next();
+		Class<?> javaClass = classIterator.next();
+		assert !classIterator.hasNext();
+		assert javaClass != null;
+
+		Method[] javaMethods = javaClass.getDeclaredMethods();
+		assert javaMethods.length == 1;
+
+		javaMethod = javaMethods[0];
 		assert javaMethod != null;
 	}
 

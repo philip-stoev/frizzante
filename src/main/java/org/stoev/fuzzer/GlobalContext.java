@@ -14,26 +14,31 @@ import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public final class GlobalContext<T> {
 	private final Grammar<T> grammar;
+
 	private final Random random;
+	private final Long randomSeed;
+
 	private final Object visitor;
 
 	private final long idRangeStart;
 	private final long idRangeLength;
 
-	private Class<? extends FuzzRunnable> runnableClass;
+	private FuzzRunnableFactory runnableFactory;
 	private int threadCount;
 	private int duration;
 	private long count;
 
 	private GlobalContext(final ContextBuilder<T> builder) {
 		grammar = builder.grammar;
+
 		random = builder.random;
+		randomSeed = builder.randomSeed;
 		visitor = builder.visitor;
 
 		idRangeStart = builder.idRangeStart;
 		idRangeLength = builder.idRangeLength;
 
-		runnableClass = builder.runnableClass;
+		runnableFactory = builder.runnableFactory;
 		threadCount = builder.threadCount;
 		duration = builder.duration;
 		count = builder.count;
@@ -45,12 +50,13 @@ public final class GlobalContext<T> {
 
 	public static final class ContextBuilder<T> {
 		private Grammar<T> grammar;
-		private Random random = new Random(1);
+		private Long randomSeed = Long.valueOf(1L);
+		private Random random = new Random(randomSeed);
 		private Object visitor;
 		private long idRangeStart = 0;
 		private long idRangeLength = Long.MAX_VALUE - 1;
 
-		private Class<? extends FuzzRunnable> runnableClass = null;
+		private FuzzRunnableFactory runnableFactory = null;
 		private int threadCount = 1;
 		private int duration = Integer.MAX_VALUE;
 		private long count = Long.MAX_VALUE;
@@ -77,7 +83,7 @@ public final class GlobalContext<T> {
 
 		public ContextBuilder<T> grammar(final File file, final Set<GrammarFlags> flags) {
 			try {
-				this.grammar = new Grammar<T>(new Scanner(file, "UTF-8"), flags);
+				this.grammar = new Grammar<T>(file, flags);
 			} catch (IOException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -94,12 +100,14 @@ public final class GlobalContext<T> {
 			return this;
 		}
 
-		public ContextBuilder<T> random(final Random r) {
-			this.random = r;
+		public ContextBuilder<T> random(final Random random) {
+			this.randomSeed = null;
+			this.random = random;
 			return this;
 		}
 
-		public ContextBuilder<T> random(final int seed) {
+		public ContextBuilder<T> random(final long seed) {
+			this.randomSeed = Long.valueOf(seed);
 			this.random = new Random(seed);
 			return this;
 		}
@@ -115,8 +123,8 @@ public final class GlobalContext<T> {
 			return this;
 		}
 
-		public ContextBuilder<T> runnable(final Class<? extends FuzzRunnable> runnableClass) {
-			this.runnableClass = runnableClass;
+		public ContextBuilder<T> runnableFactory(final FuzzRunnableFactory runnableFactory) {
+			this.runnableFactory = runnableFactory;
 			return this;
 		}
 
@@ -152,12 +160,30 @@ public final class GlobalContext<T> {
 
 
 	public void run() throws Exception {
-		if (runnableClass == null) {
+		if (runnableFactory == null) {
 			throw new IllegalArgumentException("Global context has no runnable, so can not call run() on it.");
 		}
 
 		RunnableManager manager = new RunnableManager(this);
 		manager.run();
+	}
+
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("Threads: ");
+		sb.append(threadCount);
+		sb.append("\n");
+
+		sb.append("Global random seed: ");
+		sb.append(randomSeed);
+		sb.append("\n");
+
+		sb.append("Grammar:\n");
+		sb.append(grammar.toString());
+		sb.append("\n");
+
+		return sb.toString();
 	}
 
 	long getIdRangeStart() {
@@ -168,8 +194,8 @@ public final class GlobalContext<T> {
 		return idRangeLength;
 	}
 
-	Class<? extends FuzzRunnable> getRunnableClass() {
-		return runnableClass;
+	FuzzRunnableFactory getRunnableFactory() {
+		return runnableFactory;
 	}
 
 	int getThreadCount() {

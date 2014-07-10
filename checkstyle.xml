@@ -53,6 +53,7 @@
     <property name="format" value="\s+$"/>
     <property name="message" value="Line has trailing spaces."/>
   </module>
+  <module name="SuppressWarningsFilter"/>
   <module name="TreeWalker">
     <property name="cacheFile" value="${checkstyle.cache.file}"/>
     <!-- Checks for Naming Conventions.                  -->
@@ -140,5 +141,7 @@
     <module name="FinalParameters"/>
     <module name="TodoComment"/>
     <module name="UpperEll"/>
+    <module name="SuppressWarningsHolder"/>
+    <module name="FileContentsHolder"/>
   </module>
 </module>

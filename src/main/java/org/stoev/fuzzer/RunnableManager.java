@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import java.util.concurrent.TimeoutException;
 
 public final class RunnableManager {
@@ -16,8 +13,7 @@ public final class RunnableManager {
 	private final long duration;
 
 	private final GlobalContext<?> globalContext;
-	private final Class<? extends FuzzRunnable> runnableClass;
-	private final Constructor<? extends FuzzRunnable> runnableConstructor;
+
 	private final List<FuzzRunnable> runnables = new ArrayList<FuzzRunnable>();
 	private final List<Thread> threads = new ArrayList<Thread>();
 
@@ -25,14 +21,9 @@ public final class RunnableManager {
 	private TimeoutException timeoutException;
 
 	RunnableManager(final GlobalContext<?> globalContext) {
-		this.globalContext = globalContext;
-		this.runnableClass = globalContext.getRunnableClass();
+		assert globalContext != null;
 
-		try {
-			this.runnableConstructor = runnableClass.getConstructor(RunnableManager.class, ThreadContext.class);
-		} catch (NoSuchMethodException noSuchMethodException) {
-			throw new IllegalArgumentException(noSuchMethodException);
-		}
+		this.globalContext = globalContext;
 
 		this.threadCount = globalContext.getThreadCount();
 		this.duration = globalContext.getDuration();
@@ -53,20 +44,12 @@ public final class RunnableManager {
 		for (int i = 1; i <= threadCount; i++) {
 			ThreadContext<?> threadContext = ThreadContext.newThreadContext(globalContext, i);
 
-			try {
-				FuzzRunnable runnable = runnableConstructor.newInstance(this, threadContext);
-				runnables.add(runnable);
+			FuzzRunnable runnable = globalContext.getRunnableFactory().newRunnable(this, threadContext);
+			runnables.add(runnable);
 
-	                        Thread thread = new Thread(runnable);
-				threads.add(thread);
-	                        thread.start();
-			} catch (InstantiationException e) {
-				assert false;
-			} catch (IllegalAccessException e) {
-				assert false;
-			} catch (InvocationTargetException e) {
-				assert false;
-			}
+                        Thread thread = new Thread(runnable);
+			threads.add(thread);
+                        thread.start();
 		}
 	}
 

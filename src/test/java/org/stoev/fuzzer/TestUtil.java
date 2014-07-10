@@ -34,7 +34,7 @@ final class TestUtil {
 
 	static void assertToString(final String grammarString, final String expectedString) {
 		Grammar<String> grammar = new Grammar<String>(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
-		Assert.assertEquals(grammar.toString(), expectedString, "toString() was produced from the following grammar:\n" + grammarString + "\n");
+		Assert.assertEquals(grammar.getGrammarString(), expectedString, "toString() was produced from the following grammar:\n" + grammarString + "\n");
 	}
 
 	static void assertShortestConstantSentence(final String grammarString, final String expectedShortestConstantString) {

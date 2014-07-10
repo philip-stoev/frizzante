@@ -5,6 +5,9 @@ import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Set;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import java.lang.reflect.Method;
 
 import org.stoev.fuzzer.Grammar.GrammarFlags;
@@ -29,8 +32,15 @@ public final class Grammar<T> implements Generatable<T> {
 	private static final String RULE_NAME_PATTERN = "[a-zA-Z0-9_. ]*:";
 	private static final String JAVA_EXTENSION = ".java";
 
+	private File file;
+
 	private final HashMap<String, Generatable<T>> rules = new HashMap<String, Generatable<T>>();
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
+
+	Grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
+		this(new Scanner(file, "UTF-8"), flags);
+		this.file = file;
+	}
 
 	Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
 		scanner.reset();
@@ -140,6 +150,20 @@ public final class Grammar<T> implements Generatable<T> {
 	}
 
 	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		if (file != null) {
+			sb.append("Grammar file: ");
+			sb.append(file.getAbsolutePath());
+		} else {
+			sb.append("Grammar:\n");
+			sb.append(getGrammarString());
+		}
+
+		return sb.toString();
+	}
+
+	public String getGrammarString() {
 		StringBuilder sb = new StringBuilder();
 
 		for (Generatable<T> rule: rules.values()) {

@@ -1,5 +1,5 @@
 main:
-	public static void run(ThreadContext<String> threadContext, DB db) {
+	public static void run(DB db) {
 		DBCollection coll1 = db.getCollection(collection_name);
 		DBCollection coll2 = db.getCollection(collection_name);
 		operation_list;

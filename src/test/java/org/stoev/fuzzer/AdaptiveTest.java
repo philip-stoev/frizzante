@@ -47,7 +47,7 @@ public class AdaptiveTest {
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.succeeded(1.0f);
-		Assert.assertEquals(grammar.toString(), "main:1.0 good\n;\n");
+		Assert.assertEquals(grammar.getGrammarString(), "main:1.0 good\n;\n");
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class AdaptiveTest {
 		s.failed(HALF_PENALTY);
 		s.succeeded(QUARTER_PENALTY);
 
-		Assert.assertEquals(grammar.toString(), "main:0.6666666666666666 good\n;\n");
+		Assert.assertEquals(grammar.getGrammarString(), "main:0.6666666666666666 good\n;\n");
 	}
 
 	@Test
@@ -75,6 +75,6 @@ public class AdaptiveTest {
 		Sentence<String> s = c.newSentence();
 		c.generate(s);
 		s.failed(HALF_PENALTY);
-		Assert.assertEquals(grammar.toString(), "main:0.5 bad\n;\n");
+		Assert.assertEquals(grammar.getGrammarString(), "main:0.5 bad\n;\n");
 	}
 }

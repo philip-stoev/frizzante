@@ -4,14 +4,17 @@ package org.stoev.fuzzer;
 public class ExecutionException extends Exception {
 	private final transient ThreadContext<?> threadContext;
 	private final transient Sentence<?> sentence;
+	private final transient FuzzRunnable runnable;
 
-	ExecutionException(final String message, final Throwable cause, final ThreadContext<?> threadContext, final Sentence<?> sentence) {
+	ExecutionException(final String message, final Throwable cause, final ThreadContext<?> threadContext, final FuzzRunnable runnable, final Sentence<?> sentence) {
 		super(message, cause);
 
 		assert threadContext != null;
+		assert runnable != null;
 		assert sentence != null;
 
 		this.threadContext = threadContext;
+		this.runnable = runnable;
 		this.sentence = sentence;
 	}
 
@@ -23,16 +26,28 @@ public class ExecutionException extends Exception {
 		return sentence;
 	}
 
-	public final String toString() {
+	public final String getMessage() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Grammar:\n");
-		sb.append(threadContext.getGlobalContext().getGrammar().toString());
+
+		sb.append("Cause: ");
+		sb.append(getCause().toString());
+		sb.append("\n");
 
 		sb.append("Global context:\n");
 		sb.append(threadContext.getGlobalContext().toString());
 
-		sb.append("Local context:\n");
+		sb.append("Thread context:\n");
 		sb.append(threadContext.toString());
+
+		sb.append("Execution counter: ");
+		sb.append(runnable.getExecutionCounter());
+		sb.append("\n");
+
+		sb.append("Sentence:\n");
+		sb.append("Sentence id:");
+		sb.append(sentence.getId());
+		sb.append("\n");
+		sb.append(sentence.toString());
 
 		return sb.toString();
 	}

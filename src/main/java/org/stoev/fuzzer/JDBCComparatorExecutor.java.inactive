@@ -1,0 +1,34 @@
+package org.stoev.fuzzer;
+
+java.sql.Connection;
+
+public class JDBCComparatorExecutor implements Executor<String> {
+	private final List<Connection> connections = new ArrayList<Connections>();
+
+	private CommandExecutor(final Connection... conns) {
+		connections = Arrays.asList(conns);
+	}
+
+	public final int execute(final Sentence<String> sentence) {
+		
+
+
+	}
+}
+
+
+final class JDBCResult {
+	private int errorCode;
+	private final List<List<String>> resultSet = new ArrayList<List<String>>();
+
+	void setErrorCode(int ec) {
+		assert this.errorCode == 0;
+		this.errorCode = ec;
+	}
+
+	void appendRow(List<String> row) {
+		resultSet.add(row);
+	}
+
+	boolean
+}

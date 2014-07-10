@@ -7,7 +7,6 @@ public final class ThreadContext<T> {
 	private final GlobalContext<T> globalContext;
 	private final long randomSeed;
 	private final Random random;
-
 	private final int contextId;
 
 	private final HashMap<String, Sentence<T>> ruleCache = new HashMap<String, Sentence<T>>();
@@ -44,14 +43,13 @@ public final class ThreadContext<T> {
 		return sentence.toString();
 	}
 
-	long getNewId() {
-		// Return an ID between idRangeStart and (idRangeStart + idRangeLength) inclusive
-		long newId = globalContext.getIdRangeStart() + (long) (random.nextDouble() * (globalContext.getIdRangeLength() + 1));
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Thread random seed: ");
+		sb.append(randomSeed);
+		sb.append("\n");
 
-		assert newId >= globalContext.getIdRangeStart();
-		assert newId <= globalContext.getIdRangeStart() + globalContext.getIdRangeLength();
-
-		return newId;
+		return sb.toString();
 	}
 
 	public Random getRandom() {
@@ -68,6 +66,16 @@ public final class ThreadContext<T> {
 
 	public GlobalContext<T> getGlobalContext() {
 		return globalContext;
+	}
+
+	long getNewId() {
+		// Return an ID between idRangeStart and (idRangeStart + idRangeLength) inclusive
+		long newId = globalContext.getIdRangeStart() + (long) (random.nextDouble() * (globalContext.getIdRangeLength() + 1));
+
+		assert newId >= globalContext.getIdRangeStart();
+		assert newId <= globalContext.getIdRangeStart() + globalContext.getIdRangeLength();
+
+		return newId;
 	}
 
 	Sentence<T> getCachedValue(final String ruleName) {

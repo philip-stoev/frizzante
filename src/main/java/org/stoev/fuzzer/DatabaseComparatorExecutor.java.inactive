@@ -1,0 +1,16 @@
+package org.stoev.fuzzer;
+
+java.sql.Connection;
+
+public class DatabaseComparatorExecutor implements Executor<String> {
+	private final List<Connection> connections = new ArrayList<Connections>();
+
+	private CommandExecutor(final Connection... conns) {
+		connections = Arrays.asList(conns);
+	}
+
+	public final int execute(final Sentence<String> sentence) {		
+
+
+	}
+}
