@@ -17,7 +17,7 @@ public class MongoDBRunnableFactory extends FuzzRunnableFactory {
 
 	@Override
 	@SuppressWarnings("checkstyle:designforextension")
-	public FuzzRunnable newRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) throws UnknownHostException {
+	public FuzzRunnable newRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
 		return new MongoDBRunnable(runnableManager, threadContext, dbName);
 	}
 }
@@ -26,10 +26,14 @@ class MongoDBRunnable extends JavaBatchRunnable {
 	private final MongoClient mongoClient;
 	private final DB db;
 
-	public MongoDBRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext, final String dbName) throws UnknownHostException {
+	public MongoDBRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext, final String dbName) {
 		super(runnableManager, threadContext);
-		mongoClient = new MongoClient();
-		db = mongoClient.getDB(dbName);
+		try {
+			mongoClient = new MongoClient();
+			db = mongoClient.getDB(dbName);
+		} catch (UnknownHostException unknownHostException) {
+			throw new IllegalArgumentException(unknownHostException);
+		}
 	}
 
 	@Override
