@@ -12,7 +12,7 @@ public final class App {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar(new File("mongodb.grammar"), EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
 			.idRange(0, 1000L)
-			.runnable(MongoDBRunnable.class)
+			.runnableFactory(new MongoDBRunnableFactory("test4"))
 			.count(10000L)
 			.threads(10)
 			.duration(60)
