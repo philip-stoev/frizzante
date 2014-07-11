@@ -38,6 +38,7 @@ public final class JavaBatchCompiler implements Iterable<Class<?>> {
 	public static final ConcurrentMap<String, SoftReference<Class<?>>> GLOBAL_CLASS_CACHE = new ConcurrentHashMap<String, SoftReference<Class<?>>>();
 
 	private final String[] packageHeaders;
+	private String packageName = null;
 
 	private final ConcurrentMap<String, SoftReference<Class<?>>> classCache;
 	private final Deque<JavaSource> javaSources = new ArrayDeque<JavaSource>();
@@ -63,17 +64,26 @@ public final class JavaBatchCompiler implements Iterable<Class<?>> {
 
 	JavaBatchCompiler(final ConcurrentMap<String, SoftReference<Class<?>>> cache, final String[] headers) {
 		this.classCache = cache;
-		this.packageHeaders = headers;
+
+		if (headers != null) {
+			this.packageHeaders = headers;
+		} else {
+			this.packageHeaders = new String[]{};
+		}
+
+		for (String packageHeader: packageHeaders) {
+			if (packageHeader.startsWith("package")) {
+				this.packageName = packageHeader.substring("package".length() + 1);
+			}
+		}
 	};
 
 	void addJavaClass(final String className, final String javaString) {
 		StringBuilder javaStringBuilder = new StringBuilder();
 
-		if (packageHeaders != null) {
-			for (String packageHeader: packageHeaders) {
-				javaStringBuilder.append(packageHeader);
-				javaStringBuilder.append(";\n");
-			}
+		for (String packageHeader: packageHeaders) {
+			javaStringBuilder.append(packageHeader);
+			javaStringBuilder.append(";\n");
 		}
 
 		javaStringBuilder.append("public class ");
@@ -82,7 +92,15 @@ public final class JavaBatchCompiler implements Iterable<Class<?>> {
 		javaStringBuilder.append(javaString);
                 javaStringBuilder.append("}");
 
-		javaSources.addLast(new JavaSource(className, javaStringBuilder.toString()));
+		final String fullClassName;
+
+		if (packageName != null) {
+			fullClassName = packageName + '.' + className;
+		} else {
+			fullClassName = className;
+		}
+
+		javaSources.addLast(new JavaSource(fullClassName, javaStringBuilder.toString()));
 	}
 
 	public Iterable<Class<?>> compileAll() {

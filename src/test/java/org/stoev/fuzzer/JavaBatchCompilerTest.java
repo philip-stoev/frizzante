@@ -21,7 +21,7 @@ public class JavaBatchCompilerTest {
 		}
 	}
 
-//	@Test
+	@Test
 	public final void testPackageDeclaration() throws IllegalAccessException, InvocationTargetException {
 		JavaBatchCompiler javaCompiler = new JavaBatchCompiler(null, new String[] {"package foo.bar"});
 
