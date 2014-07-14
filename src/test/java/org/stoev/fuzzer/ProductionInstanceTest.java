@@ -15,7 +15,8 @@ public class ProductionInstanceTest {
 		threadContext.generate(sentence);
 
 		List<ProductionInstance<String>> productionInstances = sentence.getProductionInstances();
-		Assert.assertTrue(productionInstances.isEmpty());
+		Assert.assertEquals(productionInstances.size(), 1);
+		Assert.assertEquals(productionInstances.get(0).getProduction().getParent().getName(), "main");
  	}
 
 	@Test
@@ -27,8 +28,9 @@ public class ProductionInstanceTest {
 		threadContext.generate(sentence);
 
 		List<ProductionInstance<String>> productionInstances = sentence.getProductionInstances();
-		Assert.assertEquals(productionInstances.size(), 1);
+		Assert.assertEquals(productionInstances.size(), 2);
 		Assert.assertEquals(productionInstances.get(0).getProduction().getParent().getName(), "main");
+		Assert.assertEquals(productionInstances.get(1).getProduction().getParent().getName(), "bar");
  	}
 
 
@@ -85,5 +87,4 @@ public class ProductionInstanceTest {
 
 		Assert.assertTrue(!i.hasNext());
 	}
-
 }

@@ -92,17 +92,37 @@ public class SeparatorsTest {
 		TestUtil.assertGenerates("main:foo\n\n|foo;", "foo");
 	}
 
-//	@Test
+	@Test
 	public final void testMultiplePipe() {
-		TestUtil.assertToString("main:|;", "");
-		TestUtil.assertToString("main:||;", "main:1.0\n|1.0\n;");
-		TestUtil.assertToString("main: ||;", "main:1.0 \n|1.0 \n;\n");
-		TestUtil.assertToString("main:| |;", "");
-		TestUtil.assertToString("main:|||;", "");
-		TestUtil.assertToString("main:|||;", "");
+		TestUtil.assertToString("main:|;", "main:1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main: |;", "main:1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main:| ;", "main:1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main:||;", "main:1.0 \n|1.0 \n|1.0 \n;\n");
+
+		TestUtil.assertToString("main:||;", "main:1.0 \n|1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main: ||;", "main:1.0 \n|1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main:| |;", "main:1.0 \n|1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main:|| ;", "main:1.0 \n|1.0 \n|1.0 \n;\n");
+
+		TestUtil.assertToString("main:|||;", "main:1.0 \n|1.0 \n|1.0 \n|1.0 \n;\n");
 	}
 
-//	@Test
+	@Test
+	final void testEmptyProductions() {
+		TestUtil.assertGenerates("main:;", "");
+		TestUtil.assertGenerates("main: ;", "");
+
+		TestUtil.assertGenerates("main:|;", "");
+		TestUtil.assertGenerates("main: |;", "");
+		TestUtil.assertGenerates("main:| ;", "");
+
+		TestUtil.assertGenerates("main:||;", "");
+		TestUtil.assertGenerates("main:| |;", "");
+		TestUtil.assertGenerates("main: ||;", "");
+		TestUtil.assertGenerates("main:|| ;", "");
+	}
+
+	@Test
 	public final void testEmptyLeadingProduction() {
 		// At least some of the generated strings must be empty
 

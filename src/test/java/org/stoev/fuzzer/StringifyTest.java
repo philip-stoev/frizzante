@@ -5,15 +5,15 @@ import org.testng.annotations.Test;
 public class StringifyTest {
 	@Test
 	public final void testEmpty() {
-		TestUtil.assertToString("main:;", "main:;\n");
-		TestUtil.assertToString("main:;\n", "main:;\n");
-		TestUtil.assertToString("main: ;", "main:;\n");
-		TestUtil.assertToString("main:  ;", "main:;\n");
+		TestUtil.assertToString("main:;", "main:1.0 \n;\n");
+		TestUtil.assertToString("main:;\n", "main:1.0 \n;\n");
+		TestUtil.assertToString("main: ;", "main:1.0 \n;\n");
+		TestUtil.assertToString("main:  ;", "main:1.0 \n;\n");
 	}
 
 	@Test
 	public final void testEmptyProductions() {
-		TestUtil.assertToString("main:| |  |   ;", "main:1.0 \n|1.0 \n|1.0 \n;\n");
+		TestUtil.assertToString("main:| |  |   ;", "main:1.0 \n|1.0 \n|1.0 \n|1.0 \n;\n");
 	}
 
 	@Test

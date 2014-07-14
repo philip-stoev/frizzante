@@ -4,7 +4,6 @@ import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -22,6 +21,12 @@ class GrammarRule<T> implements Generatable<T> {
 		ruleName = rn;
 		assert ruleString != null;
 
+		// Trim whitespace after trailing semicolon
+		final String trimmedRuleString = ruleString.replaceFirst("\\s+$", "");
+		assert trimmedRuleString.endsWith(";");
+
+		// Trim trailing semicolon and any whitespace that was immediately before it
+		final String ruleStringNoSemicolon = trimmedRuleString.substring(0, trimmedRuleString.length() - 1).replaceFirst("\\s+$", "");
 		final String pipePattern;
 
 		if (flags.contains(GrammarFlags.TRAILING_PIPES_ONLY)) {
@@ -30,14 +35,9 @@ class GrammarRule<T> implements Generatable<T> {
 			pipePattern = Constants.PIPE;
 		}
 
-		final String productionSeparationPattern = Constants.OPTIONAL_WHITESPACE + pipePattern
-		+ Constants.OR + Constants.OPTIONAL_WHITESPACE + Constants.SEMICOLON + Constants.OPTIONAL_WHITESPACE + Constants.EOF;
+		String[] productionStrings = ruleStringNoSemicolon.split(Constants.OPTIONAL_WHITESPACE + pipePattern, -1);
 
-		Scanner scanner = new Scanner(ruleString);
-		scanner.useDelimiter(productionSeparationPattern);
-
-		while (scanner.hasNext()) {
-			String productionString = scanner.next();
+		for (String productionString: productionStrings) {
 			GrammarProduction<T> production = new GrammarProduction<T>(this, productionString, flags);
 			productions.add(production);
 		}
