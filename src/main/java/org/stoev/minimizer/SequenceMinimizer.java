@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.BitSet;
 import java.util.Iterator;
-
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.util.NoSuchElementException;
 
 /**
  * Imlements a minimization algorithm that works on Lists of elements, such as Strings.
@@ -92,6 +92,10 @@ public final class SequenceMinimizer<T> implements Iterable<List<T>> {
 
 			@Override
 			public List<T> next() {
+				if (intervalQueue.isEmpty()) {
+					throw new NoSuchElementException();
+				}
+
 				currentInterval = intervalQueue.remove();
 				currentBitset.set(currentInterval.getStart(), currentInterval.getEnd() + 1);
 				return getCurrentList();

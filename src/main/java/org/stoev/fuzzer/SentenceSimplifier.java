@@ -3,6 +3,7 @@ package org.stoev.fuzzer;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public final class SentenceSimplifier<T> implements Iterable<Sentence<T>> {
 	private final Sentence<T> originalSentence;
@@ -153,6 +154,10 @@ public final class SentenceSimplifier<T> implements Iterable<Sentence<T>> {
 
 				@Override
 				public Sentence<T> next() {
+					if (!hasNext()) {
+						throw new NoSuchElementException();
+					}
+
 					// We advance the position to the next production that can be worked on
 					for (currentPosition++; currentPosition < productionInstances.size(); currentPosition++) {
 						if (productionStatus.get(currentPosition) == ProductionStatus.ORIGINAL) {
