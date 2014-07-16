@@ -166,6 +166,26 @@ public class SeparatorsTest {
 	}
 
 	@Test
+	public final void testLeadingColon() {
+		TestUtil.assertGenerates("main::;", ":");
+		TestUtil.assertGenerates("main: :;", ":");
+		TestUtil.assertGenerates("main:: ;", ":");
+	}
+
+	@Test
+	public final void testMiddleColon() {
+		TestUtil.assertGenerates("main: foo: bar;\nfoo:foo2;\nbar:bar2;\n", "foo2: bar2");
+		TestUtil.assertGenerates("main: foo :bar;\nfoo:foo2;\nbar:bar2;\n", "foo2 :bar2");
+		TestUtil.assertGenerates("main:foo:bar;\nfoo:foo2;\nbar:bar2;\n", "foo2:bar2");
+	}
+
+	@Test
+	public final void testTrailingColon() {
+		TestUtil.assertGenerates("main: foo:;\nfoo:foo2;", "foo2:");
+		TestUtil.assertGenerates("main:foo: ;\nfoo:foo2;", "foo2:");
+	}
+
+	@Test
 	public final void testMiddleSemicolon() {
 		TestUtil.assertGenerates("main:foo;bar;", "foo;bar");
 		TestUtil.assertGenerates("main:foo; bar;", "foo; bar");

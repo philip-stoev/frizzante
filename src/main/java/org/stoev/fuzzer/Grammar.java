@@ -62,6 +62,11 @@ public final class Grammar<T> implements Generatable<T> {
 				scanner.next(Constants.WHITESPACE);
 			}
 
+			// Trim comments
+			while (scanner.hasNext(Constants.COMMENT)) {
+				scanner.nextLine();
+			}
+
 			String generatableName = scanner.findWithinHorizon(RULE_NAME_PATTERN, 0);
 
 			if (generatableName == null) {
