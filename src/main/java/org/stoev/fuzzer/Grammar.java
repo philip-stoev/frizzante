@@ -33,6 +33,7 @@ public final class Grammar<T> implements Generatable<T> {
 	private static final String JAVA_EXTENSION = ".java";
 
 	private File file;
+	private final Set<GrammarFlags> flags;
 
 	private final HashMap<String, Generatable<T>> rules = new HashMap<String, Generatable<T>>();
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
@@ -43,6 +44,12 @@ public final class Grammar<T> implements Generatable<T> {
 	}
 
 	Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
+		this.flags = flags;
+		parse(scanner);
+	}
+
+
+	private void parse(final Scanner scanner) {
 		scanner.reset();
 		scanner.useDelimiter("");
 
@@ -57,14 +64,28 @@ public final class Grammar<T> implements Generatable<T> {
 		}
 
 		while (true) {
+			// Trim comments and process includes
+			while (scanner.hasNext(Constants.COMMENT)) {
+				String commentLine = scanner.nextLine();
+
+				if (commentLine.startsWith(Constants.INCLUDE)) {
+					if (commentLine.length() < Constants.INCLUDE.length() + 1) {
+						throw new IllegalArgumentException("Malformed #include directive.");
+					}
+
+					String includeFile = commentLine.substring(Constants.INCLUDE.length() + 1).trim();
+
+					try {
+						parse(new Scanner(new File(includeFile), "UTF-8"));
+					} catch (FileNotFoundException fileNotFoundException) {
+						throw new IllegalArgumentException(fileNotFoundException);
+					}
+				}
+			}
+
 			// Trim leading whitespace
 			while (scanner.hasNext(Constants.WHITESPACE)) {
 				scanner.next(Constants.WHITESPACE);
-			}
-
-			// Trim comments
-			while (scanner.hasNext(Constants.COMMENT)) {
-				scanner.nextLine();
 			}
 
 			String generatableName = scanner.findWithinHorizon(RULE_NAME_PATTERN, 0);
