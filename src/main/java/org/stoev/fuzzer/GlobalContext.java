@@ -119,7 +119,7 @@ public final class GlobalContext<T> {
 
 		public ContextBuilder<T> idRange(final long start, final long length) {
 			this.idRangeStart = start;
-			this.idRangeLength = length;
+			this.idRangeLength = Math.min(length, Long.MAX_VALUE - 1);
 			return this;
 		}
 
