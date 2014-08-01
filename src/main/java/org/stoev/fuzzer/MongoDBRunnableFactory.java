@@ -15,6 +15,10 @@ public class MongoDBRunnableFactory extends FuzzRunnableFactory {
 		this.dbName = dbName;
 	}
 
+	public MongoDBRunnableFactory() {
+		this.dbName = "test";
+	}
+
 	@Override
 	@SuppressWarnings("checkstyle:designforextension")
 	public FuzzRunnable newRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
