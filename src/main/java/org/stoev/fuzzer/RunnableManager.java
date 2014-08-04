@@ -8,6 +8,9 @@ import java.util.TimerTask;
 
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class RunnableManager {
 	private final int threadCount;
 	private final long duration;
@@ -19,6 +22,8 @@ public final class RunnableManager {
 
 	private final Timer timer = new Timer(true);
 	private TimeoutException timeoutException;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RunnableManager.class);
 
 	RunnableManager(final GlobalContext<?> globalContext) {
 		assert globalContext != null;
@@ -35,11 +40,11 @@ public final class RunnableManager {
 		waitForThreads();
 		reapExceptions();
 
-		System.out.println("Execution completed successfully.");
+		LOGGER.info("Execution completed successfully.");
 	}
 
 	void startThreads() {
-		System.out.println("Starting " + threadCount + " threads.");
+		LOGGER.info("Starting " + threadCount + " threads.");
 
 		for (int i = 1; i <= threadCount; i++) {
 			ThreadContext<?> threadContext = ThreadContext.newThreadContext(globalContext, i);
@@ -54,12 +59,12 @@ public final class RunnableManager {
 	}
 
 	void scheduleTermination() {
-		System.out.println("Scheduling termination in " + duration + " seconds.");
+		LOGGER.info("Scheduling termination in " + duration + " seconds.");
 
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("Desired execution duration reached.");
+				LOGGER.info("Desired execution duration reached.");
                                 for (FuzzRunnable runnable: runnables) {
                                         runnable.interrupt();
                                 }
@@ -69,7 +74,7 @@ public final class RunnableManager {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				System.err.println("Timeout.");
+				LOGGER.error("Timeout.");
 				timeoutException = new TimeoutException("Execution took twice longer than desired.");
 				killAll();
                         }
@@ -93,7 +98,7 @@ public final class RunnableManager {
 	}
 
 	void killAll() {
-		System.out.println("Terminating all threads.");
+		LOGGER.info("Terminating all threads.");
 
 		timer.cancel();
 
@@ -113,7 +118,7 @@ public final class RunnableManager {
 	}
 
 	void waitForThreads() {
-		System.out.println("Waiting for threads to complete...");
+		LOGGER.info("Waiting for threads to complete...");
 
 		for (Thread thread : threads) {
 			try {

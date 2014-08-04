@@ -1,5 +1,8 @@
 package org.stoev.fuzzer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -28,6 +31,8 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.FileObject;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
 
 import java.lang.ref.SoftReference;
 
@@ -36,6 +41,7 @@ public final class JavaBatchCompiler implements Iterable<Class<?>> {
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
 
 	public static final ConcurrentMap<String, SoftReference<Class<?>>> GLOBAL_CLASS_CACHE = new ConcurrentHashMap<String, SoftReference<Class<?>>>();
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavaBatchCompiler.class);
 
 	private final String[] packageHeaders;
 	private String packageName = null;
@@ -105,8 +111,6 @@ public final class JavaBatchCompiler implements Iterable<Class<?>> {
 
 	public Iterable<Class<?>> compileAll() {
 		final List<JavaFileObject> javaFileObjects = new ArrayList<JavaFileObject>();
-		final JavaFileManager fileManager = new FileManagerInMemory(COMPILER.getStandardFileManager(null, null, null));
-
 		final Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
 
 		// For each Class to be compiled, check if it exists in the cache, or if it was seen already in the current batch
@@ -127,11 +131,23 @@ public final class JavaBatchCompiler implements Iterable<Class<?>> {
 			}
 		}
 
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+		final JavaFileManager fileManager = new FileManagerInMemory(COMPILER.getStandardFileManager(diagnostics, null, null));
+
 		if (!javaFileObjects.isEmpty()) {
-			boolean compilationSuccess = COMPILER.getTask(null, fileManager, null, Arrays.asList(COMPILER_OPTIONS), null, javaFileObjects).call();
+			boolean compilationSuccess = COMPILER.getTask(null, fileManager, diagnostics, Arrays.asList(COMPILER_OPTIONS), null, javaFileObjects).call();
 
 			if (!compilationSuccess) {
-				throw new IllegalArgumentException("Java code compilation failed.");
+				StringBuilder sb = new StringBuilder();
+
+				sb.append("Java compilation failed:\n");
+				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+					sb.append(diagnostic.toString());
+					sb.append(System.getProperty("line.separator"));
+				}
+
+				LOGGER.error(sb.toString());
+				throw new IllegalArgumentException(sb.toString());
 			}
 
 			for (Map.Entry<String, Class<?>> entry : classMap.entrySet()) {
