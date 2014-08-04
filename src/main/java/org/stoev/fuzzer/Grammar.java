@@ -4,20 +4,21 @@ import java.util.regex.Pattern;
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.EnumSet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.lang.reflect.Method;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
+import org.stoev.fuzzer.Grammar.GrammarOptions;
 
 public final class Grammar<T> implements Generatable<T> {
 
-	public static enum GrammarFlags {
-		STANDALONE_SEMICOLONS_ONLY,
+	static enum GrammarOptions {
+		STANDALONE_SEMICOLONS,
 		SKIP_WHITESPACE,
-		TRAILING_PIPES_ONLY
+		TRAILING_PIPES
 	};
 
 	private static final String STARTING_GRAMMAR_RULE = "main";
@@ -33,18 +34,17 @@ public final class Grammar<T> implements Generatable<T> {
 	private static final String JAVA_EXTENSION = ".java";
 
 	private File file;
-	private final Set<GrammarFlags> flags;
+	private final Set<GrammarOptions> options = EnumSet.noneOf(GrammarOptions.class);
 
 	private final HashMap<String, Generatable<T>> rules = new HashMap<String, Generatable<T>>();
 	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
-	Grammar(final File file, final Set<GrammarFlags> flags) throws FileNotFoundException {
-		this(new Scanner(file, "UTF-8"), flags);
+	Grammar(final File file) throws FileNotFoundException {
+		this(new Scanner(file, "UTF-8"));
 		this.file = file;
 	}
 
-	Grammar(final Scanner scanner, final Set<GrammarFlags> flags) {
-		this.flags = flags;
+	Grammar(final Scanner scanner) {
 		parse(scanner);
 	}
 
@@ -52,16 +52,6 @@ public final class Grammar<T> implements Generatable<T> {
 	private void parse(final Scanner scanner) {
 		scanner.reset();
 		scanner.useDelimiter("");
-
-		final Pattern rulePattern;
-
-		// We use Pattern.DOTALL here because grammar rules are allowed to span multiple rows
-
-		if (flags.contains(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)) {
-			rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + STANDALONE_SEMICOLON + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
-		} else {
-			rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + SEMICOLON_AT_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
-		}
 
 		while (true) {
 			// Trim comments and process includes
@@ -80,6 +70,11 @@ public final class Grammar<T> implements Generatable<T> {
 					} catch (FileNotFoundException fileNotFoundException) {
 						throw new IllegalArgumentException(fileNotFoundException);
 					}
+				}
+
+				if (commentLine.startsWith(Constants.OPTION)) {
+					String optionName = commentLine.substring(Constants.OPTION.length() + 1).trim();
+					options.add(GrammarOptions.valueOf(optionName));
 				}
 			}
 
@@ -105,6 +100,16 @@ public final class Grammar<T> implements Generatable<T> {
 				throw new IllegalArgumentException("Name " + generatableName + " defined multiple times in grammar.");
 			}
 
+			final Pattern rulePattern;
+
+			// We use Pattern.DOTALL here because grammar rules are allowed to span multiple rows
+
+			if (options.contains(GrammarOptions.STANDALONE_SEMICOLONS)) {
+				rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + STANDALONE_SEMICOLON + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
+			} else {
+				rulePattern = Pattern.compile(ANY_STRING + Constants.OPTIONAL_WHITESPACE + SEMICOLON_AT_EOL + Constants.OPTIONAL_WHITESPACE, Pattern.DOTALL);
+			}
+
 			Generatable<T> generatableObject;
 
 			if (generatableName.endsWith(JAVA_EXTENSION)) {
@@ -123,7 +128,7 @@ public final class Grammar<T> implements Generatable<T> {
 					throw new IllegalArgumentException("Unable to parse rule " + generatableName + " (missing ';' terminator?)");
 				}
 
-				generatableObject = new GrammarRule<T>(generatableName, ruleString, flags);
+				generatableObject = new GrammarRule<T>(generatableName, ruleString, options);
 			}
 
 			rules.put(generatableName, generatableObject);

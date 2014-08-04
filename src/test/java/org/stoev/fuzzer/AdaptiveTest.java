@@ -4,9 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Scanner;
-import java.util.EnumSet;
-
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public class AdaptiveTest {
 	public static final int HUNDRED_ITERATIONS = 100;
@@ -40,7 +37,7 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotionLimit() {
-		Grammar<String> grammar = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+		Grammar<String> grammar = new Grammar<String>(new Scanner("main: good ;"));
 		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 
@@ -52,7 +49,7 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testPromotion() {
-		Grammar<String> grammar = new Grammar<String>(new Scanner("main: good ;"), EnumSet.noneOf(GrammarFlags.class));
+		Grammar<String> grammar = new Grammar<String>(new Scanner("main: good ;"));
 		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 
@@ -68,7 +65,7 @@ public class AdaptiveTest {
 
 	@Test
 	public final void testDemotion() {
-		Grammar<String> grammar = new Grammar<String>(new Scanner("main: bad;"), EnumSet.noneOf(GrammarFlags.class));
+		Grammar<String> grammar = new Grammar<String>(new Scanner("main: bad;"));
 		GlobalContext<String> g = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 

@@ -1,6 +1,6 @@
 package org.stoev.fuzzer;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
+import org.stoev.fuzzer.Grammar.GrammarOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ final class GrammarProduction<T> implements Generatable<T> {
 	private final double initialWeight;
 	private double weight;
 
-	GrammarProduction(final GrammarRule<T> parent, final String productionString, final Set<GrammarFlags> flags) {
+	GrammarProduction(final GrammarRule<T> parent, final String productionString, final Set<GrammarOptions> options) {
 		this.parentRule = parent;
 
 		final Scanner scanner = new Scanner(productionString);
@@ -64,7 +64,7 @@ final class GrammarProduction<T> implements Generatable<T> {
 
 			// We populate the elements array backwards as this is how items will be inserted into the stack during generation
 
-			if (!flags.contains(GrammarFlags.SKIP_WHITESPACE)) {
+			if (!options.contains(GrammarOptions.SKIP_WHITESPACE)) {
 				elements.add(0, new GrammarLiteral<T>(elementString));
 			} else if (!elementString.matches(Constants.WHITESPACE)) {
 				elements.add(0, new GrammarLiteral<T>(elementString));

@@ -1,3 +1,5 @@
+#option STANDALONE_SEMICOLONS
+
 main:
 	public static void run(DB db) {
 		DBCollection coll1 = db.getCollection(collection_name);

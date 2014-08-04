@@ -1,3 +1,5 @@
+#option STANDALONE_SEMICOLONS
+
 main:90%creating_command |10%destroying_command
 ;
 

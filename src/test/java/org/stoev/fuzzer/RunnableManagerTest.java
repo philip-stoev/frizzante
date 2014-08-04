@@ -3,10 +3,7 @@ package org.stoev.fuzzer;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 import org.stoev.fuzzer.GlobalContext.ContextBuilder;
-
-import java.util.EnumSet;
 
 import java.util.concurrent.TimeoutException;
 
@@ -14,7 +11,7 @@ public class RunnableManagerTest {
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public final void testBadJavaCode() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: simply_bad_java\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: simply_bad_java\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(1)
                         .duration(60)
@@ -26,7 +23,7 @@ public class RunnableManagerTest {
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public final void testBadJavaSignature() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: public static void testBadJavaSignature(final String foo) { assert false; }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: public static void testBadJavaSignature(final String foo) { assert false; }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(1)
                         .duration(60)
@@ -38,7 +35,7 @@ public class RunnableManagerTest {
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public final void testNonpublicJava() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: static void testNonpublicJava() { assert false; }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: static void testNonpublicJava() { assert false; }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(1)
                         .duration(60)
@@ -50,7 +47,7 @@ public class RunnableManagerTest {
 	@Test(expectedExceptions = ExecutionException.class)
 	public final void testJavaException() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: public static void testJavaException() { assert false; }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: public static void testJavaException() { assert false; }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(1)
                         .duration(60)
@@ -62,7 +59,7 @@ public class RunnableManagerTest {
 	@Test
 	public final void testZeroExecutions() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: public static void run() { assert false; }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: public static void run() { assert false; }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(0)
                         .duration(60)
@@ -74,7 +71,7 @@ public class RunnableManagerTest {
 	@Test
 	public final void testSimpleRunnableManager() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: public static void testSimpleRunnableManager() { assert true; }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: public static void testSimpleRunnableManager() { assert true; }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(1)
                         .duration(60)
@@ -86,7 +83,7 @@ public class RunnableManagerTest {
 	@Test
 	public final void testDuration() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: public static void testSimpleRunnableManager() throws InterruptedException { Thread.sleep(1000); }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: public static void testSimpleRunnableManager() throws InterruptedException { Thread.sleep(1000); }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(100)
                         .duration(1)
@@ -104,7 +101,7 @@ public class RunnableManagerTest {
 	@Test (expectedExceptions = TimeoutException.class)
 	public final void testTimeout() throws Throwable {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar("main: public static void testSimpleRunnableManager() throws InterruptedException { Thread.sleep(10000); }\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
+			.grammar("#option STANDALONE_SEMICOLONS\nmain: public static void testSimpleRunnableManager() throws InterruptedException { Thread.sleep(10000); }\n;")
                         .runnableFactory(new JavaBatchRunnableFactory())
                         .count(100)
                         .duration(1)

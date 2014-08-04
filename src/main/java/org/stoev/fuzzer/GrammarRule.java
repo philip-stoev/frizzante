@@ -1,6 +1,6 @@
 package org.stoev.fuzzer;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
+import org.stoev.fuzzer.Grammar.GrammarOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ class GrammarRule<T> implements Generatable<T> {
 	private boolean shortestConstantCalculated;
 	private Sentence<T> shortestConstantSentence;
 
-	GrammarRule(final String rn, final String ruleString, final Set<GrammarFlags> flags) {
+	GrammarRule(final String rn, final String ruleString, final Set<GrammarOptions> options) {
 		ruleName = rn;
 		assert ruleString != null;
 
@@ -29,7 +29,7 @@ class GrammarRule<T> implements Generatable<T> {
 		final String ruleStringNoSemicolon = trimmedRuleString.substring(0, trimmedRuleString.length() - 1).replaceFirst("\\s+$", "");
 		final String pipePattern;
 
-		if (flags.contains(GrammarFlags.TRAILING_PIPES_ONLY)) {
+		if (options.contains(GrammarOptions.TRAILING_PIPES)) {
 			pipePattern = Constants.TRAILING_PIPE;
 		} else {
 			pipePattern = Constants.PIPE;
@@ -38,7 +38,7 @@ class GrammarRule<T> implements Generatable<T> {
 		String[] productionStrings = ruleStringNoSemicolon.split(Constants.OPTIONAL_WHITESPACE + pipePattern, -1);
 
 		for (String productionString: productionStrings) {
-			GrammarProduction<T> production = new GrammarProduction<T>(this, productionString, flags);
+			GrammarProduction<T> production = new GrammarProduction<T>(this, productionString, options);
 			productions.add(production);
 		}
 

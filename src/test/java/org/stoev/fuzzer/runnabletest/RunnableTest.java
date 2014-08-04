@@ -3,8 +3,6 @@ package org.stoev.fuzzer.test.runnable;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
-
 import org.stoev.fuzzer.GlobalContext;
 import org.stoev.fuzzer.ThreadContext;
 import org.stoev.fuzzer.RunnableManager;
@@ -14,21 +12,19 @@ import org.stoev.fuzzer.FuzzRunnableFactory;
 
 import org.stoev.fuzzer.ExecutionException;
 
-import java.util.EnumSet;
-
 public class RunnableTest {
 	@Test
 	public final void testRunnable() throws Throwable {
-                final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-                        .grammar("main:public static void run() { Assert.assertTrue(boolean_value); }\n;\nboolean_value:\ntrue|false\n;", EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY))
-                        .runnableFactory(new TestRunnableFactory())
-                        .count(100)
-                        .threads(1)
-                        .duration(60)
-                        .build();
+		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
+			.grammar("#option STANDALONE_SEMICOLONS\nmain:public static void run() { Assert.assertTrue(boolean_value); }\n;\nboolean_value:\ntrue|false\n;")
+			.runnableFactory(new TestRunnableFactory())
+			.count(100)
+			.threads(1)
+			.duration(60)
+			.build();
 
 		try {
-	                globalContext.run();
+			globalContext.run();
 		} catch (ExecutionException e) {
 			Assert.assertEquals(e.getCause().getClass(), AssertionError.class);
 			return;
@@ -51,10 +47,10 @@ class TestRunnable extends JavaBatchRunnable {
 		super(runnableManager, threadContext);
 	}
 
-        @Override
-        protected String[] getHeaders() {
-                return new String[] {
-                        "import org.testng.Assert"
-                };
-        };
+	@Override
+	protected String[] getHeaders() {
+		return new String[] {
+			"import org.testng.Assert"
+		};
+	};
 }

@@ -1,9 +1,5 @@
 package org.stoev.fuzzer;
 
-import java.util.EnumSet;
-
-import org.stoev.fuzzer.Grammar.GrammarFlags;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -158,7 +154,7 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testTrailingPipe() {
-		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("main: foo | bar |\nfoo | bar;", EnumSet.of(GrammarFlags.TRAILING_PIPES_ONLY)).build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("#option TRAILING_PIPES\nmain: foo | bar |\nfoo | bar;").build();
 		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		Assert.assertEquals(threadContext.generateString(), "foo | bar");
@@ -197,8 +193,8 @@ public class SeparatorsTest {
 
 	@Test
 	public final void testStandaloneSemicolon() {
-		String grammar = "main: foo ; bar ;\n baz;\n;\n";
-		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar, EnumSet.of(GrammarFlags.STANDALONE_SEMICOLONS_ONLY)).build();
+		String grammar = "#option STANDALONE_SEMICOLONS\nmain: foo ; bar ;\n baz;\n;\n";
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammar).build();
 		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		Assert.assertEquals(threadContext.generateString(), "foo ; bar ;\n baz;");

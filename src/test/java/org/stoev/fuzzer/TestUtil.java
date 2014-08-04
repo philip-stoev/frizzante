@@ -3,9 +3,6 @@ package org.stoev.fuzzer;
 import org.testng.Assert;
 
 import java.util.Scanner;
-import java.util.EnumSet;
-
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 final class TestUtil {
 	private static final int ITERATIONS = 10;
@@ -24,7 +21,7 @@ final class TestUtil {
 	}
 
 	static void assertGeneratesSkipWhitespace(final String grammarString, final String expectedString) {
-		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>().grammar("#option SKIP_WHITESPACE\n" + grammarString).build();
 		ThreadContext<String> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		for (int i = 1; i <= ITERATIONS; i++) {
@@ -33,7 +30,7 @@ final class TestUtil {
 	}
 
 	static void assertToString(final String grammarString, final String expectedString) {
-		Grammar<String> grammar = new Grammar<String>(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
+		Grammar<String> grammar = new Grammar<String>(new Scanner(grammarString));
 		Assert.assertEquals(grammar.getGrammarString(), expectedString, "toString() was produced from the following grammar:\n" + grammarString + "\n");
 	}
 

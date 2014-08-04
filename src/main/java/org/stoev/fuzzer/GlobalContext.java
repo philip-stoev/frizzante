@@ -2,15 +2,10 @@ package org.stoev.fuzzer;
 
 import java.util.Random;
 import java.util.Scanner;
-import java.util.EnumSet;
-import java.util.Set;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
-
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public final class GlobalContext<T> {
 	private final Grammar<T> grammar;
@@ -67,23 +62,13 @@ public final class GlobalContext<T> {
 		}
 
 		public ContextBuilder<T> grammar(final String grammarString) {
-			this.grammar = new Grammar<T>(new Scanner(grammarString), EnumSet.noneOf(GrammarFlags.class));
+			this.grammar = new Grammar<T>(new Scanner(grammarString));
 			return this;
 		}
 
-		public ContextBuilder<T> grammar(final String grammarString, final Set<GrammarFlags> flags) {
-			this.grammar = new Grammar<T>(new Scanner(grammarString), flags);
-			return this;
-		}
-
-		public ContextBuilder<T> grammar(final File file) throws FileNotFoundException {
-			this.grammar(file, EnumSet.noneOf(GrammarFlags.class));
-			return this;
-		}
-
-		public ContextBuilder<T> grammar(final File file, final Set<GrammarFlags> flags) {
+		public ContextBuilder<T> grammar(final File file) {
 			try {
-				this.grammar = new Grammar<T>(file, flags);
+				this.grammar = new Grammar<T>(file);
 			} catch (IOException e) {
 				throw new IllegalArgumentException(e);
 			}
@@ -91,12 +76,7 @@ public final class GlobalContext<T> {
 		}
 
 		public ContextBuilder<T> grammar(final InputStream stream) {
-			this.grammar = new Grammar<T>(new Scanner(stream, "UTF-8"), EnumSet.noneOf(GrammarFlags.class));
-			return this;
-		}
-
-		public ContextBuilder<T> grammar(final InputStream stream, final Set<GrammarFlags> flags) {
-			this.grammar = new Grammar<T>(new Scanner(stream, "UTF-8"), flags);
+			this.grammar = new Grammar<T>(new Scanner(stream, "UTF-8"));
 			return this;
 		}
 

@@ -5,9 +5,7 @@ import org.testng.annotations.Test;
 
 import java.util.Map;
 import java.util.HashMap;
-import java.util.EnumSet;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 import org.stoev.fuzzer.GlobalContext.ContextBuilder;
 
 public class GrammarTest {
@@ -190,7 +188,7 @@ public class GrammarTest {
 		};
 
 		for (String grammarString: grammarStrings) {
-			GlobalContext<String> g = new ContextBuilder<String>().grammar(grammarString, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+			GlobalContext<String> g = new ContextBuilder<String>().grammar("#option SKIP_WHITESPACE\n" + grammarString).build();
 			ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 
 			Assert.assertEquals(c.generateString(), "foobar", "Problematic string produced by grammar:'" + grammarString + "'");

@@ -1,8 +1,5 @@
 package org.stoev.fuzzer;
 
-import org.stoev.fuzzer.Grammar.GrammarFlags;
-
-import java.util.EnumSet;
 import java.io.File;
 
 public final class App {
@@ -16,7 +13,6 @@ public final class App {
 		long range = Long.MAX_VALUE;
 
 		String grammarFile = null;
-		EnumSet<GrammarFlags> grammarFlags = EnumSet.noneOf(GrammarFlags.class);
 		FuzzRunnableFactory runnableFactory = null;
 
 		for (int i = 0; i < args.length; i++) {
@@ -53,10 +49,6 @@ public final class App {
 						Class<?> runnableFactoryClass = Class.forName(args[i]);
 						runnableFactory = (FuzzRunnableFactory) runnableFactoryClass.newInstance();
 						break;
-					case "-standalone-semicolons":
-					case "--standalone-semicolons":
-						grammarFlags.add(GrammarFlags.STANDALONE_SEMICOLONS_ONLY);
-						break;
 					default:
 						throw new IllegalArgumentException("Can not parse command line argument '" + args[i] + "'");
 				}
@@ -77,7 +69,7 @@ public final class App {
 
 
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
-			.grammar(new File(grammarFile), grammarFlags)
+			.grammar(new File(grammarFile))
 			.idRange(0, range)
 			.runnableFactory(runnableFactory)
 			.count(count)

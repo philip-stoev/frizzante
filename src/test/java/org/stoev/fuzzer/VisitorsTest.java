@@ -4,10 +4,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Iterator;
-import java.util.EnumSet;
 
 import org.stoev.fuzzer.GlobalContext.ContextBuilder;
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public class VisitorsTest {
 	@Test
@@ -110,7 +108,7 @@ public class VisitorsTest {
 
 	@Test
 	public final void testVisitorObjectArguments() {
-		String grammar = "main: sum;\nsum: one two two one;";
+		String grammar = "#option SKIP_WHITESPACE\nmain: sum;\nsum: one two two one;";
 
 		class TestObject {
 			private int value;
@@ -143,7 +141,7 @@ public class VisitorsTest {
 		}
 
 		Object v = new TestVisitor();
-		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar).visitor(v).build();
 		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
@@ -154,7 +152,7 @@ public class VisitorsTest {
 	// Top-level production is an object visitor, but its arguments are ordinary string productions
 	@Test
 	public final void testMixedVisitorObjects() {
-		String grammar = "main: sum;\nsum: 1 2;";
+		String grammar = "#option SKIP_WHITESPACE\nmain: sum;\nsum: 1 2;";
 
 		class TestObject {
 			private int value;
@@ -179,7 +177,7 @@ public class VisitorsTest {
 		}
 
 		Object v = new TestVisitor();
-		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar).visitor(v).build();
 		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);
@@ -191,7 +189,7 @@ public class VisitorsTest {
 	// Arguments of different types
 	@Test
 	public final void testMixedVisitorArguments() {
-		String grammar = "main: sum;\nsum: one 2;";
+		String grammar = "#option SKIP_WHITESPACE\nmain: sum;\nsum: one 2;";
 
 		class TestObject {
 			private int value;
@@ -227,7 +225,7 @@ public class VisitorsTest {
 		}
 
 		Object v = new TestVisitor();
-		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).visitor(v).build();
+		GlobalContext<TestObject> g = new ContextBuilder<TestObject>().grammar(grammar).visitor(v).build();
 		ThreadContext<TestObject> c = ThreadContext.newThreadContext(g, 1);
 		Sentence<TestObject> s = c.newSentence();
 		c.generate(s);

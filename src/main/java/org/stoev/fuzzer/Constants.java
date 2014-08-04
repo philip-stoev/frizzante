@@ -10,6 +10,7 @@ final class Constants {
 	public static final String WHITESPACE = "\\s+";
 	public static final String COMMENT = "#";
 	public static final String INCLUDE = "#include";
+	public static final String OPTION = "#option";
 
 	public static final String EOL = "\\n+";
 	public static final String EOF = "\\z";

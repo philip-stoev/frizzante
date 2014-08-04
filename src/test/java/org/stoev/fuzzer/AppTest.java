@@ -8,7 +8,6 @@ public class AppTest {
 		org.stoev.fuzzer.App.main(new String[] {
 			"--grammar", "mongodb.grammar"
 			, "--runnableFactory", "org.stoev.fuzzer.DummyRunnableFactory"
-			, "--standalone-semicolons"
 			, "--duration", "1"
 			, "--count", "1"
 			, "--range", "10000"

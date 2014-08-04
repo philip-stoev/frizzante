@@ -4,9 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Iterator;
-import java.util.EnumSet;
-
-import org.stoev.fuzzer.Grammar.GrammarFlags;
 
 public class CachingTest {
 
@@ -22,8 +19,8 @@ public class CachingTest {
 
 	@Test
 	public final void testCachingObject() {
-		String grammar = "main: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
-		GlobalContext<Long> globalContext = new GlobalContext.ContextBuilder<Long>().grammar(grammar, EnumSet.of(GrammarFlags.SKIP_WHITESPACE)).build();
+		String grammar = "#option SKIP_WHITESPACE\nmain: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
+		GlobalContext<Long> globalContext = new GlobalContext.ContextBuilder<Long>().grammar(grammar).build();
 		ThreadContext<Long> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
 		Sentence<Long> sentence = threadContext.newSentence();
