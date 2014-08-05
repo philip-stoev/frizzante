@@ -64,7 +64,7 @@ final class InlineJava<T> implements Generatable<T> {
 	}
 
 	public void compile(final Grammar<T> grammar) {
-
+		// do nothing at the compilation phase
 	}
 
 	public boolean isConstant() {

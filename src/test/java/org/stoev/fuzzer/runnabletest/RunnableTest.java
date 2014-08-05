@@ -34,7 +34,7 @@ public class RunnableTest {
 	}
 }
 
-class TestRunnableFactory extends FuzzRunnableFactory {
+class TestRunnableFactory implements FuzzRunnableFactory {
 	@Override
 	@SuppressWarnings("checkstyle:designforextension")
 	public FuzzRunnable newRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
@@ -43,7 +43,7 @@ class TestRunnableFactory extends FuzzRunnableFactory {
 }
 
 class TestRunnable extends JavaBatchRunnable {
-	public TestRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
+	TestRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
 		super(runnableManager, threadContext);
 	}
 

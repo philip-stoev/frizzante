@@ -3,7 +3,9 @@ package org.stoev.fuzzer;
 import java.io.File;
 
 public final class App {
-	private App() {	}
+	private App() {
+		assert false;
+	}
 
 	public static void main(final String[] args) throws Throwable {
 

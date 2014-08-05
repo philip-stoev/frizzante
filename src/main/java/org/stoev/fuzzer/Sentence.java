@@ -7,8 +7,6 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Random;
 
-import java.io.IOException;
-
 /**
  * This class holds the output from a random generation run.
  *
@@ -110,7 +108,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	**/
 
 	@SuppressWarnings("unchecked")
-	public Appendable append(final CharSequence csq) throws IOException {
+	public Appendable append(final CharSequence csq) {
 		elements.add((T) csq.toString());
 		return this;
 	}
@@ -121,7 +119,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	@throws UnsupportedOperationException
 	**/
 
-	public Appendable append(final char c) throws IOException {
+	public Appendable append(final char c) {
 		throw new UnsupportedOperationException("Sentence does not support append(char r)");
 	}
 
@@ -131,7 +129,7 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	@throws UnsupportedOperationException
 	**/
 
-	public Appendable append(final CharSequence csq, final int start, final int end) throws IOException {
+	public Appendable append(final CharSequence csq, final int start, final int end) {
 		throw new UnsupportedOperationException("Sentence does not support append(CharSequence csq, int start, int end)");
 	}
 

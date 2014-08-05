@@ -10,7 +10,7 @@ public abstract class FuzzRunnable implements Runnable {
 	protected ExecutionException executionException = null;
 	protected RuntimeException runtimeException = null;
 
-	FuzzRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
+	protected FuzzRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
 		assert runnableManager != null;
 		assert threadContext != null;
 

@@ -6,20 +6,20 @@ import com.foundationdb.Database;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-public class FoundationDBRunnableFactory extends FuzzRunnableFactory {
+public class FoundationDBRunnableFactory implements FuzzRunnableFactory {
 	@Override
 	@SuppressWarnings("checkstyle:designforextension")
 	public FuzzRunnable newRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
 		return new FoundationDBRunnable(runnableManager, threadContext);
-        }
+	}
 }
 
 class FoundationDBRunnable extends JavaBatchRunnable {
 	private final FDB fdb = FDB.selectAPIVersion(200);
 	private final Database db = fdb.open();
 
-        public FoundationDBRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
-                super(runnableManager, threadContext);
+	FoundationDBRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
+		super(runnableManager, threadContext);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.stoev.fuzzer;
 
 import java.util.Random;
+import java.util.Map;
 import java.util.HashMap;
 
 public final class ThreadContext<T> {
@@ -9,7 +10,7 @@ public final class ThreadContext<T> {
 	private final Random random;
 	private final int contextId;
 
-	private final HashMap<String, Sentence<T>> ruleCache = new HashMap<String, Sentence<T>>();
+	private final Map<String, Sentence<T>> ruleCache = new HashMap<String, Sentence<T>>();
 
 	public static <T> ThreadContext<T> newThreadContext(final GlobalContext<T> globalContext, final int contextId) {
                 return new ThreadContext<T>(globalContext, contextId);

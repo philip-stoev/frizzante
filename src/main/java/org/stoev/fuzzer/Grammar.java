@@ -2,6 +2,7 @@ package org.stoev.fuzzer;
 
 import java.util.regex.Pattern;
 import java.util.Scanner;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.EnumSet;
@@ -36,8 +37,8 @@ public final class Grammar<T> implements Generatable<T> {
 	private File file;
 	private final Set<GrammarOptions> options = EnumSet.noneOf(GrammarOptions.class);
 
-	private final HashMap<String, Generatable<T>> rules = new HashMap<String, Generatable<T>>();
-	private final HashMap<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
+	private final Map<String, Generatable<T>> rules = new HashMap<String, Generatable<T>>();
+	private final Map<String, Boolean> shouldCacheRule = new HashMap<String, Boolean>();
 
 	Grammar(final File file) throws FileNotFoundException {
 		this(new Scanner(file, "UTF-8"));

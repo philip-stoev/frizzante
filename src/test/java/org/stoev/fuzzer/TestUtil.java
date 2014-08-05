@@ -8,7 +8,7 @@ final class TestUtil {
 	private static final int ITERATIONS = 10;
 
 	private TestUtil() {
-
+		assert false;
 	}
 
 	static void assertGenerates(final String grammarString, final String expectedString) {

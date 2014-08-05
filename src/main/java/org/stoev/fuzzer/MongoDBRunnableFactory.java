@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import java.net.UnknownHostException;
 
-public class MongoDBRunnableFactory extends FuzzRunnableFactory {
+public class MongoDBRunnableFactory implements FuzzRunnableFactory {
 	private final String dbName;
 
 	public MongoDBRunnableFactory(final String dbName) {
@@ -30,7 +30,7 @@ class MongoDBRunnable extends JavaBatchRunnable {
 	private final MongoClient mongoClient;
 	private final DB db;
 
-	public MongoDBRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext, final String dbName) {
+	MongoDBRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext, final String dbName) {
 		super(runnableManager, threadContext);
 		try {
 			mongoClient = new MongoClient();

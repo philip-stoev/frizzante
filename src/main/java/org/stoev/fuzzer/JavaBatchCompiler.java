@@ -232,7 +232,7 @@ class JavaSourceInMemory extends SimpleJavaFileObject {
 class JavaClassInMemory extends SimpleJavaFileObject {
 	private final ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-	public JavaClassInMemory(final String className, final Kind kind) {
+	JavaClassInMemory(final String className, final Kind kind) {
 		super(URI.create("string:///" + className.replace('.', '/') + kind.extension), kind);
 	}
 
@@ -250,7 +250,7 @@ class JavaClassInMemory extends SimpleJavaFileObject {
 class FileManagerInMemory extends ForwardingJavaFileManager<JavaFileManager> {
 	private Map<String, JavaClassInMemory> javaClassesInMemory = new HashMap<String, JavaClassInMemory>();
 
-	public FileManagerInMemory(final StandardJavaFileManager standardManager) {
+	FileManagerInMemory(final StandardJavaFileManager standardManager) {
 		super(standardManager);
 	}
 
