@@ -12,7 +12,7 @@ public class DummyRunnableFactory implements FuzzRunnableFactory {
 }
 
 class DummyRunnable extends FuzzRunnable {
-	private static final Logger LOGGER = LoggerFactory.getLogger(JavaBatchCompiler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DummyRunnable.class);
 
 	DummyRunnable(final RunnableManager runnableManager, final ThreadContext<?> threadContext) {
                 super(runnableManager, threadContext);
