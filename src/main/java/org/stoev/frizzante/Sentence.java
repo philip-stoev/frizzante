@@ -54,12 +54,12 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 		random.setSeed(random.nextLong());
 	}
 
-	public int randomInt(final int n) {
-		return random.nextInt(n);
-	}
+	/**
+	Obtains the Random object associated with the Sentence
+	**/
 
-	public double randomDouble() {
-		return random.nextDouble();
+	public Random getRandom() {
+		return random;
 	}
 
 	/**

@@ -19,7 +19,7 @@ public class CachingTest {
 
 	@Test
 	public final void testCachingObject() {
-		String grammar = "#option SKIP_WHITESPACE\nmain: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.randomInt(100))); }};";
+		String grammar = "#option SKIP_WHITESPACE\nmain: bar bar_cached;\n bar.java: {{ sentence.add(new Long(sentence.getRandom().nextInt(100))); }};";
 		GlobalContext<Long> globalContext = new GlobalContext.ContextBuilder<Long>().grammar(grammar).build();
 		ThreadContext<Long> threadContext = ThreadContext.newThreadContext(globalContext, 1);
 
