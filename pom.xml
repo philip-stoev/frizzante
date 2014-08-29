@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.stoev.fuzzer</groupId>
-  <artifactId>fuzzer</artifactId>
+  <groupId>org.stoev.frizzante</groupId>
+  <artifactId>frizzante</artifactId>
   <packaging>jar</packaging>
   <version>0.1</version>
-  <name>fuzzer</name>
-  <description>A comprehensive framework for Fuzz testing, including execution of generated Java code</description>
+  <name>frizzante</name>
+  <description>A comprehensive framework for grammar-based Fuzz testing, including gneration and execution of SQL statements and Java and Python code</description>
   <developers>
     <developer>
       <id>philips</id>
@@ -92,7 +92,7 @@
           </formats>
           <instrumentation>
             <excludes>
-              <exclude>org/stoev/fuzzer/Generatable.class</exclude>
+              <exclude>org/stoev/frizzante/Generatable.class</exclude>
             </excludes>
           </instrumentation>
           <check>
@@ -194,7 +194,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.stoev.fuzzer.App</mainClass>
+              <mainClass>org.stoev.frizzante.App</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
