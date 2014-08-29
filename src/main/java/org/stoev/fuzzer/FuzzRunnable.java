@@ -18,7 +18,31 @@ public abstract class FuzzRunnable implements Runnable {
 		this.threadContext = threadContext;
 	}
 
-	public abstract void run();
+	public void run() {
+		while (executionCounter < threadContext.getGlobalContext().getCount()) {
+			if (interrupted) {
+				return;
+			}
+
+			Sentence<?> sentence = threadContext.generateSentence();
+
+			try {
+				execute(sentence);
+			} catch (Exception executionException) {
+				if (!interrupted) {
+					executionException("Execution exception.", executionException, sentence);
+				}
+				return;
+			}
+
+			executionCounter++;
+		}
+	}
+
+        @SuppressWarnings("checkstyle:designforextension")
+	public void execute(Sentence<?> sentence) {
+		throw new IllegalArgumentException("You need to override execute() in FuzzRunnable.");
+	}
 
 	public final void interrupt() {
 		interrupted = true;
