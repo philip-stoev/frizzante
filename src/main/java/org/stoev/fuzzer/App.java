@@ -13,6 +13,7 @@ public final class App {
 		int duration = 60;
 		long count = Long.MAX_VALUE;
 		long range = Long.MAX_VALUE;
+		long seed = 1;
 
 		String grammarFile = null;
 		FuzzRunnableFactory runnableFactory = null;
@@ -51,6 +52,11 @@ public final class App {
 						Class<?> runnableFactoryClass = Class.forName(args[i]);
 						runnableFactory = (FuzzRunnableFactory) runnableFactoryClass.newInstance();
 						break;
+					case "-seed":
+					case "--seed":
+						i++;
+						seed = Integer.parseInt(args[i]);
+						break;
 					default:
 						throw new IllegalArgumentException("Can not parse command line argument '" + args[i] + "'");
 				}
@@ -73,6 +79,7 @@ public final class App {
 		final GlobalContext<String> globalContext = new GlobalContext.ContextBuilder<String>()
 			.grammar(new File(grammarFile))
 			.idRange(0, range)
+			.random(seed)
 			.runnableFactory(runnableFactory)
 			.count(count)
 			.threads(threads)
