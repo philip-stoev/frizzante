@@ -18,6 +18,7 @@ public abstract class FuzzRunnable implements Runnable {
 		this.threadContext = threadContext;
 	}
 
+	@SuppressWarnings("checkstyle:designforextension")
 	public void run() {
 		while (executionCounter < threadContext.getGlobalContext().getCount()) {
 			if (interrupted) {
@@ -39,8 +40,8 @@ public abstract class FuzzRunnable implements Runnable {
 		}
 	}
 
-        @SuppressWarnings("checkstyle:designforextension")
-	public void execute(Sentence<?> sentence) {
+	@SuppressWarnings("checkstyle:designforextension")
+	public void execute(final Sentence<?> sentence) {
 		throw new IllegalArgumentException("You need to override execute() in FuzzRunnable.");
 	}
 
