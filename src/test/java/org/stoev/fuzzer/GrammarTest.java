@@ -168,11 +168,11 @@ public class GrammarTest {
 
 	@Test
 	public final void testRecursiveWeight() {
-		String grammar = "main:95% foo , main |5% foo;";
+		String grammar = "main:80% foo , main |20% foo;";
 		GlobalContext<String> g = new ContextBuilder<String>().grammar(grammar).build();
 		ThreadContext<String> c = ThreadContext.newThreadContext(g, 1);
 
-		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo");
+		Assert.assertEquals(c.generateString(), "foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo , foo");
 	}
 
 	@Test
