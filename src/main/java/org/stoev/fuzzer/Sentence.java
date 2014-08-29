@@ -47,6 +47,11 @@ public final class Sentence<T> implements Iterable<T>, Appendable {
 	private Sentence(final long i) {
 		id = i;
 		random = new Random(id);
+
+		// We reseed the PRNG here because id can be a small integer, which does not make for a good seed
+		// when doubles are being generated when picking a random grammar production
+
+		random.setSeed(random.nextLong());
 	}
 
 	public int randomInt(final int n) {
