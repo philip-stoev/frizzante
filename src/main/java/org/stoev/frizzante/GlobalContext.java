@@ -133,11 +133,15 @@ public final class GlobalContext<T> {
 		return sentence;
 	}
 
+	public ThreadContext<T> newThreadContext() {
+                ThreadContext<T> threadContext = ThreadContext.newThreadContext(this, 1);
+                return threadContext;
+        }
+
 	public ThreadContext<T> newThreadContext(final int id) {
                 ThreadContext<T> threadContext = ThreadContext.newThreadContext(this, id);
                 return threadContext;
         }
-
 
 	public void run() throws Exception {
 		if (runnableFactory == null) {
