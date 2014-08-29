@@ -1,8 +1,0 @@
-package org.stoev.fuzzer;
-
-public enum ResultComparison {
-	COMPARISON_IDENTICAL,
-	COMPARISON_ERROR_MISMATCH,
-	COMPARISON_LENGTH_MISMATCH,
-	COMPARISON_CONTENT_MISMATCH;
-}
